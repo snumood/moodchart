@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>기분기록지 | 분당서울대학교병원</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+    :root { --main: #007bff; --bg: #f8f9fa; --border: #ddd; }
+    body { font-family: 'Apple SD Gothic Neo', sans-serif; margin: 0; background: var(--bg); color: #333; -webkit-tap-highlight-color: transparent; }
+    .hidden { display: none !important; }
+
+    /* 인증 화면 */
+    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: white; }
+    .auth-box { width: 90%; max-width: 350px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; }
+    .tabs { display: flex; border-bottom: 2px solid #f5f5f5; margin-bottom: 25px; }
+    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #aaa; font-weight: bold; }
+    .tab.active { color: var(--main); border-bottom: 2px solid var(--main); }
+    input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline-color: var(--main); }
+    .btn-main { width: 100%; padding: 15px; background: var(--main); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn-main:active { transform: scale(0.98); }
+
+    /* 대시보드 상단 */
+    .top-bar { position: sticky; top: 0; left: 0; background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); z-index: 1000; }
+    .nav-group { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+    .nav-btn { padding: 8px 15px; background: #eee; border: none; border-radius: 6px; cursor: pointer; }
+
+    /* 엑셀 그리드 (반응형 가로 스크롤) */
+    .grid-container { overflow: auto; height: calc(100vh - 70px); background: white; }
+    table { border-collapse: collapse; min-width: 1600px; table-layout: fixed; }
+    th, td { border: 1px solid #eee; text-align: center; height: 42px; font-size: 13px; width: 45px; }
+    
+    /* 엑셀 핵심: 헤더 및 첫 열 고정 */
+    thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 100; border-bottom: 2px solid #ccc; }
+    td:first-child, th:first-child { position: sticky; left: 0; background: #f1f3f5; z-index: 110; width: 180px; text-align: left; padding-left: 10px; font-weight: bold; border-right: 2px solid #ccc; }
+    
+    /* 항목별 색상 및 셀 스타일 */
+    .row-mood { background: #f0f7ff; }
+    .row-sym { background: #fff9f0; }
+    .cell-check { cursor: pointer; transition: 0.2s; font-size: 18px; }
+    .cell-check.checked { background: var(--main); color: white; }
+    .cell-check.checked::after { content: '✔'; }
+    .cell-input input { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 14px; outline: none; }
+
+    @media (max-width: 600px) {
+        td:first-child, th:first-child { width: 130px; font-size: 12px; }
+        th, td { height: 48px; width: 48px; } /* 모바일 터치 최적화 */
+    }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+    <div class="auth-box">
+        <h2 style="text-align:center; color:var(--main); margin-top:0;">마음기록지</h2>
+        <div class="tabs">
+            <div id="t-login" class="tab active" onclick="setAuth('login')">로그인</div>
+            <div id="t-signup" class="tab" onclick="setAuth('signup')">회원가입</div>
+        </div>
+        <div id="f-login">
+            <input id="li-id" placeholder="아이디">
+            <input id="li-pw" type="password" placeholder="비밀번호">
+            <button class="btn-main" onclick="doLogin()">로그인</button>
+        </div>
+        <div id="f-signup" class="hidden">
+            <input id="su-id" placeholder="희망 아이디 (필수)">
+            <input id="su-pw" type="password" placeholder="비밀번호 (필수)">
+            <input id="su-hosp" placeholder="병원 환자번호 (선택)">
+            <p style="font-size:11px; color:#999; margin: -5px 0 15px 5px;">* 환자번호는 진료 시 확인용으로 사용됩니다.</p>
+            <button class="btn-main" style="background:#28a745;" onclick="doSignUp()">회원가입 완료</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-screen" class="hidden">
+    <div class="top-bar">
+        <div class="nav-group">
+            <button class="nav-btn" onclick="chgMonth(-1)">◀</button>
+            <span id="m-label"></span>
+            <button class="nav-btn" onclick="chgMonth(1)">▶</button>
+        </div>
+        <div id="doc-tool" class="hidden" style="display:flex; gap:5px;">
+            <input id="q-id" placeholder="환자ID 조회" style="width:100px; margin:0; padding:8px; font-size:14px;">
+            <button onclick="load()" style="background:#6c757d; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">조회</button>
+        </div>
+        <div style="font-size:14px;">
+            <span id="u-name" style="font-weight:bold; margin-right:10px;"></span>
+            <button onclick="location.reload()" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:5px; cursor:pointer; font-size:12px;">로그아웃</button>
+        </div>
+    </div>
+    <div class="grid-container">
+        <table>
+            <thead><tr id="h-row"><th>항목 / 날짜</th></tr></thead>
+            <tbody id="b-rows"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // [중요] 여기에 본인의 Supabase 프로젝트 정보를 넣으세요.
+    const S_URL = '여기에_URL_붙여넣기'; 
+    const S_KEY = '여기에_ANON_KEY_붙여넣기';
+    const sb = supabase.createClient(S_URL, S_KEY);
+
+    let me = null, target = null, yr = new Date().getFullYear(), mo = new Date().getMonth() + 1;
+
+    // 엑셀 파일의 모든 항목을 1:1 반영
+    const items = [
+        { id: 'm_p4', l: '기분 +4 (극히상승)', g: 'mood', t: 'check' },
+        { id: 'm_p3', l: '기분 +3 (상당상승)', g: 'mood', t: 'check' },
+        { id: 'm_p2', l: '기분 +2 (분명상승)', g: 'mood', t: 'check' },
+        { id: 'm_p1', l: '기분 +1 (미세상승)', g: 'mood', t: 'check' },
+        { id: 'm_0',  l: '기분 0 (보통)',     g: 'mood', t: 'check' },
+        { id: 'm_m1', l: '기분 -1 (미세저하)', g: 'mood', t: 'check' },
+        { id: 'm_m2', l: '기분 -2 (분명저하)', g: 'mood', t: 'check' },
+        { id: 'm_m3', l: '기분 -3 (상당저하)', g: 'mood', t: 'check' },
+        { id: 'm_m4', l: '기분 -4 (극히저하)', g: 'mood', t: 'check' },
+        { id: 'ir_an', l: '짜증/분노 (-4~4)', g: 'sym',  t: 'input' },
+        { id: 'motiv', l: '의욕/흥미 (-4~4)', g: 'sym',  t: 'input' },
+        { id: 'activ', l: '활동량 (-4~4)',    g: 'sym',  t: 'input' },
+        { id: 't_spd', l: '생각속도 (-4~4)',  g: 'sym',  t: 'input' },
+        { id: 't_con', l: '생각내용 (-4~4)',  g: 'sym',  t: 'input' },
+        { id: 'sleep', l: '수면시간 (시간)',   g: 'etc',  t: 'input' },
+        { id: 'weight',l: '체중 (kg)',        g: 'etc',  t: 'input' },
+        { id: 'period',l: '생리기간 (√)',     g: 'etc',  t: 'check' },
+        { id: 'alcoh', l: '음주량 (잔)',       g: 'etc',  t: 'input' },
+        { id: 'binge', l: '폭식여부 (√)',     g: 'etc',  t: 'check' },
+        { id: 'pain',  l: '통증/신체증상 (√)', g: 'etc',  t: 'check' },
+        { id: 'crying',l: '울음 (√)',         g: 'etc',  t: 'check' }
+    ];
+
+    function setAuth(m) {
+        document.getElementById('f-login').classList.toggle('hidden', m!=='login');
+        document.getElementById('f-signup').classList.toggle('hidden', m!=='signup');
+        document.getElementById('t-login').classList.toggle('active', m==='login');
+        document.getElementById('t-signup').classList.toggle('active', m==='signup');
+    }
+
+    async function doSignUp() {
+        const id = document.getElementById('su-id').value, pw = document.getElementById('su-pw').value, h = document.getElementById('su-hosp').value;
+        if(!id || !pw) return alert("필수 항목을 입력해주세요.");
+        const { error } = await sb.from('user_profiles').insert([{ username:id, password:pw, hospital_id:h, role:'patient' }]);
+        if(error) alert("중복된 아이디이거나 가입 오류가 발생했습니다.");
+        else { alert("회원가입 성공! 로그인해주세요."); setAuth('login'); }
+    }
+
+    async function doLogin() {
+        const id = document.getElementById('li-id').value, pw = document.getElementById('li-pw').value;
+        const { data, error } = await sb.from('user_profiles').select('*').eq('username',id).eq('password',pw).single();
+        if(error || !data) return alert("아이디 또는 비밀번호를 확인해주세요.");
+        me = data; target = id;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('u-name').innerText = id + "님";
+        if(me.role==='doctor') { document.getElementById('doc-tool').classList.remove('hidden'); target = ""; }
+        initTable(); updateLabel();
+    }
+
+    function initTable() {
+        const h = document.getElementById('h-row'), b = document.getElementById('b-rows');
+        if(h.children.length===1) for(let d=1; d<=31; d++) { let th=document.createElement('th'); th.innerText=d; h.appendChild(th); }
+        b.innerHTML = '';
+        items.forEach((r, idx) => {
+            let tr = document.createElement('tr');
+            if(r.g==='mood') tr.classList.add('row-mood'); else if(r.g==='sym') tr.classList.add('row-sym');
+            let tdL = document.createElement('td'); tdL.innerText = r.l; tr.appendChild(tdL);
+            for(let d=1; d<=31; d++) {
+                let td = document.createElement('td');
+                if(r.t==='check') { 
+                    td.className='cell-check'; 
+                    td.onclick=()=> { if(me.role==='doctor') return alert("의료진은 조회만 가능합니다."); save(td,d,r.id,td.classList.toggle('checked')?'Y':null); }
+                } else { 
+                    let i=document.createElement('input'); 
+                    i.onblur=(e)=> { if(me.role==='doctor') return; save(td,d,r.id,e.target.value); };
+                    td.className='cell-input'; td.appendChild(i); 
+                }
+                tr.appendChild(td);
+            }
+            b.appendChild(tr);
+        });
+        if(target) load();
+    }
+
+    async function load() {
+        if(me.role==='doctor') {
+            const searchId = document.getElementById('q-id').value;
+            if(!searchId) return; target = searchId;
+        }
+        // 초기화
+        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
+        document.querySelectorAll('.cell-input input').forEach(e=>e.value='');
+
+        const daysInMonth = new Date(yr, mo, 0).getDate();
+        const start = `${yr}-${String(mo).padStart(2,'0')}-01`, end = `${yr}-${String(mo).padStart(2,'0')}-${daysInMonth}`;
+        
+        const { data } = await sb.from('mood_records').select('*').eq('username', target).gte('record_date', start).lte('record_date', end);
+        data?.forEach(d => {
+            const day = new Date(d.record_date).getDate();
+            const rowIdx = items.findIndex(i => i.id === d.category);
+            if(rowIdx > -1) {
+                const targetCell = document.getElementById('b-rows').children[rowIdx].children[day];
+                if(targetCell.classList.contains('cell-check')) { if(d.value==='Y') targetCell.classList.add('checked'); }
+                else targetCell.querySelector('input').value = d.value;
+            }
+        });
+    }
+
+    async function save(td, d, cat, val) {
+        const date = `${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        if(!val) await sb.from('mood_records').delete().match({ username:me.username, record_date:date, category:cat });
+        else await sb.from('mood_records').upsert({ username:me.username, record_date:date, category:cat, value:val });
+    }
+
+    function chgMonth(v) { mo+=v; if(mo>12){mo=1;yr++;} if(mo<1){mo=12;yr--;} updateLabel(); load(); }
+    function updateLabel() { document.getElementById('m-label').innerText = `${yr}년 ${mo}월`; }
+</script>
+</body>
+</html>
