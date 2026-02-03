@@ -3,148 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 1.2 | 분당서울대학교병원</title>
+<title>기분기록지 1.03 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    /* --- 디자인 시스템 (엑셀 싱크로율 100%) --- */
+    /* --- 디자인 시스템 --- */
     :root { 
-        --primary: #005eb8; /* SNUH Blue */
+        --primary: #005eb8; 
+        --primary-dark: #004a94;
+        --accent: #fbc02d;
         --text: #333;
-        --border: #bbb;
-        /* 섹션별 배경색 (파스텔톤) */
-        --bg-mania: #fff0f0;   /* 기분 고양: 연한 붉은색 */
-        --bg-dep: #f0f8ff;     /* 기분 저하: 연한 푸른색 */
-        --bg-scale: #fffde7;   /* 정서/생각: 연한 노란색 */
-        --bg-body: #e8f5e9;    /* 신체/수면: 연한 초록색 */
-        --bg-symptom: #f3e5f5; /* 주요 증상: 연한 보라색 */
-        --bg-event: #fafafa;   /* 생활 사건: 연한 회색 */
-        --header-h: 40px;      
-        --footer-h: 85px;      
+        --border: #ccc;
+        
+        /* 섹션별 배경색 */
+        --bg-mania: #fff0f0;   
+        --bg-dep: #f0f8ff;     
+        --bg-mixed: #f3e5f5;   
+        --bg-scale: #fffde7;   
+        --bg-body: #e8f5e9;    
+        --bg-chk: #fafafa;     
+        
+        /* 레이아웃 사이즈 */
+        --header-h: 42px;      
+        --footer-h: 70px;
+        --cell-h: 24px;        
+        --col-w: 160px;
     }
 
-    body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; color: var(--text); font-size: 11px; overflow: hidden; }
+    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; color: var(--text); font-size: 11px; overflow: hidden; letter-spacing: -0.5px; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
     a { text-decoration: none; color: inherit; }
+    * { box-sizing: border-box; }
 
     /* 로그인 화면 */
-    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f4f6f9; }
-    .auth-box { width: 380px; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border: 1px solid #eee; }
-    .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f4f8; }
+    .auth-box { width: 360px; padding: 35px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e0e0e0; }
+    .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #f9f9f9; }
+    .auth-inp:focus { background: #fff; border-color: var(--primary); }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 5px; transition: 0.2s; }
-    .btn-auth:hover { opacity: 0.9; }
+    .btn-auth:hover { background: var(--primary-dark); }
+    
+    .save-login-wrap { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #666; margin: 5px 0 15px 0; }
+    .warning-text { color: #e53935; font-size: 10px; font-weight: bold; }
     .toggle-auth { margin-top: 15px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline; display: inline-block; }
-    .legal-text { text-align: left; font-size: 11px; margin: 10px 0; background: #eee; padding: 10px; border-radius: 6px; color: #555; line-height: 1.4; word-break: keep-all; }
+    .legal-text { text-align: left; font-size: 11px; margin: 10px 0; background: #f5f5f5; padding: 10px; border-radius: 6px; color: #555; line-height: 1.4; word-break: keep-all; border: 1px solid #eee; }
 
     /* 메인 컨테이너 */
     .container { height: 100vh; display: flex; flex-direction: column; }
     
     /* 1. 상단 헤더 */
-    .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; }
-    .month-nav { font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #222; }
-    .btn-nav { background: white; border: 1px solid #ccc; padding: 4px 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 26px; display: flex; align-items: center; justify-content: center; white-space: nowrap;}
+    .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; white-space: nowrap; }
+    
+    .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 5px; color: #222; }
+    .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 11px; height: 26px; display: flex; align-items: center; justify-content: center; }
     .btn-nav:hover { background: #f5f5f5; border-color: #999; }
-    #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 24px; font-size: 12px; cursor: pointer; }
+    #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 26px; font-size: 12px; cursor: pointer; width: 110px; }
 
-    /* 2. 엑셀 그리드 (중앙 스크롤 영역) */
+    /* 의료진 패널 */
+    #doc-panel { display: flex; align-items: center; gap: 5px; background: #e3f2fd; padding: 3px 10px; border-radius: 20px; border: 1px solid #bbdefb; }
+    #doc-panel input { border: 1px solid #90caf9; padding: 3px 8px; border-radius: 4px; font-size: 12px; width: 100px; }
+    #doc-panel button { background: var(--primary); color: white; border: none; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
+
+    /* 사용자 정보 */
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    #user-display { font-weight: bold; font-size: 12px; color: #444; }
+
+    /* 2. 엑셀 그리드 */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; }
     table { border-collapse: separate; border-spacing: 0; min-width: 100%; table-layout: fixed; }
     
-    th, td { 
-        border-right: 1px solid var(--border); 
-        border-bottom: 1px solid var(--border); 
-        text-align: center; 
-        height: 26px; /* 오밀조밀한 높이 */
-        padding: 0; 
-        box-sizing: border-box; 
-        vertical-align: middle; 
-    }
+    th, td { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; height: var(--cell-h); padding: 0; vertical-align: middle; }
+    thead th { position: sticky; top: 0; background: #f9f9f9; z-index: 10; border-bottom: 1px solid #999; height: 28px; font-weight: bold; color: #444; }
     
-    /* 고정 헤더 (날짜) */
-    thead th { position: sticky; top: 0; background: #f9f9f9; z-index: 10; border-bottom: 2px solid #999; height: 30px; font-weight: bold; }
-    /* 고정 첫 열 (항목명) */
     .col-label { 
-        position: sticky; left: 0; z-index: 20; 
-        width: 160px; min-width: 160px; 
-        border-right: 2px solid #888; 
-        text-align: left; padding-left: 8px; 
-        font-weight: 600; font-size: 11px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        background: #fff; 
+        position: sticky; left: 0; z-index: 20; width: var(--col-w); min-width: var(--col-w); 
+        border-right: 2px solid #888; text-align: left; padding-left: 10px; 
+        font-weight: 700; font-size: 11px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #fff; 
     }
     
-    /* 섹션별 행 배경색 적용 */
+    /* 섹션 배경색 */
     tr.sec-mania td, tr.sec-mania .col-label { background-color: var(--bg-mania); }
     tr.sec-dep td, tr.sec-dep .col-label { background-color: var(--bg-dep); }
+    tr.sec-mixed td, tr.sec-mixed .col-label { background-color: var(--bg-mixed); }
     tr.sec-scale td, tr.sec-scale .col-label { background-color: var(--bg-scale); }
     tr.sec-body td, tr.sec-body .col-label { background-color: var(--bg-body); }
-    tr.sec-symptom td, tr.sec-symptom .col-label { background-color: var(--bg-symptom); }
-    tr.sec-event td, tr.sec-event .col-label { background-color: var(--bg-event); }
+    tr.sec-chk td, tr.sec-chk .col-label { background-color: var(--bg-chk); }
+    tr.sec-event td, tr.sec-event .col-label { background-color: #fff; }
 
-    /* 요일 및 공휴일 */
+    /* 오늘 날짜 */
+    .today-col { background-color: #fff9c4 !important; border-left: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+    .today-header { background-color: #fff9c4 !important; color: #f57f17; border-bottom: 2px solid var(--accent) !important; border-top: 2px solid var(--accent); }
+
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
 
-    /* 셀 입력 스타일 */
-    .cell-check { cursor: pointer; color: #ddd; font-size: 14px; transition: color 0.1s; }
-    .cell-check:hover { color: #aaa; }
+    /* 입력 컨트롤 */
+    .cell-check { cursor: pointer; color: #e0e0e0; font-size: 13px; }
+    .cell-check:hover { color: #bbb; }
     .cell-check.checked { font-weight: 900; color: #000; }
     .cell-check.checked::after { content: "✔"; }
     
-    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 500; }
-    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; }
+    .cell-mixed { font-size: 13px; color: #e0e0e0; pointer-events: none; }
+    .cell-mixed.checked { color: #673ab7; font-weight: bold; }
+    .cell-mixed.checked::after { content: "✔"; }
+
+    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 500; font-size: 11px; }
+    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; }
     .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cell-event:hover { text-decoration: underline; background-color: rgba(0,0,0,0.05); }
     .disabled-cell { background-color: #eee !important; pointer-events: none; }
 
-    /* 툴팁 (작성법 안내) */
+    /* 툴팁 */
+    .tooltip-target[data-tip=""]:hover::after { display: none; }
     .tooltip-target:hover::after {
-        content: attr(data-tip);
-        position: fixed; left: 170px; top: 50%; transform: translateY(-50%);
-        background: #2d3436; color: #fff; padding: 10px; border-radius: 6px;
-        width: 240px; font-size: 12px; line-height: 1.5; z-index: 9999;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3); pointer-events: none; white-space: pre-wrap;
+        content: attr(data-tip); position: fixed; left: 170px; top: 50%; transform: translateY(-50%);
+        background: #2d3436; color: #fff; padding: 10px 14px; border-radius: 6px;
+        width: 260px; font-size: 12px; line-height: 1.5; z-index: 9999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3); pointer-events: none; white-space: pre-wrap; text-align: left;
     }
 
-    /* 3. 하단 섹션 (평가 & 링크 & 푸터) */
-    .bottom-panel { height: var(--footer-h); flex-shrink: 0; background: #f8f9fa; border-top: 2px solid #ccc; display: flex; flex-direction: column; }
-    
-    /* 월간 평가 영역 */
-    .monthly-score-bar { 
-        display: flex; align-items: center; justify-content: space-between; 
-        padding: 8px 15px; background: #fff; border-bottom: 1px solid #eee; 
-    }
-    .score-group { display: flex; align-items: center; gap: 20px; font-size: 12px; }
-    .score-item { display: flex; align-items: center; gap: 8px; }
-    .score-input { width: 40px; padding: 3px; border: 1px solid #ccc; border-radius: 3px; text-align: center; }
-    .link-btn { color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 3px; transition: 0.2s; white-space: nowrap;}
-    .link-btn:hover { text-decoration: underline; color: #004494; }
+    /* 3. 하단 섹션 */
+    .bottom-panel { height: var(--footer-h); flex-shrink: 0; background: #f8f9fa; border-top: 2px solid #ccc; display: flex; flex-direction: column; justify-content: center; }
+    .monthly-score-bar { display: flex; align-items: center; justify-content: space-between; padding: 5px 15px; background: #fff; border-bottom: 1px solid #eee; height: 32px; }
+    .score-group { display: flex; align-items: center; gap: 15px; font-size: 11px; }
+    .score-item { display: flex; align-items: center; gap: 5px; }
+    .score-input { width: 35px; padding: 2px; border: 1px solid #ccc; border-radius: 3px; text-align: center; font-size: 11px; }
+    .link-btn { color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 3px; font-size: 11px; }
+    .link-btn:hover { text-decoration: underline; }
 
-    /* 푸터 (면책조항 & 데이터 관리) */
-    .footer { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; color: #666; }
-    .footer-warning { line-height: 1.3; max-width: 65%; word-break: keep-all; font-weight: 500; }
-    .footer-btns { display: flex; gap: 8px; }
+    .footer { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 10px; color: #777; background: #f9f9f9; }
+    .footer-warning { line-height: 1.3; max-width: 70%; word-break: keep-all; font-weight: 500; }
+    .footer-btns { display: flex; gap: 5px; }
 
-    /* 모달 (생활사건 입력) */
-    #event-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; }
-    .modal-content { background: white; padding: 20px; border-radius: 10px; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-    .modal-header { font-weight: bold; margin-bottom: 12px; font-size: 14px; display: flex; justify-content: space-between; color: var(--primary); }
-    .modal-textarea { width: 100%; height: 100px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; resize: none; border-radius: 6px; margin-bottom: 15px; font-size: 13px; line-height: 1.4; }
-    .modal-btns { text-align: right; }
-    .btn-modal { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    /* 공통 모달 스타일 */
+    .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-header { font-weight: bold; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; color: var(--primary); }
+    .modal-textarea { width: 100%; height: 120px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; resize: none; border-radius: 4px; margin-bottom: 10px; font-size: 12px; }
+    .modal-input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
+    .modal-btns { text-align: right; margin-top: 10px; }
+    .btn-modal { padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: bold; }
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
 
     @media (max-width: 768px) {
-        .col-label { width: 120px; min-width: 120px; font-size: 11px; }
+        :root { --col-w: 130px; }
+        .header { height: auto; padding: 5px 10px; flex-wrap: wrap; gap: 5px; }
+        #doc-panel { width: 100%; justify-content: space-between; margin-top: 5px; }
         .bottom-panel { height: auto; padding-bottom: 10px; }
-        .monthly-score-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-        .footer { flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 5px; }
-        .footer-btns { width: 100%; justify-content: space-between; }
+        .monthly-score-bar { flex-direction: column; align-items: flex-start; gap: 5px; height: auto; padding: 8px 15px; }
+        .footer { flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 5px; }
+        .footer-btns { width: 100%; justify-content: flex-start; }
         .tooltip-target:hover::after { display: none; }
         .footer-warning { max-width: 100%; }
-        .score-group { flex-wrap: wrap; gap: 10px;}
+        .score-group { flex-wrap: wrap; gap: 10px; }
+        .save-login-wrap { flex-direction: column; align-items: flex-start; gap: 2px; }
     }
 </style>
 </head>
@@ -152,10 +166,16 @@
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지</h2>
+        <h2 style="color:var(--primary); margin:0 0 15px 0;">기분기록지</h2>
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            
+            <div class="save-login-wrap">
+                <label style="cursor:pointer;"><input type="checkbox" id="remember-me"> 아이디/비밀번호 저장</label>
+                <div class="warning-text">※ 공용 기기 사용 금지</div>
+            </div>
+
             <button class="btn-auth" onclick="login()">로그인</button>
             <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
         </div>
@@ -184,13 +204,17 @@
                 <input type="date" id="date-picker" onchange="jumpToDate(this.value)">
                 <button class="btn-nav" onclick="moveMonth(1)">▶</button>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span id="user-display" style="font-weight:bold; font-size:12px;"></span>
-                <button class="btn-nav" onclick="location.reload()">로그아웃</button>
-                <div id="doc-panel" class="hidden">
-                    <input id="search-id" placeholder="환자ID" style="padding:2px 5px; width:70px; height:24px; border:1px solid #ccc; border-radius:4px;">
-                    <button class="btn-nav" onclick="loadData()">조회</button>
-                </div>
+            
+            <div id="doc-panel" class="hidden">
+                <span style="font-weight:bold; font-size:11px; color:#0277bd;">환자조회:</span>
+                <input id="search-id" placeholder="ID입력" onkeypress="if(event.key==='Enter') loadData()">
+                <button onclick="loadData()">검색</button>
+            </div>
+
+            <div class="user-info">
+                <span id="user-display"></span>
+                <button class="btn-nav" onclick="openPwModal()">🔑 비번변경</button>
+                <button class="btn-nav" onclick="doLogout()">로그아웃</button>
             </div>
         </div>
 
@@ -207,7 +231,7 @@
         <div class="bottom-panel">
             <div class="monthly-score-bar">
                 <div class="score-group">
-                    <strong>[월간 자가 평가]</strong>
+                    <strong style="color:var(--primary);">[월간 평가]</strong>
                     <div class="score-item">
                         <a href="https://snumood.github.io/homepage/ls.html" target="_blank" class="link-btn">▶ 생활습관점수</a>
                         <input id="score-ls" type="number" class="score-input" placeholder="점수" onblur="saveMonthlyScore('ls', this.value)">
@@ -218,7 +242,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="https://drive.google.com/file/d/11grOF3LoZ1MYFk0GCB7WaCDRCTsYm7E7/view?usp=sharing" target="_blank" class="link-btn" style="color:#555;">
+                    <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="link-btn" style="color:#555;">
                         📖 기분기록지 작성방법 보기
                     </a>
                 </div>
@@ -226,11 +250,10 @@
 
             <div class="footer">
                 <div class="footer-warning">
-                    본 프로그램은 종이 기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용 프로그램이 아닙니다. <br>
-                    이 프로그램의 사용과 관련된 모든 책임은 의료진이 아닌 작성자에게 있습니다. 개인식별정보를 적지 않도록 유념하세요.
+                    본 프로그램은 의료용 프로그램이 아닙니다. 사용 책임은 작성자에게 있으며, 개인식별정보 기재를 삼가주세요.
                 </div>
                 <div class="footer-btns">
-                    <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">💾 데이터 저장</button>
+                    <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">💾 저장</button>
                     <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
                     <button class="btn-nav" onclick="document.getElementById('import-file').click()">📂 불러오기</button>
                 </div>
@@ -239,7 +262,7 @@
     </div>
 </div>
 
-<div id="event-modal">
+<div id="event-modal" class="modal-wrap">
     <div class="modal-content">
         <div class="modal-header">
             <span id="modal-title"></span>
@@ -253,86 +276,59 @@
     </div>
 </div>
 
+<div id="pw-modal" class="modal-wrap">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>비밀번호 변경</span>
+            <span style="cursor:pointer; color:#999;" onclick="closePwModal()">✕</span>
+        </div>
+        <input type="password" id="pw-old" class="modal-input" placeholder="현재 비밀번호">
+        <input type="password" id="pw-new" class="modal-input" placeholder="새 비밀번호">
+        <input type="password" id="pw-cfm" class="modal-input" placeholder="새 비밀번호 확인">
+        <div class="modal-btns">
+            <button class="btn-modal btn-cancel" onclick="closePwModal()">취소</button>
+            <button class="btn-modal btn-save" onclick="changePassword()">변경하기</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // [설정] Supabase
+    // [Supabase 설정]
     const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // [공휴일 데이터 2025~2040: 생략 없이 전부 포함]
+    // [보안] 비밀번호 해싱 (SHA-256)
+    async function hashPassword(str) {
+        const msgBuffer = new TextEncoder().encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // [공휴일 데이터 2025~2040]
     const krHolidays = {
-        // 양력 고정
-        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', 
-        '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
-        
-        // 2025
-        '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일',
-        '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
-        
-        // 2026
-        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일',
-        '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석', 
-        
-        // 2027
-        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-05-13':'석가탄신일',
-        '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석',
-        
-        // 2028
-        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-05-02':'석가탄신일',
-        '2028-10-02':'추석', '2028-10-03':'개천절/추석', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
-        
-        // 2029
-        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일',
-        '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석',
-        
-        // 2030
-        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-09':'석가탄신일',
-        '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
-
-        // 2031
-        '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일',
-        '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
-
-        // 2032
-        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일',
-        '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일',
-
-        // 2033
-        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일',
-        '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-09':'추석', '2033-10-10':'대체공휴일',
-
-        // 2034
-        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일',
-        '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
-
-        // 2035
-        '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일',
-        '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
-
-        // 2036
-        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-05-02':'석가탄신일',
-        '2036-10-03':'추석', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
-
-        // 2037
-        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-05-22':'석가탄신일',
-        '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석',
-
-        // 2038
-        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일',
-        '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일',
-
-        // 2039
-        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일',
-        '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석',
-
-        // 2040
-        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일',
-        '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
+        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
+        '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일', '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
+        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석',
+        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-05-13':'석가탄신일', '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석',
+        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-05-02':'석가탄신일', '2028-10-02':'추석', '2028-10-03':'개천절/추석', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
+        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일', '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석',
+        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-09':'석가탄신일', '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
+        '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일', '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
+        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일', '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일',
+        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일', '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-09':'추석', '2033-10-10':'대체공휴일',
+        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일', '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
+        '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일', '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
+        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-05-02':'석가탄신일', '2036-10-03':'추석', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
+        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-05-22':'석가탄신일', '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석',
+        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일', '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일',
+        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일', '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석',
+        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-    // [항목 및 섹션 정의]
+    // [항목 정의]
     const items = [
-        // 기분
         { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mania', type: 'check' },
         { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mania', type: 'check' },
         { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', section: 'mania', type: 'check' },
@@ -342,34 +338,45 @@
         { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', section: 'dep', type: 'check' },
         { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'dep', type: 'check' },
         { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'dep', type: 'check' },
+        { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다 (2개 이상 선택시)', section: 'mixed', type: 'mixed' },
         
-        // 정서 반응 / 생각 (척도)
-        { id: 's_anx', label: '정서 반응\n(불안/우울 등)', desc: '-4(무감각) ~ +4(과민)', section: 'scale', type: 'scale' },
-        { id: 's_mot', label: '의욕/흥미', desc: '-4(무의욕) ~ +4(충동적)', section: 'scale', type: 'scale' },
-        { id: 's_tht', label: '생각의 속도/양', desc: '-4(느림/없음) ~ +4(빠름/많음)', section: 'scale', type: 'scale' },
+        { id: 's_anx', label: '정서 반응 (불안/우울 등)', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
+        { id: 's_ang', label: '짜증/분노', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
+        { id: 's_mot', label: '관심/흥미/즐거움/소비/계획', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
+        { id: 's_act', label: '활동량', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
+        { id: 's_tsp', label: '생각의 속도와 양', desc: '-4 매우 느리고 적음, 0 적당, 4 극히 빠르고 많음', section: 'scale', type: 'scale' },
+        { id: 's_tct', label: '생각의 내용', desc: '-4 극히 부정적, 0 적당, 4 극히 긍정적', section: 'scale', type: 'scale' },
 
-        // 신체
         { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간 선택', section: 'body', type: 'sleep' },
-        { id: 'weight',label: '체중 (kg)\n*일요일만', desc: '일요일 아침 측정 권장', section: 'body', type: 'weight' },
+        { id: 'weight',label: '체중 (kg) *일요일만', desc: '일요일 아침 측정 권장', section: 'body', type: 'weight' },
 
-        // 주요 증상
-        { id: 'panic', label: '공황발작 (√)', desc: '갑작스러운 공포/신체증상', section: 'symptom', type: 'check' },
-        { id: 'hyper', label: '과호흡 (√)', desc: '숨이 가쁘고 손발 저림 등', section: 'symptom', type: 'check' },
-        { id: 'cry',   label: '울음 (√)', desc: '', section: 'symptom', type: 'check' },
-        { id: 'pain',  label: '통증 (√)', desc: '', section: 'symptom', type: 'check' },
-        { id: 'meds',  label: '약물복용 (√)', desc: '', section: 'symptom', type: 'check' },
-        { id: 'period',label: '생리기간 (√)', desc: '', section: 'symptom', type: 'check' },
-        { id: 'alcoh', label: '음주 (√)', desc: '', section: 'symptom', type: 'check' },
-        { id: 'binge', label: '폭식 (√)', desc: '', section: 'symptom', type: 'check' },
+        { id: 'period',label: '생리기간', desc: '', section: 'body', type: 'check' },
+        { id: 'alcoh', label: '음주', desc: '', section: 'body', type: 'check' },
+        { id: 'binge', label: '폭식', desc: '', section: 'body', type: 'check' },
+        { id: 'pain',  label: '통증 및 신체증상', desc: '', section: 'chk', type: 'check' },
+        { id: 'cry',   label: '울음', desc: '', section: 'chk', type: 'check' },
+        { id: 'panic', label: '공황발작', desc: '', section: 'chk', type: 'check' },
+        { id: 'hyper', label: '과호흡', desc: '', section: 'chk', type: 'check' },
+        { id: 'meds',  label: '약물복용', desc: '', section: 'chk', type: 'check' },
+        { id: 'exer',  label: '운동', desc: '', section: 'chk', type: 'check' },
         
-        // 생활 사건
         { id: 'event', label: '생활사건 (클릭)', desc: '클릭하여 내용을 기록하세요', section: 'event', type: 'event' }
     ];
 
     let user = null, target = null, curDate = new Date();
     let modalTarget = { day: null, id: null };
 
-    // --- 인증 ---
+    // --- 초기화 ---
+    window.onload = () => {
+        const savedId = localStorage.getItem('mood_saved_id');
+        const savedPw = localStorage.getItem('mood_saved_pw'); 
+        if(savedId && savedPw) {
+            document.getElementById('l-id').value = savedId;
+            document.getElementById('l-pw').value = savedPw; 
+            document.getElementById('remember-me').checked = true;
+        }
+    };
+
     function toggleAuth(m) {
         document.getElementById('login-form').classList.toggle('hidden', m !== 'login');
         document.getElementById('join-form').classList.toggle('hidden', m !== 'join');
@@ -379,20 +386,77 @@
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
         const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
         if(!id || !pw) return alert('필수 정보를 입력하세요.');
-        const { error } = await sb.from('user_profiles').insert([{ username:id, password:pw, hospital_id:h }]);
+        const hashedPw = await hashPassword(pw);
+        const { error } = await sb.from('user_profiles').insert([{ username:id, password:hashedPw, hospital_id:h }]);
         if(error) alert('이미 사용 중인 아이디입니다.'); else { alert('가입 완료.'); toggleAuth('login'); }
     }
 
     async function login() {
-        const id = document.getElementById('l-id').value, pw = document.getElementById('l-pw').value;
-        const { data } = await sb.from('user_profiles').select('*').eq('username',id).eq('password',pw).single();
-        if(!data) return alert('로그인 실패.');
-        user = data; target = id;
+        const id = document.getElementById('l-id').value;
+        const pw = document.getElementById('l-pw').value;
+        
+        if(document.getElementById('remember-me').checked) {
+            localStorage.setItem('mood_saved_id', id);
+            localStorage.setItem('mood_saved_pw', pw); 
+        } else {
+            localStorage.removeItem('mood_saved_id');
+            localStorage.removeItem('mood_saved_pw');
+        }
+
+        const hashedPw = await hashPassword(pw); 
+        const { data } = await sb.from('user_profiles').select('*').eq('username',id).eq('password',hashedPw).single();
+        
+        if(!data) return alert('로그인 실패. 아이디나 비밀번호를 확인하세요.');
+        
+        user = data; 
+        target = id; 
+        
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText = id + (user.role==='doctor'?'(의료진)':'');
-        if(user.role==='doctor') { document.getElementById('doc-panel').classList.remove('hidden'); target = null; }
-        renderTable();
+        
+        if(user.role==='doctor') { 
+            document.getElementById('doc-panel').classList.remove('hidden'); 
+            target = null; 
+            alert("의료진 모드입니다. 환자 ID를 검색하세요.");
+        } else {
+            renderTable(); 
+        }
+    }
+
+    function doLogout() { location.reload(); }
+
+    // --- 비밀번호 변경 ---
+    function openPwModal() {
+        document.getElementById('pw-old').value = '';
+        document.getElementById('pw-new').value = '';
+        document.getElementById('pw-cfm').value = '';
+        document.getElementById('pw-modal').style.display = 'flex';
+    }
+    function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
+    
+    async function changePassword() {
+        const oldPw = document.getElementById('pw-old').value;
+        const newPw = document.getElementById('pw-new').value;
+        const cfmPw = document.getElementById('pw-cfm').value;
+
+        if(!oldPw || !newPw) return alert("비밀번호를 입력해주세요.");
+        if(newPw !== cfmPw) return alert("새 비밀번호가 일치하지 않습니다.");
+
+        const hashedOld = await hashPassword(oldPw);
+        
+        // 현재 비번 검증
+        const { data, error } = await sb.from('user_profiles').select('*').eq('username', user.username).eq('password', hashedOld).single();
+        if(!data) return alert("현재 비밀번호가 틀렸습니다.");
+
+        const hashedNew = await hashPassword(newPw);
+        const { error: updateErr } = await sb.from('user_profiles').update({ password: hashedNew }).eq('username', user.username);
+        
+        if(updateErr) alert("변경 실패: " + updateErr.message);
+        else {
+            alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
+            location.reload();
+        }
     }
 
     // --- 렌더링 ---
@@ -400,19 +464,21 @@
         const year = curDate.getFullYear(), month = curDate.getMonth();
         document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
 
+        const today = new Date();
+        const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+        const todayDate = today.getDate();
+
         const lastDay = new Date(year, month+1, 0).getDate();
         const header = document.getElementById('header-row');
         const dowRow = document.getElementById('dow-row');
         const body = document.getElementById('table-body');
 
-        // 초기화
         while(header.children.length > 1) header.removeChild(header.lastChild);
         while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
         body.innerHTML = '';
 
         const days = ['일','월','화','수','목','금','토'];
 
-        // 헤더 생성
         for(let d=1; d<=lastDay; d++) {
             const dt = new Date(year, month, d);
             const dayIdx = dt.getDay();
@@ -420,20 +486,22 @@
             const kFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const hol = krHolidays[kShort] || krHolidays[kFull];
             const isRed = dayIdx === 0 || hol;
+            const isToday = isCurrentMonth && d === todayDate;
 
             let th = document.createElement('th'); th.innerText = d;
             if(isRed) th.className = 'day-holiday';
             if(hol) th.title = hol;
             if(dayIdx===6 && !isRed) th.className = 'day-sat';
+            if(isToday) th.classList.add('today-header', 'today-col');
             header.appendChild(th);
 
             let td = document.createElement('th'); td.innerText = days[dayIdx];
             if(isRed) td.className = 'day-holiday';
             if(dayIdx===6 && !isRed) td.className = 'day-sat';
+            if(isToday) td.classList.add('today-col');
             dowRow.appendChild(td);
         }
 
-        // 본문 생성
         items.forEach(item => {
             let tr = document.createElement('tr');
             tr.classList.add('sec-' + item.section); 
@@ -446,48 +514,44 @@
                 const dt = new Date(year, month, d);
                 let td = document.createElement('td');
                 if(dt.getDay() === 0) td.style.borderRight = "2px solid #888"; 
-                
+                if(isCurrentMonth && d === todayDate) td.classList.add('today-col');
+
                 td.dataset.d = d; td.dataset.c = item.id; td.dataset.s = item.section;
 
-                // 1. 기분 (체크박스)
-                if(item.type === 'check') {
+                if(item.type === 'check' && (item.section === 'mania' || item.section === 'dep')) {
                     td.className = 'cell-check';
                     td.onclick = () => {
                         if(user.role === 'doctor') return;
                         const isChecked = td.classList.contains('checked');
-                        // 기분 섹션이면 2개 제한 체크
-                        if((item.section === 'mania' || item.section === 'dep') && !isChecked) {
-                            const cnt = document.querySelectorAll(`tr.sec-mania td[data-d="${d}"].checked, tr.sec-dep td[data-d="${d}"].checked`).length;
-                            if(cnt >= 2) return alert("기분 항목은 하루에 최대 2개까지만 선택 가능합니다.");
-                        }
-                        if(isChecked) {
-                            td.classList.remove('checked'); saveData(d, item.id, null);
-                        } else {
-                            td.classList.add('checked'); saveData(d, item.id, 'Y');
-                        }
+                        const cnt = document.querySelectorAll(`tr.sec-mania td[data-d="${d}"].checked, tr.sec-dep td[data-d="${d}"].checked`).length;
+                        if(!isChecked && cnt >= 2) return alert("기분 항목은 하루에 최대 2개까지만 선택 가능합니다.");
+                        if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
+                        else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                        updateMixedState(d);
                     };
-                }
-                // 2. 척도 (-4~4)
-                else if(item.type === 'scale') {
+                } else if(item.type === 'mixed') {
+                    td.className = 'cell-mixed';
+                } else if(item.type === 'check') {
+                    td.className = 'cell-check';
+                    td.onclick = () => {
+                        if(user.role==='doctor') return;
+                        let val = td.classList.toggle('checked') ? 'Y' : null;
+                        saveData(d, item.id, val);
+                    };
+                } else if(item.type === 'scale') {
                     let sel = createSelect(-4, 4);
                     sel.onchange = (e) => saveData(d, item.id, e.target.value);
                     td.appendChild(sel);
-                }
-                // 3. 수면 (0~24)
-                else if(item.type === 'sleep') {
+                } else if(item.type === 'sleep') {
                     let sel = createSelect(0, 24);
                     sel.onchange = (e) => saveData(d, item.id, e.target.value);
                     td.appendChild(sel);
-                }
-                // 4. 체중
-                else if(item.type === 'weight') {
+                } else if(item.type === 'weight') {
                     let inp = document.createElement('input'); inp.type='number'; inp.className='cell-input';
                     if(dt.getDay() !== 0) { td.className = 'disabled-cell'; inp.disabled = true; }
                     else inp.onblur = (e) => saveData(d, item.id, e.target.value);
                     td.appendChild(inp);
-                }
-                // 5. 생활사건
-                else if(item.type === 'event') {
+                } else if(item.type === 'event') {
                     td.className = 'cell-event';
                     td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); };
                 }
@@ -496,7 +560,7 @@
             body.appendChild(tr);
         });
         
-        // 월간 점수 초기화
+        // 초기화
         document.getElementById('score-ls').value = '';
         document.getElementById('score-mssi').value = '';
         
@@ -510,36 +574,48 @@
         return s;
     }
 
-    // --- 데이터 처리 ---
+    async function updateMixedState(day) {
+        setTimeout(() => {
+            const cnt = document.querySelectorAll(`tr.sec-mania td[data-d="${day}"].checked, tr.sec-dep td[data-d="${day}"].checked`).length;
+            const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
+            if(cnt >= 2) {
+                if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); }
+            } else {
+                if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); }
+            }
+        }, 50);
+    }
+
     async function saveData(day, cat, val) {
         if(user.role==='doctor') return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        
         if(!val) await sb.from('mood_records').delete().match({username:user.username, record_date:date, category:cat});
         else await sb.from('mood_records').upsert({username:user.username, record_date:date, category:cat, value:val});
     }
 
-    // 월간 점수 저장
     async function saveMonthlyScore(type, val) {
         if(user.role==='doctor') return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-01`;
-        await sb.from('mood_records').upsert({
-            username: user.username, 
-            record_date: date, 
-            category: `score_${type}`, 
-            value: val 
-        });
+        await sb.from('mood_records').upsert({ username: user.username, record_date: date, category: `score_${type}`, value: val });
     }
 
+    // [의료진 조회 수정: 입력값 기반으로 조회 후 렌더링]
     async function loadData() {
-        if(user.role==='doctor') target = document.getElementById('search-id').value;
-        if(!target) return;
+        if(user.role==='doctor') {
+            const inputId = document.getElementById('search-id').value;
+            if(!inputId) return alert("조회할 환자 아이디를 입력하세요.");
+            target = inputId;
+        } else {
+            target = user.username;
+        }
 
-        // 초기화
+        // 화면 초기화
         document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
-        document.querySelectorAll('input, select').forEach(e => { if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score')) e.value=''; });
+        document.querySelectorAll('input, select').forEach(e => { 
+            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) e.value=''; 
+        });
         document.querySelectorAll('.cell-event').forEach(e => e.innerText = '');
 
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
@@ -549,16 +625,19 @@
 
         const { data } = await sb.from('mood_records').select('*').eq('username',target).gte('record_date',start).lte('record_date',end);
         
+        if(user.role === 'doctor' && (!data || data.length === 0)) {
+            // 데이터가 없어도 테이블은 그려져야 함 (빈 상태)
+            // 별도 알림은 선택 사항
+        }
+
         data?.forEach(rec => {
-            // 월간 점수
             if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
             else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
-            // 일반 데이터
             else {
                 const day = new Date(rec.record_date).getDate();
                 const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
                 if(cell) {
-                    if(cell.classList.contains('cell-check')) {
+                    if(rec.category === 'mixed' || cell.classList.contains('cell-check') || cell.classList.contains('cell-mixed')) {
                         if(rec.value === 'Y') cell.classList.add('checked');
                     } else if(cell.classList.contains('cell-event')) {
                         cell.innerText = rec.value;
