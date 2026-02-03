@@ -6,45 +6,82 @@
 <title>기분기록지 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    :root { --main: #007bff; --bg: #f8f9fa; --border: #ddd; }
-    body { font-family: 'Apple SD Gothic Neo', sans-serif; margin: 0; background: var(--bg); color: #333; -webkit-tap-highlight-color: transparent; }
+    /* --- CSS 스타일 정의 --- */
+    :root { 
+        --primary: #005eb8; /* SNUH Blue */
+        --line-color: #555; 
+        --line-light: #ccc;
+        --bg-mania: #ffebee; 
+        --bg-dep: #e3f2fd; 
+        --bg-head: #f8f9fa;
+    }
+    body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; color: #333; font-size: 12px; }
     .hidden { display: none !important; }
+    input, button, select { outline: none; font-family: inherit; }
 
-    /* 인증 화면 */
-    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: white; }
-    .auth-box { width: 90%; max-width: 350px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; }
-    .tabs { display: flex; border-bottom: 2px solid #f5f5f5; margin-bottom: 25px; }
-    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #aaa; font-weight: bold; }
-    .tab.active { color: var(--main); border-bottom: 2px solid var(--main); }
-    input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline-color: var(--main); }
-    .btn-main { width: 100%; padding: 15px; background: var(--main); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .btn-main:active { transform: scale(0.98); }
+    /* 로그인 화면 */
+    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f4f8; }
+    .auth-box { width: 360px; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+    .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 10px; }
+    .toggle-auth { margin-top: 15px; font-size: 13px; color: #666; cursor: pointer; text-decoration: underline; display: inline-block; }
 
-    /* 대시보드 상단 */
-    .top-bar { position: sticky; top: 0; left: 0; background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); z-index: 1000; }
-    .nav-group { display: flex; align-items: center; gap: 10px; font-weight: bold; }
-    .nav-btn { padding: 8px 15px; background: #eee; border: none; border-radius: 6px; cursor: pointer; }
-
-    /* 엑셀 그리드 (반응형 가로 스크롤) */
-    .grid-container { overflow: auto; height: calc(100vh - 70px); background: white; }
-    table { border-collapse: collapse; min-width: 1600px; table-layout: fixed; }
-    th, td { border: 1px solid #eee; text-align: center; height: 42px; font-size: 13px; width: 45px; }
+    /* 메인 레이아웃 */
+    .container { max-width: 100%; padding: 10px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px; flex-wrap: wrap; gap: 10px; }
+    .month-nav { font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 15px; color: #333; }
+    .btn-nav { background: white; border: 1px solid #ccc; padding: 5px 12px; cursor: pointer; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+    .btn-nav:hover { background: #f0f0f0; }
     
-    /* 엑셀 핵심: 헤더 및 첫 열 고정 */
-    thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 100; border-bottom: 2px solid #ccc; }
-    td:first-child, th:first-child { position: sticky; left: 0; background: #f1f3f5; z-index: 110; width: 180px; text-align: left; padding-left: 10px; font-weight: bold; border-right: 2px solid #ccc; }
-    
-    /* 항목별 색상 및 셀 스타일 */
-    .row-mood { background: #f0f7ff; }
-    .row-sym { background: #fff9f0; }
-    .cell-check { cursor: pointer; transition: 0.2s; font-size: 18px; }
-    .cell-check.checked { background: var(--main); color: white; }
-    .cell-check.checked::after { content: '✔'; }
-    .cell-input input { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 14px; outline: none; }
+    #date-picker { border: 1px solid #ccc; padding: 4px; border-radius: 4px; font-size: 14px; }
 
-    @media (max-width: 600px) {
-        td:first-child, th:first-child { width: 130px; font-size: 12px; }
-        th, td { height: 48px; width: 48px; } /* 모바일 터치 최적화 */
+    /* 엑셀 그리드 */
+    .grid-wrapper { overflow-x: auto; border: 1px solid var(--line-color); height: calc(100vh - 180px); }
+    table { border-collapse: separate; border-spacing: 0; min-width: 1600px; width: 100%; table-layout: fixed; }
+    
+    th, td { border-right: 1px solid var(--line-light); border-bottom: 1px solid var(--line-light); text-align: center; height: 38px; padding: 0; box-sizing: border-box; font-size: 12px; vertical-align: middle; background: #fff; }
+    
+    /* 헤더 및 첫열 고정 */
+    thead th { position: sticky; top: 0; background: var(--bg-head); z-index: 10; border-bottom: 2px solid var(--line-color); height: 45px; }
+    .col-label { position: sticky; left: 0; background: #fff; z-index: 20; width: 220px; min-width: 220px; border-right: 2px solid var(--line-color); text-align: left; padding-left: 10px; font-weight: bold; white-space: pre-wrap; line-height: 1.3; }
+    
+    /* 주말 및 휴일 */
+    .day-sun { color: red; background-color: #fff5f5 !important; border-right: 2px solid #555 !important; }
+    .day-sat { color: blue; background-color: #f5faff !important; }
+    .day-holiday { color: red !important; background-color: #fff0f0 !important; font-weight: bold; }
+
+    /* 행 배경색 */
+    .bg-mania { background-color: var(--bg-mania); }
+    .bg-dep { background-color: var(--bg-dep); }
+    
+    /* 입력 컨트롤 */
+    .cell-check { cursor: pointer; font-size: 18px; color: #ccc; user-select: none; }
+    .cell-check.checked { font-weight: 900; color: #000; }
+    .cell-check.checked::after { content: "✔"; }
+    
+    .cell-select { width: 100%; height: 100%; border: none; text-align: center; text-align-last: center; background: transparent; font-size: 12px; appearance: none; -webkit-appearance: none; cursor: pointer; }
+    .cell-input { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; }
+    .cell-text input { width: 96%; border: none; background: transparent; font-size: 11px; text-align: left; padding-left: 5px; }
+    .disabled-cell { background-color: #eee; pointer-events: none; }
+
+    /* 툴팁 */
+    .tooltip-target:hover::after {
+        content: attr(data-tip);
+        position: fixed; left: 240px; top: 50%; transform: translateY(-50%);
+        background: #333; color: #fff; padding: 12px; border-radius: 8px;
+        width: 220px; font-size: 13px; line-height: 1.5; z-index: 1000;
+        box-shadow: 4px 4px 15px rgba(0,0,0,0.3); pointer-events: none;
+    }
+
+    /* 하단 섹션 */
+    .footer { margin-top: 10px; padding: 15px; background: #f9f9f9; border-top: 2px solid #555; font-size: 11px; color: #555; line-height: 1.6; display: flex; justify-content: space-between; align-items: flex-start; }
+    .data-controls { display: flex; gap: 10px; flex-shrink: 0; }
+    
+    @media (max-width: 768px) {
+        .col-label { width: 140px; min-width: 140px; font-size: 11px; }
+        .grid-wrapper { height: calc(100vh - 260px); } /* 하단 문구 공간 확보 */
+        .tooltip-target:hover::after { display: none; }
+        .footer { flex-direction: column; gap: 10px; }
     }
 </style>
 </head>
@@ -52,167 +89,452 @@
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="text-align:center; color:var(--main); margin-top:0;">기분기록지</h2>
-        <div class="tabs">
-            <div id="t-login" class="tab active" onclick="setAuth('login')">로그인</div>
-            <div id="t-signup" class="tab" onclick="setAuth('signup')">회원가입</div>
+        <h2 style="color:var(--primary); margin-top:0;">기분기록지</h2>
+        <div id="login-form">
+            <input id="l-id" class="auth-inp" placeholder="아이디">
+            <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            <button class="btn-auth" onclick="login()">로그인</button>
+            <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
         </div>
-        <div id="f-login">
-            <input id="li-id" placeholder="아이디">
-            <input id="li-pw" type="password" placeholder="비밀번호">
-            <button class="btn-main" onclick="doLogin()">로그인</button>
-        </div>
-        <div id="f-signup" class="hidden">
-            <input id="su-id" placeholder="희망 아이디 (필수)">
-            <input id="su-pw" type="password" placeholder="비밀번호 (필수)">
-            <input id="su-hosp" placeholder="병원 환자번호 (선택)">
-            <p style="font-size:11px; color:#999; margin: -5px 0 15px 5px;">* 환자번호는 진료 시 확인용으로 사용됩니다.</p>
-            <button class="btn-main" style="background:#28a745;" onclick="doSignUp()">회원가입 완료</button>
+        <div id="join-form" class="hidden">
+            <input id="j-id" class="auth-inp" placeholder="희망 아이디">
+            <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            <input id="j-hosp" class="auth-inp" placeholder="병원 환자번호 (선택)">
+            <div style="text-align:left; font-size:11px; margin:10px 0; background:#eee; padding:8px; border-radius:4px; word-break: keep-all;">
+                <strong>[이용 안내 및 면책 조항]</strong><br>
+                본 프로그램은 종이 기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용 프로그램이 아닙니다. <br>
+                이 프로그램의 사용과 관련된 모든 책임은 의료진이 아닌 작성자에게 있습니다. 개인식별정보를 적지 않도록 유념하세요.
+            </div>
+            <label style="font-size:12px; cursor:pointer;"><input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.</label>
+            <button class="btn-auth" style="background:#28a745;" onclick="join()">가입완료</button>
+            <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
         </div>
     </div>
 </div>
 
 <div id="main-screen" class="hidden">
-    <div class="top-bar">
-        <div class="nav-group">
-            <button class="nav-btn" onclick="chgMonth(-1)">◀</button>
-            <span id="m-label"></span>
-            <button class="nav-btn" onclick="chgMonth(1)">▶</button>
+    <div class="container">
+        <div class="header">
+            <div class="month-nav">
+                <button class="btn-nav" onclick="moveMonth(-1)">◀</button>
+                <input type="date" id="date-picker" onchange="jumpToDate(this.value)">
+                <button class="btn-nav" onclick="moveMonth(1)">▶</button>
+            </div>
+            <div style="text-align:right; display:flex; align-items:center; gap:10px;">
+                <span id="user-display" style="font-weight:bold;"></span>
+                <button class="btn-nav" onclick="location.reload()">로그아웃</button>
+                <div id="doc-panel" class="hidden">
+                    <input id="search-id" placeholder="환자ID 조회" style="padding:4px; width:100px;">
+                    <button class="btn-nav" onclick="loadData()">조회</button>
+                </div>
+            </div>
         </div>
-        <div id="doc-tool" class="hidden" style="display:flex; gap:5px;">
-            <input id="q-id" placeholder="환자ID 조회" style="width:100px; margin:0; padding:8px; font-size:14px;">
-            <button onclick="load()" style="background:#6c757d; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">조회</button>
+
+        <div class="grid-wrapper">
+            <table id="mood-table">
+                <thead>
+                    <tr id="header-row"><th class="col-label" style="text-align:center;">항목 / 날짜</th></tr>
+                    <tr id="dow-row"><th class="col-label" style="text-align:center; background:#f9f9f9; color:#666;">요일</th></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
         </div>
-        <div style="font-size:14px;">
-            <span id="u-name" style="font-weight:bold; margin-right:10px;"></span>
-            <button onclick="location.reload()" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:5px; cursor:pointer; font-size:12px;">로그아웃</button>
+
+        <div class="footer">
+            <div style="word-break: keep-all; margin-right: 20px;">
+                <strong>[안내]</strong> 본 프로그램은 종이 기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용 프로그램이 아닙니다. <br>
+                이 프로그램의 사용과 관련된 모든 책임은 의료진이 아닌 작성자에게 있습니다. 민감정보 및 개인식별정보를 적지 않도록 주의하세요.
+            </div>
+            <div class="data-controls">
+                <button class="btn-nav" onclick="exportData()" style="border:1px solid var(--primary); color:var(--primary);">💾 내 데이터 다운로드</button>
+                <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
+                <button class="btn-nav" onclick="document.getElementById('import-file').click()">📂 데이터 불러오기</button>
+            </div>
         </div>
-    </div>
-    <div class="grid-container">
-        <table>
-            <thead><tr id="h-row"><th>항목 / 날짜</th></tr></thead>
-            <tbody id="b-rows"></tbody>
-        </table>
     </div>
 </div>
 
 <script>
-    // [중요] 여기에 본인의 Supabase 프로젝트 정보를 넣으세요.
-    const S_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co'; 
-    const S_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
-    const sb = supabase.createClient(S_URL, S_KEY);
+    // [중요] Supabase 설정 (본인의 키를 입력하세요)
+    const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj;
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let me = null, target = null, yr = new Date().getFullYear(), mo = new Date().getMonth() + 1;
+    // [공휴일 데이터 2025~2040]
+    // 양력 고정 공휴일은 날짜만, 음력/대체 공휴일은 전체 날짜(YYYY-MM-DD)
+    const krHolidays = {
+        // 양력 고정
+        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', 
+        '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
+        
+        // 2025
+        '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일',
+        '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
+        
+        // 2026
+        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일',
+        '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석', 
+        
+        // 2027
+        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-05-13':'석가탄신일',
+        '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석',
+        
+        // 2028
+        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-05-02':'석가탄신일',
+        '2028-10-02':'추석', '2028-10-03':'개천절/추석', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
+        
+        // 2029
+        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일',
+        '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석',
+        
+        // 2030
+        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-09':'석가탄신일',
+        '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
 
-    // 엑셀 파일의 모든 항목을 1:1 반영
+        // 2031
+        '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일',
+        '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
+
+        // 2032
+        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일',
+        '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일',
+
+        // 2033
+        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일',
+        '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-09':'추석', '2033-10-10':'대체공휴일',
+
+        // 2034
+        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일',
+        '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
+
+        // 2035
+        '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일',
+        '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
+
+        // 2036
+        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-05-02':'석가탄신일',
+        '2036-10-03':'추석', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
+
+        // 2037
+        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-05-22':'석가탄신일',
+        '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석',
+
+        // 2038
+        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일',
+        '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일',
+
+        // 2039
+        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일',
+        '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석',
+
+        // 2040
+        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일',
+        '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
+    };
+
     const items = [
-        { id: 'm_p4', l: '기분 +4 (극히상승)', g: 'mood', t: 'check' },
-        { id: 'm_p3', l: '기분 +3 (상당상승)', g: 'mood', t: 'check' },
-        { id: 'm_p2', l: '기분 +2 (분명상승)', g: 'mood', t: 'check' },
-        { id: 'm_p1', l: '기분 +1 (미세상승)', g: 'mood', t: 'check' },
-        { id: 'm_0',  l: '기분 0 (보통)',     g: 'mood', t: 'check' },
-        { id: 'm_m1', l: '기분 -1 (미세저하)', g: 'mood', t: 'check' },
-        { id: 'm_m2', l: '기분 -2 (분명저하)', g: 'mood', t: 'check' },
-        { id: 'm_m3', l: '기분 -3 (상당저하)', g: 'mood', t: 'check' },
-        { id: 'm_m4', l: '기분 -4 (극히저하)', g: 'mood', t: 'check' },
-        { id: 'ir_an', l: '짜증/분노 (-4~4)', g: 'sym',  t: 'input' },
-        { id: 'motiv', l: '의욕/흥미 (-4~4)', g: 'sym',  t: 'input' },
-        { id: 'activ', l: '활동량 (-4~4)',    g: 'sym',  t: 'input' },
-        { id: 't_spd', l: '생각속도 (-4~4)',  g: 'sym',  t: 'input' },
-        { id: 't_con', l: '생각내용 (-4~4)',  g: 'sym',  t: 'input' },
-        { id: 'sleep', l: '수면시간 (시간)',   g: 'etc',  t: 'input' },
-        { id: 'weight',l: '체중 (kg)',        g: 'etc',  t: 'input' },
-        { id: 'period',l: '생리기간 (√)',     g: 'etc',  t: 'check' },
-        { id: 'alcoh', l: '음주량 (잔)',       g: 'etc',  t: 'input' },
-        { id: 'binge', l: '폭식여부 (√)',     g: 'etc',  t: 'check' },
-        { id: 'pain',  l: '통증/신체증상 (√)', g: 'etc',  t: 'check' },
-        { id: 'crying',l: '울음 (√)',         g: 'etc',  t: 'check' }
+        { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', group: 'mood' },
+        { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', group: 'mood' },
+        { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', group: 'mood' },
+        { id: 'm_p1', label: '+1 미세한 상승', desc: '미미한 변화, 본인은 기분 좋음', group: 'mood' },
+        { id: 'm_0',  label: '0  보통 기분',   desc: '평온하고 정상적인 상태', group: 'mood' },
+        { id: 'm_m1', label: '-1 미세한 저하', desc: '미미한 변화, 의욕 저하', group: 'mood' },
+        { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', group: 'mood' },
+        { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', group: 'mood' },
+        { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', group: 'mood' },
+        
+        // 척도형 (-4 ~ +4)
+        { id: 's_anx', label: '정서 반응\n(불안/우울 등)', desc: '-4(무감각) ~ +4(과민)', group: 'scale' },
+        { id: 's_mot', label: '의욕/흥미', desc: '-4(무의욕) ~ +4(충동적)', group: 'scale' },
+        { id: 's_tht', label: '생각의 속도/양', desc: '-4(느림/없음) ~ +4(빠름/많음)', group: 'scale' },
+
+        // 수치 입력
+        { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간 선택', group: 'val_sleep' },
+        { id: 'weight',label: '체중 (kg)\n*일요일만', desc: '일요일 아침 측정 권장', group: 'val_weight' },
+
+        // 체크박스
+        { id: 'panic', label: '공황발작 (√)', desc: '갑작스러운 공포/신체증상', group: 'chk' },
+        { id: 'hyper', label: '과호흡 (√)', desc: '숨이 가쁘고 손발 저림 등', group: 'chk' },
+        { id: 'cry',   label: '울음 (√)', desc: '', group: 'chk' },
+        { id: 'pain',  label: '통증 (√)', desc: '', group: 'chk' },
+        { id: 'meds',  label: '약물복용 (√)', desc: '', group: 'chk' },
+        { id: 'period',label: '생리기간 (√)', desc: '', group: 'chk' },
+        { id: 'alcoh', label: '음주 (√)', desc: '', group: 'chk' },
+        { id: 'binge', label: '폭식 (√)', desc: '', group: 'chk' },
+
+        // 텍스트
+        { id: 'event', label: '생활사건 (기록)', desc: '스트레스 요인 등 상세 기록', group: 'text' }
     ];
 
-    function setAuth(m) {
-        document.getElementById('f-login').classList.toggle('hidden', m!=='login');
-        document.getElementById('f-signup').classList.toggle('hidden', m!=='signup');
-        document.getElementById('t-login').classList.toggle('active', m==='login');
-        document.getElementById('t-signup').classList.toggle('active', m==='signup');
+    let user = null, target = null, curDate = new Date();
+
+    // --- 인증 로직 ---
+    function toggleAuth(m) {
+        document.getElementById('login-form').classList.toggle('hidden', m !== 'login');
+        document.getElementById('join-form').classList.toggle('hidden', m !== 'join');
     }
 
-    async function doSignUp() {
-        const id = document.getElementById('su-id').value, pw = document.getElementById('su-pw').value, h = document.getElementById('su-hosp').value;
-        if(!id || !pw) return alert("필수 항목을 입력해주세요.");
-        const { error } = await sb.from('user_profiles').insert([{ username:id, password:pw, hospital_id:h, role:'patient' }]);
-        if(error) alert("중복된 아이디이거나 가입 오류가 발생했습니다.");
-        else { alert("회원가입 성공! 로그인해주세요."); setAuth('login'); }
+    async function join() {
+        if(!document.getElementById('j-agree').checked) return alert("이용 안내 및 면책 조항에 동의해야 가입 가능합니다.");
+        const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
+        if(!id || !pw) return alert('아이디와 비밀번호를 입력하세요.');
+        const { error } = await sb.from('user_profiles').insert([{ username:id, password:pw, hospital_id:h }]);
+        if(error) alert('이미 사용 중인 아이디입니다.'); else { alert('가입 완료. 로그인해주세요.'); toggleAuth('login'); }
     }
 
-    async function doLogin() {
-        const id = document.getElementById('li-id').value, pw = document.getElementById('li-pw').value;
-        const { data, error } = await sb.from('user_profiles').select('*').eq('username',id).eq('password',pw).single();
-        if(error || !data) return alert("아이디 또는 비밀번호를 확인해주세요.");
-        me = data; target = id;
+    async function login() {
+        const id = document.getElementById('l-id').value, pw = document.getElementById('l-pw').value;
+        const { data } = await sb.from('user_profiles').select('*').eq('username',id).eq('password',pw).single();
+        if(!data) return alert('정보가 일치하지 않습니다.');
+        user = data; target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('u-name').innerText = id + "님";
-        if(me.role==='doctor') { document.getElementById('doc-tool').classList.remove('hidden'); target = ""; }
-        initTable(); updateLabel();
+        document.getElementById('user-display').innerText = id + (user.role==='doctor'?'(의료진)':'');
+        if(user.role==='doctor') { document.getElementById('doc-panel').classList.remove('hidden'); target = null; }
+        renderTable();
     }
 
-    function initTable() {
-        const h = document.getElementById('h-row'), b = document.getElementById('b-rows');
-        if(h.children.length===1) for(let d=1; d<=31; d++) { let th=document.createElement('th'); th.innerText=d; h.appendChild(th); }
-        b.innerHTML = '';
-        items.forEach((r, idx) => {
+    // --- 테이블 렌더링 (핵심 UI) ---
+    function renderTable() {
+        // 날짜 동기화
+        const year = curDate.getFullYear(), month = curDate.getMonth();
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-01`;
+        document.getElementById('date-picker').value = dateStr;
+
+        const lastDay = new Date(year, month+1, 0).getDate();
+        const header = document.getElementById('header-row');
+        const dowRow = document.getElementById('dow-row');
+        const body = document.getElementById('table-body');
+
+        while(header.children.length > 1) header.removeChild(header.lastChild);
+        while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
+        body.innerHTML = '';
+
+        const days = ['일','월','화','수','목','금','토'];
+
+        // 날짜/요일 헤더 생성
+        for(let d=1; d<=lastDay; d++) {
+            const dt = new Date(year, month, d);
+            const dayIdx = dt.getDay();
+            const dateKeyShort = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; // MM-DD (양력)
+            const dateKeyFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; // YYYY-MM-DD (음력 등)
+            
+            // 공휴일 판별
+            const holName = krHolidays[dateKeyShort] || krHolidays[dateKeyFull];
+            const isRed = dayIdx === 0 || holName;
+
+            let th = document.createElement('th'); 
+            th.innerText = d; 
+            if(isRed) th.className = 'day-holiday';
+            if(holName) th.title = holName; // 툴팁으로 공휴일 이름 표시
+            if(dayIdx===6 && !isRed) th.className = 'day-sat';
+            header.appendChild(th);
+
+            let td = document.createElement('th'); 
+            td.innerText = days[dayIdx];
+            if(isRed) td.className = 'day-holiday';
+            if(dayIdx===6 && !isRed) td.className = 'day-sat';
+            dowRow.appendChild(td);
+        }
+
+        // 본문 행 생성
+        items.forEach(item => {
             let tr = document.createElement('tr');
-            if(r.g==='mood') tr.classList.add('row-mood'); else if(r.g==='sym') tr.classList.add('row-sym');
-            let tdL = document.createElement('td'); tdL.innerText = r.l; tr.appendChild(tdL);
-            for(let d=1; d<=31; d++) {
+            
+            // 행 색상 구분
+            if(item.group === 'mood') {
+                if(item.id.includes('p')) tr.classList.add('bg-mania');
+                else if(item.id.includes('m')) tr.classList.add('bg-dep');
+            }
+
+            // 첫 열 (라벨)
+            let th = document.createElement('th');
+            th.className = 'col-label tooltip-target';
+            th.innerText = item.label;
+            th.setAttribute('data-tip', item.desc);
+            tr.appendChild(th);
+
+            // 데이터 셀 생성
+            for(let d=1; d<=lastDay; d++) {
+                const dt = new Date(year, month, d);
+                const dayIdx = dt.getDay();
                 let td = document.createElement('td');
-                if(r.t==='check') { 
-                    td.className='cell-check'; 
-                    td.onclick=()=> { if(me.role==='doctor') return alert("의료진은 조회만 가능합니다."); save(td,d,r.id,td.classList.toggle('checked')?'Y':null); }
-                } else { 
-                    let i=document.createElement('input'); 
-                    i.onblur=(e)=> { if(me.role==='doctor') return; save(td,d,r.id,e.target.value); };
-                    td.className='cell-input'; td.appendChild(i); 
+                
+                // 일요일 구분선 적용
+                if(dayIdx === 0) td.style.borderRight = "2px solid #555"; 
+
+                td.dataset.d = d; td.dataset.c = item.id; td.dataset.g = item.group;
+
+                // 1. 기분 체크 (Exclusive Checkbox)
+                if(item.group === 'mood') {
+                    td.className = 'cell-check';
+                    td.onclick = () => {
+                        if(user.role === 'doctor') return;
+                        const siblings = document.querySelectorAll(`td[data-d="${d}"][data-g="mood"]`);
+                        siblings.forEach(sib => sib.classList.remove('checked'));
+                        td.classList.add('checked');
+                        saveData(d, item.id, 'Y', 'mood'); 
+                    };
+                }
+                // 2. 척도 선택 (-4 ~ +4)
+                else if(item.group === 'scale') {
+                    let sel = createSelect(-4, 4);
+                    sel.onchange = (e) => saveData(d, item.id, e.target.value);
+                    td.appendChild(sel);
+                }
+                // 3. 수면 시간 (0 ~ 24)
+                else if(item.group === 'val_sleep') {
+                    let sel = createSelect(0, 24);
+                    sel.onchange = (e) => saveData(d, item.id, e.target.value);
+                    td.appendChild(sel);
+                }
+                // 4. 체중 (일요일만)
+                else if(item.group === 'val_weight') {
+                    let inp = document.createElement('input');
+                    inp.type = 'number'; inp.className = 'cell-input';
+                    if(dayIdx !== 0) { // 일요일 아니면 비활성
+                        td.classList.add('disabled-cell');
+                        inp.disabled = true;
+                    } else {
+                        inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    }
+                    td.appendChild(inp);
+                }
+                // 5. 일반 체크박스
+                else if(item.group === 'chk') {
+                    td.className = 'cell-check';
+                    td.onclick = () => {
+                        if(user.role === 'doctor') return;
+                        let val = td.classList.toggle('checked') ? 'Y' : null;
+                        saveData(d, item.id, val);
+                    };
+                }
+                // 6. 텍스트 (생활사건)
+                else if(item.group === 'text') {
+                    td.className = 'cell-text';
+                    let inp = document.createElement('input');
+                    inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    td.appendChild(inp);
                 }
                 tr.appendChild(td);
             }
-            b.appendChild(tr);
+            body.appendChild(tr);
         });
-        if(target) load();
+
+        if(target) loadData();
     }
 
-    async function load() {
-        if(me.role==='doctor') {
-            const searchId = document.getElementById('q-id').value;
-            if(!searchId) return; target = searchId;
+    // 헬퍼: Select 박스 생성
+    function createSelect(min, max) {
+        let s = document.createElement('select');
+        s.className = 'cell-select';
+        let def = document.createElement('option'); def.text='-'; def.value=''; s.add(def);
+        for(let i=min; i<=max; i++) {
+            let o = document.createElement('option'); o.text=i; o.value=i; s.add(o);
         }
+        return s;
+    }
+
+    // --- 데이터 저장/로드 ---
+    async function saveData(day, cat, val, group) {
+        if(user.role==='doctor') return;
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        
+        // 기분(Mood) 그룹일 경우: 해당 날짜의 다른 기분 기록 먼저 삭제 (Exclusive Logic)
+        if(group === 'mood' && val === 'Y') {
+            const moodCats = items.filter(i=>i.group==='mood').map(i=>i.id);
+            await sb.from('mood_records').delete().eq('username', user.username).eq('record_date', date).in('category', moodCats);
+        }
+
+        if(!val) await sb.from('mood_records').delete().match({username:user.username, record_date:date, category:cat});
+        else await sb.from('mood_records').upsert({username:user.username, record_date:date, category:cat, value:val});
+    }
+
+    async function loadData() {
+        if(user.role==='doctor') target = document.getElementById('search-id').value;
+        if(!target) return;
+
         // 초기화
         document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
-        document.querySelectorAll('.cell-input input').forEach(e=>e.value='');
+        document.querySelectorAll('input, select').forEach(e => { if(!e.id.includes('search') && !e.id.includes('date')) e.value=''; });
 
-        const daysInMonth = new Date(yr, mo, 0).getDate();
-        const start = `${yr}-${String(mo).padStart(2,'0')}-01`, end = `${yr}-${String(mo).padStart(2,'0')}-${daysInMonth}`;
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const lastDay = new Date(y, m, 0).getDate();
+        const start = `${y}-${String(m).padStart(2,'0')}-01`;
+        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
+
+        const { data } = await sb.from('mood_records').select('*').eq('username',target).gte('record_date',start).lte('record_date',end);
         
-        const { data } = await sb.from('mood_records').select('*').eq('username', target).gte('record_date', start).lte('record_date', end);
-        data?.forEach(d => {
-            const day = new Date(d.record_date).getDate();
-            const rowIdx = items.findIndex(i => i.id === d.category);
-            if(rowIdx > -1) {
-                const targetCell = document.getElementById('b-rows').children[rowIdx].children[day];
-                if(targetCell.classList.contains('cell-check')) { if(d.value==='Y') targetCell.classList.add('checked'); }
-                else targetCell.querySelector('input').value = d.value;
+        data?.forEach(rec => {
+            const day = new Date(rec.record_date).getDate();
+            const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
+            if(cell) {
+                if(cell.classList.contains('cell-check')) {
+                    if(rec.value === 'Y') cell.classList.add('checked');
+                } else if(cell.querySelector('select')) {
+                    cell.querySelector('select').value = rec.value;
+                } else if(cell.querySelector('input')) {
+                    cell.querySelector('input').value = rec.value;
+                }
             }
         });
     }
 
-    async function save(td, d, cat, val) {
-        const date = `${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        if(!val) await sb.from('mood_records').delete().match({ username:me.username, record_date:date, category:cat });
-        else await sb.from('mood_records').upsert({ username:me.username, record_date:date, category:cat, value:val });
+    // --- 유틸리티 기능 ---
+    function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
+    function jumpToDate(dateStr) { curDate = new Date(dateStr); renderTable(); }
+
+    // 데이터 다운로드
+    async function exportData() {
+        if(user.role === 'doctor') return alert("의료진은 데이터를 다운로드할 수 없습니다.");
+        const { data, error } = await sb.from('mood_records').select('*').eq('username', user.username).order('record_date');
+        if(error || !data.length) return alert("저장된 데이터가 없습니다.");
+
+        let csvContent = "data:text/csv;charset=utf-8,Date,Category,Value\n";
+        data.forEach(row => { csvContent += `${row.record_date},${row.category},"${row.value}"\n`; });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `mood_data_${user.username}.csv`);
+        document.body.appendChild(link);
+        link.click();
     }
 
-    function chgMonth(v) { mo+=v; if(mo>12){mo=1;yr++;} if(mo<1){mo=12;yr--;} updateLabel(); load(); }
-    function updateLabel() { document.getElementById('m-label').innerText = `${yr}년 ${mo}월`; }
+    // 데이터 업로드
+    async function importData(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const text = e.target.result;
+            const rows = text.split("\n").slice(1);
+            let upsertData = [];
+            
+            rows.forEach(row => {
+                const cols = row.split(",");
+                if(cols.length >= 3) {
+                    const rDate = cols[0].trim();
+                    const rCat = cols[1].trim();
+                    const rVal = cols[2].replace(/"/g, '').trim();
+                    if(rDate && rCat) {
+                        upsertData.push({ username: user.username, record_date: rDate, category: rCat, value: rVal });
+                    }
+                }
+            });
+
+            if(upsertData.length > 0) {
+                for (let i = 0; i < upsertData.length; i += 100) {
+                    const chunk = upsertData.slice(i, i + 100);
+                    await sb.from('mood_records').upsert(chunk);
+                }
+                alert("데이터 복원 완료. 화면을 갱신합니다.");
+                loadData();
+            }
+        };
+        reader.readAsText(file);
+    }
 </script>
 </body>
 </html>
