@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 1.01| 분당서울대학교병원</title>
+<title>기분기록지 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
     /* --- 디자인 시스템 --- */
@@ -32,6 +32,10 @@
     #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f5f7fa; }
     .auth-box { width: 380px; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e0e0e0; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    
+    /* 회원가입 라벨 스타일 */
+    .input-label { text-align: left; font-size: 13px; font-weight: bold; color: #333; margin-bottom: 6px; display: block; }
+    
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
     .save-login-wrap { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin: 10px 0; align-items: center; }
     .warning-text { color: #d32f2f; font-weight: bold; font-size: 11px; }
@@ -104,7 +108,8 @@
     .score-item { display: flex; align-items: center; gap: 8px; }
     .score-input { width: 40px; padding: 3px; border: 1px solid #ccc; border-radius: 4px; text-align: center; font-size: 12px; }
     .link-btn { color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 12px; text-decoration: none; }
-    
+    .link-btn:hover { text-decoration: underline; }
+
     .footer { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; color: #666; background: #f9f9f9; }
     .footer-warning { line-height: 1.3; max-width: 60%; word-break: keep-all; font-weight: 500; }
     .footer-btns { display: flex; gap: 8px; }
@@ -139,19 +144,33 @@
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            
             <div class="save-login-wrap">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="remember-me"> 아이디/비밀번호 저장</label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="remember-me"> 아이디/비밀번호 저장
+                </label>
                 <div class="warning-text">※ 공용 기기 사용 금지</div>
             </div>
+
             <button class="btn-auth" onclick="login()">로그인</button>
             <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
         </div>
         <div id="join-form" class="hidden">
+            <label class="input-label">아이디</label>
             <input id="j-id" class="auth-inp" placeholder="희망 아이디">
+            
+            <label class="input-label">비밀번호</label>
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
-            <input id="j-hosp" class="auth-inp" placeholder="병원 환자번호 (선택)">
-            <div class="legal-text">본 프로그램은 종이 기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 사용 책임은 작성자에게 있습니다.</div>
-            <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;"><input type="checkbox" id="j-agree"> 동의합니다.</label>
+            
+            <label class="input-label">등록번호 또는 이니셜+생년월일 (필수)</label>
+            <input id="j-hosp" class="auth-inp" placeholder="예: 43445678 또는 HGD19990305">
+            
+            <div class="legal-text">
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
+            </div>
+            <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
+                <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
+            </label>
             <button class="btn-auth" style="background:#28a745;" onclick="join()">가입완료</button>
             <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
         </div>
@@ -168,15 +187,15 @@
             </div>
             
             <div id="doc-panel" class="hidden">
-                <span>환자조회</span>
-                <input id="search-id" placeholder="ID 또는 환자번호" onkeypress="if(event.key==='Enter') loadData()">
-                <button onclick="loadData()">검색</button>
+                <span style="font-weight:bold; font-size:11px; color:#0277bd;">환자조회</span>
+                <input id="search-id" placeholder="ID 또는 환자번호" onkeypress="if(event.key==='Enter') searchPatient()">
+                <button onclick="searchPatient()">검색</button>
             </div>
 
             <div class="user-info">
                 <span id="user-display"></span>
                 <button class="btn-nav" onclick="openPwModal()">🔑 비번변경</button>
-                <button class="btn-nav" onclick="location.reload()">로그아웃</button>
+                <button class="btn-nav" onclick="doLogout()">로그아웃</button>
             </div>
         </div>
 
@@ -204,12 +223,16 @@
                     </div>
                 </div>
                 <div>
-                    <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="link-btn" style="color:#555;">📖 기분기록지 작성방법 보기</a>
+                    <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="link-btn" style="color:#555;">
+                        📖 기분기록지 작성방법 보기
+                    </a>
                 </div>
             </div>
 
             <div class="footer">
-                <div class="footer-warning">본 프로그램은 의료용이 아닙니다. 개인식별정보 금지. 책임은 작성자에게 있습니다.</div>
+                <div class="footer-warning">
+                    본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
+                </div>
                 <div class="footer-btns">
                     <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">모든 기록을 파일로 다운로드</button>
                     <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
@@ -222,7 +245,10 @@
 
 <div id="event-modal" class="modal-wrap">
     <div class="modal-content">
-        <div class="modal-header"><span id="modal-title"></span><span style="cursor:pointer;" onclick="closeEventModal()">✕</span></div>
+        <div class="modal-header">
+            <span id="modal-title"></span>
+            <span style="cursor:pointer; color:#999;" onclick="closeEventModal()">✕</span>
+        </div>
         <textarea id="modal-text" class="modal-textarea" placeholder="내용을 입력하세요."></textarea>
         <div class="modal-btns">
             <button class="btn-modal btn-cancel" onclick="closeEventModal()">취소</button>
@@ -330,11 +356,12 @@
     async function join() {
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
         const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
-        if(!id || !pw) return alert('필수 입력 누락');
+        if(!id || !pw || !h) return alert('필수 정보를 모두 입력해주세요.\n(아이디, 비번, 등록번호/생년월일)');
         const hashedPw = await hashPassword(pw);
         const { error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h });
         if(error) alert('오류: ' + error.message);
-        else alert('가입 완료.'); toggleAuth('login');
+        else if(error && error.message.includes('duplicate')) alert('이미 존재하는 아이디입니다.'); 
+        else { alert('가입 완료.'); toggleAuth('login'); }
     }
 
     async function login() {
@@ -346,7 +373,6 @@
             localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw');
         }
         const hashedPw = await hashPassword(pw); 
-        // 로그인 검증을 위해 1회용 조회 시도 (본인 조회)
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         
         if(error && error.message.includes('로그인')) return alert('로그인 실패.');
@@ -362,61 +388,13 @@
         } else { renderTable(); }
     }
 
-    // [핵심] 의료진 조회 로직 수정
-    async function loadData() {
-        if(user.role==='doctor') {
-            const inputId = document.getElementById('search-id').value.trim();
-            if(!inputId) return alert("아이디를 입력하세요.");
-            target = inputId;
-            alert(`'${target}' 님을 조회 중입니다...`);
-        } else { target = user.username; }
-
-        // 화면 클리어
-        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
-        document.querySelectorAll('input, select').forEach(e => { 
-            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) e.value=''; 
-        });
-        document.querySelectorAll('.cell-event').forEach(e => e.innerText = '');
-
-        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
-        const lastDay = new Date(y, m, 0).getDate();
-        const start = `${y}-${String(m).padStart(2,'0')}-01`;
-        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
-
-        const { data, error } = await sb.rpc('get_records_secure', {
-            p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end
-        });
+    async function searchPatient() {
+        const q = document.getElementById('search-id').value.trim();
+        if(!q) return alert("ID 또는 환자번호를 입력하세요.");
         
-        if(error) {
-            console.error(error);
-            if(error.message.includes('찾을 수')) return alert("환자를 찾을 수 없습니다.");
-            else return alert("조회 오류: " + error.message);
-        }
-
-        if(user.role === 'doctor') {
-            alert(`조회 성공: ${target}님의 기록을 불러왔습니다.`);
-            renderTable(); // 테이블 리프레시 (타겟 변경 반영)
-        }
-
-        data?.forEach(rec => {
-            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
-            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
-            else {
-                const day = new Date(rec.record_date).getDate();
-                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
-                if(cell) {
-                    if(rec.category === 'mixed' || cell.classList.contains('cell-check') || cell.classList.contains('cell-mixed')) {
-                        if(rec.value === 'Y') cell.classList.add('checked');
-                    } else if(cell.classList.contains('cell-event')) {
-                        cell.innerText = rec.value;
-                    } else if(cell.querySelector('select')) {
-                        cell.querySelector('select').value = rec.value;
-                    } else if(cell.querySelector('input')) {
-                        cell.querySelector('input').value = rec.value;
-                    }
-                }
-            }
-        });
+        target = q; 
+        alert(`${target} 님을 조회합니다.`);
+        renderTable(); 
     }
 
     function renderTable() {
@@ -446,8 +424,8 @@
 
             let th = document.createElement('th'); 
             if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
-            if(isRed) th.className = 'day-holiday'; if(hol) th.title = hol;
-            if(dayIdx===6 && !isRed) th.className = 'day-sat';
+            if(isRed) th.classList.add('day-holiday'); if(hol) th.title = hol;
+            if(dayIdx===6 && !isRed) th.classList.add('day-sat');
             if(isToday) th.classList.add('today-header'); 
             header.appendChild(th);
 
@@ -468,9 +446,6 @@
                 const dt = new Date(year, month, d);
                 let td = document.createElement('td');
                 if(dt.getDay() === 0) td.style.borderRight = "2px solid #888"; 
-                // 오늘 날짜 열 하이라이트 삭제 (헤더만 강조 요청)
-                // if(isCurMonth && d === todayDate) { ... } 
-
                 td.dataset.d = d; td.dataset.c = item.id; td.dataset.s = item.section;
 
                 if(item.type === 'check' && (item.section === 'mania' || item.section === 'dep')) {
@@ -505,7 +480,7 @@
         
         document.getElementById('score-ls').value = '';
         document.getElementById('score-mssi').value = '';
-        if(target && user.role !== 'doctor') loadData(); // 환자는 자동 로드, 의사는 검색시에만
+        if(target) loadData();
     }
 
     function createSelect(min, max) {
@@ -534,6 +509,66 @@
         if(user.role==='doctor') return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+    }
+
+    async function loadData() {
+        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
+        document.querySelectorAll('input, select').forEach(e => { 
+            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) e.value=''; 
+        });
+        document.querySelectorAll('.cell-event').forEach(e => e.innerText = '');
+
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const lastDay = new Date(y, m, 0).getDate();
+        const start = `${y}-${String(m).padStart(2,'0')}-01`;
+        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
+
+        const { data, error } = await sb.rpc('get_records_secure', {
+            p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end
+        });
+        
+        if(error) {
+            console.error(error);
+            if(error.message.includes('찾을 수')) return alert("환자를 찾을 수 없습니다.");
+            else return alert("조회 오류: " + error.message);
+        }
+
+        if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
+
+        data?.forEach(rec => {
+            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
+            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
+            else {
+                const day = new Date(rec.record_date).getDate();
+                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
+                if(cell) {
+                    if(rec.category === 'mixed' || cell.classList.contains('cell-check') || cell.classList.contains('cell-mixed')) {
+                        if(rec.value === 'Y') cell.classList.add('checked');
+                    } else if(cell.classList.contains('cell-event')) {
+                        cell.innerText = rec.value;
+                    } else if(cell.querySelector('select')) {
+                        cell.querySelector('select').value = rec.value;
+                    } else if(cell.querySelector('input')) {
+                        cell.querySelector('input').value = rec.value;
+                    }
+                }
+            }
+        });
+
+        // [알림 기능] 환자 전용 & 월말 체크
+        if(user.role !== 'doctor') {
+            const today = new Date();
+            if(today.getFullYear() === y && today.getMonth() + 1 === m) {
+                const lastDayOfCurrentMonth = new Date(y, m, 0).getDate();
+                if(today.getDate() >= lastDayOfCurrentMonth - 7) {
+                    const lsVal = document.getElementById('score-ls').value;
+                    const mssiVal = document.getElementById('score-mssi').value;
+                    if(!lsVal || !mssiVal) {
+                        setTimeout(() => alert("📢 [알림] 이번 달 평가를 진행해주세요!\n하단의 '생활습관점수'와 '기분안정성평가'를 입력해주세요."), 500);
+                    }
+                }
+            }
+        }
     }
 
     // 모달 및 기타
