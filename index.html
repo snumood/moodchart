@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 1.15 | 분당서울대학교병원</title>
+<title>기분기록지 1.2 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,8 +20,9 @@
         --text: #2c3e50;
         --border: #ccc;
         
-        /* 섹션별 배경색 (기분은 그라데이션으로 대체) */
-        --bg-block-scale: #fffdeb;  
+        /* 섹션별 배경색 */
+        --bg-block-mood: #fff5f5;   
+        --bg-block-scale: #fffdeb;  /* 척도 기본 배경 */
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
         
@@ -58,7 +59,7 @@
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 2. 상단 월간 평가 바 (헤더와 그리드 사이) */
+    /* 2. 상단 월간 평가 바 (고정) */
     .top-assessment-bar { 
         height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
         display: flex; align-items: center; justify-content: center; gap: 8px; 
@@ -72,7 +73,7 @@
     /* 3. 스크롤 영역 (테이블만 존재) */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
     
-    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 50px; }
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 0; }
     
     th, td { 
         border-right: 1px solid #ddd; 
@@ -98,9 +99,8 @@
     }
 
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
-    
-    /* 섹션 배경 */
-    .bg-scale { background-color: var(--bg-block-scale); }
+    /* 기분 섹션은 인라인 컬러, 나머지는 클래스 */
+    .bg-scale { background-color: var(--bg-block-scale); transition: background-color 0.3s; }
     .bg-body { background-color: var(--bg-block-body); }
     .bg-event { background-color: var(--bg-block-event); }
 
@@ -108,8 +108,9 @@
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
-    .active-row td { background-color: rgba(0, 94, 184, 0.08) !important; }
-    .active-col { background-color: rgba(0, 94, 184, 0.08) !important; }
+    .active-row td { background-color: rgba(0, 94, 184, 0.08); } 
+    /* .bg-scale의 그라데이션이 active-row보다 우선순위가 높아야 하므로 active는 약하게 처리, 
+       하지만 여기서는 인라인 스타일이 가장 강력하므로 scale 그라데이션이 우선됨. */
 
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
@@ -205,10 +206,10 @@
         <div id="join-form" class="hidden">
             <input id="j-id" class="auth-inp" placeholder="희망 아이디">
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
-            <input id="j-hosp" class="auth-inp" placeholder="분당서울대학교병원 등록번호 또는 이니셜+생년월일">
+            <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜+생년월일 (필수)">
             <div style="font-size:11px; color:#888; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305</div>
             <div class="legal-text">
-                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 가입정보를 잊어버리면 계정을 복구할 수 없습니다.
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
             </div>
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
@@ -246,6 +247,7 @@
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
+            <div style="height: 100px;"></div>
         </div>
 
         <div id="arrow-down" class="scroll-arrow arrow-down">▼</div>
@@ -346,27 +348,27 @@
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // [2025~2040 공휴일/대체공휴일/선거일 완벽 리스트]
     const krHolidays = {
-        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
+        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '07-17': '제헌절', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
         '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일', '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
-        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석',
-        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-05-13':'석가탄신일', '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석',
-        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-05-02':'석가탄신일', '2028-10-02':'추석', '2028-10-03':'개천절/추석', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
-        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일', '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석',
-        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-09':'석가탄신일', '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
+        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-03-02':'대체공휴일', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-06-03':'지방선거', '2026-08-17':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석', '2026-10-05':'대체공휴일',
+        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-03-03':'대통령선거', '2027-05-13':'석가탄신일', '2027-08-16':'대체공휴일', '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석', '2027-10-04':'대체공휴일', '2027-10-11':'대체공휴일', '2027-12-27':'대체공휴일',
+        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-04-12':'국회의원선거', '2028-05-02':'석가탄신일', '2028-10-02':'추석', '2028-10-03':'개천절', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
+        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일', '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석', '2029-09-24':'대체공휴일',
+        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-05':'어린이날', '2030-05-06':'대체공휴일', '2030-05-09':'석가탄신일', '2030-06-05':'지방선거', '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
         '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일', '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
-        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일', '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일',
-        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일', '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-09':'추석', '2033-10-10':'대체공휴일',
-        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일', '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
+        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-03-03':'대통령선거', '2032-04-14':'국회의원선거', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일', '2032-08-16':'대체공휴일', '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일', '2032-10-04':'대체공휴일',
+        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일', '2033-08-16':'대체공휴일', '2033-10-06':'추석', '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-10':'대체공휴일', '2033-12-26':'대체공휴일',
+        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일', '2034-06-07':'지방선거', '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
         '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일', '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
-        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-05-02':'석가탄신일', '2036-10-03':'추석', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
-        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-05-22':'석가탄신일', '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석',
-        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일', '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일',
-        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일', '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석',
-        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
+        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-04-09':'국회의원선거', '2036-05-02':'석가탄신일', '2036-10-03':'개천절', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
+        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-03-04':'대통령선거', '2037-05-22':'석가탄신일', '2037-08-17':'대체공휴일', '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석', '2037-10-05':'대체공휴일',
+        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일', '2038-06-02':'지방선거', '2038-08-16':'대체공휴일', '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일', '2038-10-04':'대체공휴일', '2038-10-11':'대체공휴일',
+        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일', '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석', '2039-10-04':'대체공휴일', '2039-10-10':'대체공휴일', '2039-12-26':'대체공휴일',
+        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-    // [수정] 기분 섹션 배경색 그라데이션 적용 (진한 빨강 -> 흰색 -> 진한 파랑)
     const items = [
         { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 50, 50, 0.3)', type: 'check' },
         { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', color: 'rgba(255, 50, 50, 0.2)', type: 'check' },
@@ -404,7 +406,6 @@
     let modalTarget = { day: null, id: null };
     let myChart = null; 
 
-    // 플로팅 화살표 로직
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
     const aRight = document.getElementById('arrow-right');
@@ -412,16 +413,10 @@
     gridWrapper.addEventListener('scroll', checkScroll);
     
     function checkScroll() {
-        if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) {
-            aDown.classList.add('visible');
-        } else {
-            aDown.classList.remove('visible');
-        }
-        if (gridWrapper.scrollWidth - gridWrapper.scrollLeft > gridWrapper.clientWidth + 20) {
-            aRight.classList.add('visible');
-        } else {
-            aRight.classList.remove('visible');
-        }
+        if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
+        else aDown.classList.remove('visible');
+        if (gridWrapper.scrollWidth - gridWrapper.scrollLeft > gridWrapper.clientWidth + 20) aRight.classList.add('visible');
+        else aRight.classList.remove('visible');
     }
 
     window.onload = () => {
@@ -513,8 +508,9 @@
         for(let d=1; d<=lastDay; d++) {
             const dt = new Date(year, month, d);
             const dayIdx = dt.getDay();
-            const kDate = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const hol = krHolidays[kDate];
+            const kShort = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const kFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const hol = krHolidays[kFull] || krHolidays[kShort]; // [수정] 전체날짜 먼저 체크
             const isRed = dayIdx === 0 || hol;
             const isToday = isCurMonth && d === todayDate;
 
@@ -540,7 +536,6 @@
             }
             lastSection = item.section;
             
-            // [수정] 기분 섹션은 배경색을 item.color로 적용 (그라데이션 효과)
             if (item.section === 'mood' && item.color) {
                 tr.style.backgroundColor = item.color;
             } else {
@@ -549,7 +544,6 @@
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            // 항목명 칸도 같은 배경색 적용
             if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
             
             tr.appendChild(th);
@@ -577,10 +571,8 @@
                         originClick(e);
                         if(user.role === 'doctor') return;
                         const isChecked = td.classList.contains('checked');
-                        // 기분 섹션 체크 제한
                         if(item.id !== 'mixed') {
                             let cnt = 0;
-                            // 같은 날짜, 기분 섹션(mood) 중 mixed가 아닌 항목 체크 개수
                             const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
                             moodItems.forEach(i => {
                                 const t = document.querySelector(`td[data-d="${d}"][data-c="${i.id}"]`);
@@ -599,7 +591,13 @@
                     const originClick = td.onclick;
                     td.onclick = (e) => { originClick(e); if(user.role!=='doctor') { let val = td.classList.toggle('checked') ? 'Y' : null; saveData(d, item.id, val); }};
                 } else if(item.type === 'scale') {
-                    let sel = createSelect(-4, 4); sel.onchange = (e) => saveData(d, item.id, e.target.value); td.appendChild(sel);
+                    let sel = createSelect(-4, 4); 
+                    // [수정] 척도 색상 변경 로직 적용
+                    sel.onchange = (e) => { 
+                        saveData(d, item.id, e.target.value); 
+                        updateScaleColor(td, e.target.value); 
+                    }; 
+                    td.appendChild(sel);
                 } else if(item.type === 'sleep') {
                     let sel = createSelect(0, 24); sel.onchange = (e) => saveData(d, item.id, e.target.value); td.appendChild(sel);
                 } else if(item.type === 'weight') {
@@ -637,6 +635,26 @@
         return s;
     }
 
+    // [NEW] 척도 색상 업데이트 함수
+    function updateScaleColor(cell, value) {
+        if (value === '' || value === null) {
+            cell.style.backgroundColor = ''; 
+            return;
+        }
+        const val = parseInt(value);
+        if (val === 0) {
+            cell.style.backgroundColor = '#ffffff'; 
+        } else if (val > 0) {
+            // +4에 가까울수록 붉은색 (0.05 ~ 0.3)
+            const alpha = 0.05 + (val * 0.06);
+            cell.style.backgroundColor = `rgba(255, 82, 82, ${alpha})`;
+        } else {
+            // -4에 가까울수록 푸른색
+            const alpha = 0.05 + (Math.abs(val) * 0.06);
+            cell.style.backgroundColor = `rgba(33, 150, 243, ${alpha})`;
+        }
+    }
+
     function checkMin(el) { if(el.value < 0) el.value = 0; }
 
     async function updateMixedState(day) {
@@ -672,7 +690,11 @@
     async function loadData() {
         document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
         document.querySelectorAll('input, select').forEach(e => { 
-            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) e.value=''; 
+            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) {
+                e.value='';
+                // 색상 초기화
+                if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
+            }
         });
         document.querySelectorAll('.cell-event').forEach(e => e.innerText = '');
 
@@ -707,6 +729,8 @@
                         cell.innerText = rec.value;
                     } else if(cell.querySelector('select')) {
                         cell.querySelector('select').value = rec.value;
+                        // [수정] 데이터 로드 시 색상 업데이트
+                        if(cell.dataset.s === 'scale') updateScaleColor(cell, rec.value);
                     } else if(cell.querySelector('input')) {
                         cell.querySelector('input').value = rec.value;
                     }
@@ -729,6 +753,7 @@
         }
     }
 
+    // [선택 기능] 차트 함수
     async function openChartModal(type) {
         toggleSidebar(); 
         document.getElementById('chart-modal').style.display = 'flex';
