@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>기분기록지 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+
 <style>
     /* --- 디자인 시스템 --- */
     :root { 
@@ -21,10 +26,11 @@
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
         
-        --top-bar-h: 36px; /* 월간평가 바 높이 */
+        --top-bar-h: 36px;
         --header-h: 46px;      
         --cell-h: 28px;        
-        --col-w: 160px;
+        --col-w: 160px; /* 항목명 너비 */
+        --date-w: 42px; /* [수정] 날짜 열 고정 너비 */
     }
 
     body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 11px; overflow: hidden; }
@@ -46,25 +52,23 @@
     /* 메인 컨테이너 */
     .container { height: 100vh; display: flex; flex-direction: column; background: #fff; }
     
-    /* 헤더 (날짜 선택) */
-    .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
-    .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
-    #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
-    .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
-
-    /* [수정] 상단 월간 평가 바 (헤더 아래 위치) */
+    /* [선택 기능] 상단 월간 평가 바 */
     .top-assessment-bar { 
         height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #ddd; 
         display: flex; align-items: center; justify-content: center; gap: 8px; 
         font-size: 11px; flex-shrink: 0; padding: 0 5px; overflow-x: auto; white-space: nowrap;
     }
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
-    
-    /* [수정] 입력창 너비 50px로 확대 (200점 입력 가능) */
     .top-assessment-bar input { 
         width: 50px; height: 24px; text-align: center; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; padding: 0;
     }
+
+    /* 헤더 */
+    .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
+    .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
+    .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
     /* 사이드바 */
     #sidebar { 
@@ -78,23 +82,47 @@
     .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1500; display: none; }
     .sidebar-overlay.show { display: block; }
 
-    .menu-section { margin-bottom: 25px; }
-    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-    .menu-item { display: block; padding: 10px 0; font-size: 13px; color: #333; cursor: pointer; }
+    .menu-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; }
+    .menu-item { display: block; padding: 8px 0; font-size: 13px; color: #333; cursor: pointer; }
     .menu-item:hover { color: var(--primary); font-weight: bold; }
     .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
 
+    /* [선택 기능] 사이드바 내 점수 입력 */
+    .score-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+    .score-inp-side { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+
     /* 엑셀 그리드 */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; }
-    table { border-collapse: separate; border-spacing: 0; min-width: 100%; table-layout: fixed; }
-    th, td { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; text-align: center; height: var(--cell-h); padding: 0; vertical-align: middle; }
+    /* [수정] 테이블 레이아웃을 고정하여 칸 벌어짐 방지 */
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
+    
+    th, td { 
+        border-right: 1px solid #ddd; 
+        border-bottom: 1px solid #ddd; 
+        text-align: center; 
+        height: var(--cell-h); 
+        padding: 0; 
+        vertical-align: middle; 
+        /* [핵심] 너비 고정 및 넘침 방지 */
+        width: var(--date-w);
+        min-width: var(--date-w);
+        max-width: var(--date-w);
+        overflow: hidden;
+        white-space: nowrap;
+    }
     
     thead th { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 2px solid #999; height: 34px; font-weight: 700; color: #444; }
+    
+    /* 항목명 열 (넓게 고정) */
     .col-label { 
-        position: sticky; left: 0; z-index: 20; width: var(--col-w); min-width: var(--col-w); 
+        position: sticky; left: 0; z-index: 20; 
+        width: var(--col-w) !important; 
+        min-width: var(--col-w) !important; 
+        max-width: var(--col-w) !important;
         border-right: 2px solid #999; text-align: left; padding-left: 10px; 
         font-weight: 700; font-size: 11px; color: #222; 
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #fff; 
+        background: #fff; 
     }
 
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
@@ -105,7 +133,7 @@
 
     .today-header { background-color: var(--today-bg) !important; color: #d50000; border: 2px solid var(--today-border) !important; border-bottom: none !important; position: sticky; top: 0; z-index: 15; }
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
-    .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 40px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
+    .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
     /* 선택 강조 */
     .active-row td { background-color: rgba(0, 94, 184, 0.08) !important; }
@@ -121,9 +149,12 @@
     .cell-mixed { font-size: 14px; color: #ccc; pointer-events: none; }
     .cell-mixed.checked { color: #7b1fa2; font-weight: bold; }
     .cell-mixed.checked::after { content: "✔"; }
-    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 12px; }
-    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 12px; }
-    .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    /* [수정] 입력 컨트롤이 셀 크기를 넘지 않게 */
+    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; padding: 0; margin: 0; }
+    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; padding: 0; margin: 0; min-width: 0; }
+    
+    .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; }
 
     .tooltip-target:hover::after {
@@ -132,9 +163,14 @@
     }
     .tooltip-target[data-tip=""]:hover::after { display: none; }
 
-    /* 모달 공통 */
+    /* 모달 */
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    
+    /* 차트 모달 */
+    .chart-modal-content { background: white; padding: 20px; border-radius: 20px; width: 95%; height: 80%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+    .chart-container { flex: 1; position: relative; width: 100%; min-height: 0; }
+
     .modal-header { font-weight: bold; margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between; color: var(--primary); }
     .modal-textarea { width: 100%; height: 120px; border: 1px solid #ccc; padding: 10px; resize: none; border-radius: 6px; font-size: 13px; }
     .modal-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
@@ -187,7 +223,13 @@
 
 <div id="main-screen" class="hidden">
     <div class="container">
-        
+        <div class="top-assessment-bar">
+            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
+            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
+            <span style="color:#ddd">|</span>
+            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
+            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
+        </div>
         <div class="header">
             <div class="month-nav">
                 <button class="btn-nav" onclick="moveMonth(-1)">◀</button>
@@ -195,14 +237,6 @@
                 <button class="btn-nav" onclick="moveMonth(1)">▶</button>
             </div>
             <button class="btn-menu" onclick="toggleSidebar()">☰</button>
-        </div>
-
-        <div class="top-assessment-bar">
-            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
-            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
-            <span style="color:#ddd">|</span>
-            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
-            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
         </div>
 
         <div class="grid-wrapper">
@@ -233,6 +267,19 @@
             </div>
         </div>
 
+        <div class="menu-section">
+            <div class="menu-title">📊 월간 평가 및 추세 분석</div>
+            <div class="score-row">
+                <span>월간생활습관점수</span>
+                <input id="score-ls-side" class="score-inp-side" type="number" placeholder="입력" onblur="saveMonthlyScore('ls', this.value)">
+            </div>
+            <div class="score-row">
+                <span>기분안정성평가점수</span>
+                <input id="score-mssi-side" class="score-inp-side" type="number" placeholder="입력" onblur="saveMonthlyScore('mssi', this.value)">
+            </div>
+            <div class="menu-item" style="margin-top:10px; color:var(--primary);" onclick="openChartModal('ls')">📈 생활습관 추세 그래프 보기</div>
+            <div class="menu-item" style="color:#6366F1;" onclick="openChartModal('mssi')">📈 기분안정 추세 그래프 보기</div>
+        </div>
         <div class="menu-section">
             <div class="menu-title">계정 관리</div>
             <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
@@ -281,6 +328,18 @@
     </div>
 </div>
 
+<div id="chart-modal" class="modal-wrap">
+    <div class="chart-modal-content">
+        <div class="modal-header">
+            <span id="chart-title">추세 그래프</span>
+            <span style="cursor:pointer; font-size:20px;" onclick="closeChartModal()">✕</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+        </div>
+    </div>
+</div>
+
 <script>
     const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
@@ -323,14 +382,12 @@
         { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', type: 'check' },
         { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', type: 'check' },
         { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', type: 'mixed' },
-        
         { id: 's_anx', label: '두려움/소심함/걱정/불안', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_ang', label: '짜증/분노', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_mot', label: '관심/흥미/즐거움/소비/계획', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_act', label: '활동량', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_tsp', label: '생각의 속도와 양', desc: '-4 매우 느리고 적음, 0 적당, 4 극히 빠르고 많음', section: 'scale', type: 'scale' },
         { id: 's_tct', label: '생각의 내용', desc: '-4 극히 부정적, 0 적당, 4 극히 긍정적', section: 'scale', type: 'scale' },
-
         { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간', section: 'body', type: 'sleep' },
         { id: 'weight',label: '체중 (kg) *일요일만', desc: '일요일 권장', section: 'body', type: 'weight' },
         { id: 'period',label: '생리기간', desc: '', section: 'body', type: 'check' },
@@ -342,12 +399,12 @@
         { id: 'hyper', label: '과호흡', desc: '', section: 'body', type: 'check' },
         { id: 'meds',  label: '약물복용', desc: '', section: 'body', type: 'check' },
         { id: 'exer',  label: '운동', desc: '', section: 'body', type: 'check' },
-        
         { id: 'event', label: '생활사건 (클릭)', desc: '클릭하여 기록', section: 'event', type: 'event' }
     ];
 
     let user = null, target = null, curDate = new Date();
     let modalTarget = { day: null, id: null };
+    let myChart = null; // 차트 인스턴스
 
     window.onload = () => {
         const savedId = localStorage.getItem('mood_saved_id');
@@ -499,6 +556,7 @@
                         }
                         if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
                         else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                        
                         if(item.id !== 'mixed') updateMixedState(d);
                     };
                 } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
@@ -524,8 +582,11 @@
             body.appendChild(tr);
         });
         
+        // 상단바 및 사이드바 점수 초기화
         document.getElementById('score-ls').value = '';
         document.getElementById('score-mssi').value = '';
+        document.getElementById('score-ls-side').value = '';
+        document.getElementById('score-mssi-side').value = '';
         
         if(isCurMonth) {
             setTimeout(() => {
@@ -543,7 +604,6 @@
         return s;
     }
 
-    // 마이너스 방지
     function checkMin(el) { if(el.value < 0) el.value = 0; }
 
     async function updateMixedState(day) {
@@ -600,9 +660,13 @@
         if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
 
         data?.forEach(rec => {
-            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
-            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
-            else {
+            if(rec.category === 'score_ls') {
+                document.getElementById('score-ls').value = rec.value;
+                document.getElementById('score-ls-side').value = rec.value;
+            } else if(rec.category === 'score_mssi') {
+                document.getElementById('score-mssi').value = rec.value;
+                document.getElementById('score-mssi-side').value = rec.value;
+            } else {
                 const day = new Date(rec.record_date).getDate();
                 const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
                 if(cell) {
@@ -632,6 +696,94 @@
                 }
             }
         }
+    }
+
+    // [선택 기능] 차트 함수
+    async function openChartModal(type) {
+        toggleSidebar(); 
+        document.getElementById('chart-modal').style.display = 'flex';
+        const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
+        document.getElementById('chart-title').innerText = title;
+
+        const { data } = await sb.rpc('get_records_secure', {
+            p_user: user.username, p_pw: user.password, p_target: target,
+            p_start: '2000-01-01', p_end: '2099-12-31'
+        });
+
+        if(!data || data.length === 0) return alert("데이터가 없습니다.");
+
+        const targetCat = `score_${type}`;
+        const points = data.filter(r => r.category === targetCat)
+                           .map(r => ({ x: r.record_date, y: parseInt(r.value) }))
+                           .sort((a,b) => new Date(a.x) - new Date(b.x));
+
+        drawDashboardChart(points, title, type === 'ls' ? '#10B981' : '#6366F1');
+    }
+
+    function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
+
+    function drawDashboardChart(points, label, color) {
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        if(myChart) myChart.destroy();
+
+        if(points.length === 0) return;
+
+        const dates = points.map(p => new Date(p.x).getTime());
+        const minTime = Math.min(...dates);
+        const maxTime = Math.max(...dates);
+        const buffer = 28 * 24 * 3600 * 1000;
+        const minYear = new Date(minTime - buffer).getFullYear();
+        const maxYear = new Date(maxTime + buffer).getFullYear();
+
+        const annotations = {};
+        const bgColors = ['rgba(248, 250, 252, 0.6)', 'rgba(240, 253, 244, 0.6)', 'rgba(239, 246, 255, 0.6)', 'rgba(254, 252, 232, 0.6)'];
+        
+        for (let y = minYear; y <= maxYear; y++) {
+            annotations['year'+y] = {
+                type: 'box',
+                xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(),
+                xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(),
+                backgroundColor: bgColors[(y - minYear) % bgColors.length],
+                borderWidth: 0,
+                label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:12, weight:'bold'}, color: '#475569' }
+            };
+        }
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: label,
+                    data: points,
+                    borderColor: color,
+                    backgroundColor: color + '10',
+                    fill: true,
+                    tension: 0.25,
+                    pointRadius: 5,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        type: 'time', 
+                        time: { unit: 'month', displayFormats: { month: 'MM월' } },
+                        min: minTime - buffer,
+                        max: maxTime + buffer
+                    },
+                    y: { 
+                        beginAtZero: true, 
+                        max: 200 
+                    }
+                },
+                plugins: {
+                    annotation: { annotations: annotations },
+                    legend: { display: false }
+                }
+            }
+        });
     }
 
     function openEventModal(day, id, txt) { modalTarget = { day, id }; document.getElementById('modal-title').innerText = `${day}일 생활사건`; document.getElementById('modal-text').value = txt || ""; document.getElementById('event-modal').style.display = 'flex'; document.getElementById('modal-text').focus(); }
