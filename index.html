@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 1.3 | 분당서울대학교병원</title>
+<title>기분기록지 1.21 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,27 +20,27 @@
         --text: #2c3e50;
         --border: #ccc;
         
+        /* 섹션별 배경색 */
         --bg-block-mood: #fff5f5;   
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
         
+        --top-bar-h: 36px;
         --header-h: 46px;      
-        --top-bar-h: 38px; 
-        --cell-h: 30px;        
-        --col-w: 160px; 
-        --date-w: 42px; /* 날짜 열 고정 */
+        --cell-h: 28px;        
+        --col-w: 160px;
+        --date-w: 42px; 
     }
 
-    /* 100dvh: 모바일 주소창 제외한 실제 높이 */
-    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 11px; overflow: hidden; height: 100dvh; position: relative; }
+    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 11px; overflow: hidden; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; }
 
     /* 로그인 화면 */
-    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; }
+    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; }
     .auth-box { width: 340px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
@@ -50,31 +50,47 @@
     .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f9f9f9; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
 
     /* 메인 컨테이너 */
-    .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
+    .container { height: 100vh; display: flex; flex-direction: column; background: #fff; position: relative; }
     
-    /* 1. 헤더 (고정) */
+    /* 상단 월간 평가 바 */
+    .top-assessment-bar { 
+        height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #ddd; 
+        display: flex; align-items: center; justify-content: center; gap: 8px; 
+        font-size: 11px; flex-shrink: 0; padding: 0 5px; overflow-x: auto; white-space: nowrap;
+    }
+    .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
+    .top-assessment-bar input { 
+        width: 50px; height: 24px; text-align: center; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; padding: 0;
+    }
+
+    /* 헤더 */
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
     .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 2. 상단 월간 평가 바 (고정) */
-    .top-assessment-bar { 
-        height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
-        display: flex; align-items: center; justify-content: center; gap: 8px; 
-        font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90;
+    /* 사이드바 */
+    #sidebar { 
+        position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
+        background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); 
+        z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; 
     }
-    .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
-    .top-assessment-bar input { 
-        width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold;
-    }
+    #sidebar.open { right: 0; }
+    .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
+    .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1500; display: none; }
+    .sidebar-overlay.show { display: block; }
 
-    /* 3. 스크롤 영역 (테이블 + 푸터 포함) */
-    .scroll-container { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
-    
-    /* 엑셀 테이블 */
-    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 0; }
+    .menu-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; }
+    .menu-item { display: block; padding: 10px 0; font-size: 13px; color: #333; cursor: pointer; }
+    .menu-item:hover { color: var(--primary); font-weight: bold; }
+    .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+
+    /* 엑셀 그리드 */
+    .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
     
     th, td { 
         border-right: 1px solid #ddd; 
@@ -86,18 +102,20 @@
         width: var(--date-w);
         min-width: var(--date-w);
         max-width: var(--date-w);
-        overflow: hidden; white-space: nowrap;
+        overflow: hidden;
+        white-space: nowrap;
     }
     
-    /* 테이블 헤더 고정 (스크롤 시에도 상단 유지) */
     thead th { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 2px solid #999; height: 34px; font-weight: 700; color: #444; }
     
-    /* 왼쪽 항목 열 고정 (스크롤 시에도 좌측 유지) */
     .col-label { 
         position: sticky; left: 0; z-index: 20; 
-        width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important;
+        width: var(--col-w) !important; 
+        min-width: var(--col-w) !important; 
+        max-width: var(--col-w) !important;
         border-right: 2px solid #999; text-align: left; padding-left: 10px; 
-        font-weight: 700; font-size: 11px; color: #222; background: #fff; 
+        font-weight: 700; font-size: 11px; color: #222; 
+        background: #fff; 
     }
 
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
@@ -110,6 +128,7 @@
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
+    /* 선택 강조 */
     .active-row td { background-color: rgba(0, 94, 184, 0.08) !important; }
     .active-col { background-color: rgba(0, 94, 184, 0.08) !important; }
 
@@ -123,64 +142,42 @@
     .cell-mixed { font-size: 14px; color: #ccc; pointer-events: none; }
     .cell-mixed.checked { color: #7b1fa2; font-weight: bold; }
     .cell-mixed.checked::after { content: "✔"; }
-    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 12px; padding: 0; margin: 0; }
-    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 12px; padding: 0; margin: 0; min-width: 0; }
+    
+    .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
+    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; }
     .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; }
 
-    .tooltip-target[data-tip=""]:hover::after { display: none; }
     .tooltip-target:hover::after {
         content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%);
         background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left;
     }
+    .tooltip-target[data-tip=""]:hover::after { display: none; }
 
-    /* 4. 하단 섹션 (이제 스크롤 영역 안에 포함됨) */
-    .bottom-panel { background: #f8f9fa; border-top: 2px solid #999; padding: 20px 10px; margin-top: 10px; }
-    .footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #666; }
-    .footer-warning { line-height: 1.4; max-width: 100%; word-break: keep-all; font-weight: 500; margin-bottom: 10px; }
-    .footer-btns { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
-    .footer-btns button { flex: 1; padding: 10px; border-radius: 6px; }
+    /* 하단 섹션 */
+    .bottom-panel { height: var(--footer-h); flex-shrink: 0; background: #f8f9fa; border-top: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; }
+    
+    .footer { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; color: #666; background: #f9f9f9; }
+    .footer-warning { line-height: 1.3; max-width: 60%; word-break: keep-all; font-weight: 500; }
+    .footer-btns { display: flex; gap: 8px; }
 
-    /* --- [NEW] 플로팅 스크롤 화살표 --- */
+    /* [NEW] 플로팅 스크롤 화살표 */
     .scroll-arrow {
-        position: absolute; width: 40px; height: 40px; border-radius: 50%;
-        background: rgba(0, 94, 184, 0.4); color: white;
+        position: absolute; width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(0, 94, 184, 0.6); color: white;
         display: flex; align-items: center; justify-content: center;
-        font-size: 20px; font-weight: bold; pointer-events: none; /* 클릭 통과 */
-        z-index: 500; transition: opacity 0.3s; opacity: 0;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        font-size: 20px; font-weight: bold; pointer-events: none;
+        z-index: 900; opacity: 0; transition: opacity 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         animation: floatArrow 1.5s infinite ease-in-out;
     }
     .scroll-arrow.visible { opacity: 1; }
     
-    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); }
-    .arrow-up { top: 90px; left: 50%; transform: translateX(-50%); } /* 헤더 아래 */
-    .arrow-right { top: 50%; right: 10px; transform: translateY(-50%); }
-    .arrow-left { top: 50%; left: 10px; transform: translateY(-50%); }
+    .arrow-down { bottom: 80px; left: 50%; transform: translateX(-50%); }
+    .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
 
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
-    /* 좌우 화살표 애니메이션 */
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
-    .arrow-right { animation: floatArrowH 1.5s infinite ease-in-out; }
-    
-    /* 사이드바 */
-    #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
-    #sidebar.open { right: 0; }
-    .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
-    .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
-    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1500; display: none; }
-    .sidebar-overlay.show { display: block; }
-
-    .menu-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; }
-    .menu-item { display: block; padding: 10px 0; font-size: 13px; color: #333; cursor: pointer; }
-    .menu-item:hover { color: var(--primary); font-weight: bold; }
-    .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
-
-    #doc-panel { display: none; margin-bottom: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; }
-    #doc-panel.active { display: block; }
-    #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
-    #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
 
     /* 모달 */
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
@@ -195,8 +192,17 @@
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
 
+    /* 의료진 패널 */
+    #doc-panel { display: none; margin-bottom: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; }
+    #doc-panel.active { display: block; }
+    #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
+    #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
+
     @media (max-width: 768px) {
         :root { --col-w: 130px; }
+        .header { padding: 5px 10px; }
+        .footer { flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 5px; }
+        .footer-btns { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
     }
 </style>
 </head>
@@ -236,7 +242,14 @@
 
 <div id="main-screen" class="hidden">
     <div class="container">
-        
+        <div class="top-assessment-bar">
+            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
+            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
+            <span style="color:#ddd">|</span>
+            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
+            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
+        </div>
+
         <div class="header">
             <div class="month-nav">
                 <button class="btn-nav" onclick="moveMonth(-1)">◀</button>
@@ -246,15 +259,7 @@
             <button class="btn-menu" onclick="toggleSidebar()">☰</button>
         </div>
 
-        <div class="top-assessment-bar">
-            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
-            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
-            <span style="color:#ddd">|</span>
-            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
-            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
-        </div>
-
-        <div id="scroll-container" class="scroll-container">
+        <div class="grid-wrapper" id="grid-container">
             <table id="mood-table">
                 <thead>
                     <tr id="header-row"><th class="col-label">항목 / 날짜</th></tr>
@@ -262,15 +267,15 @@
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
+        </div>
 
-            <div class="bottom-panel">
-                <div class="footer">
-                    <div class="footer-warning">본 프로그램은 의료용이 아닙니다. 개인식별정보 금지. 책임은 작성자에게 있습니다.</div>
-                    <div class="footer-btns">
-                        <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">모든 기록을 파일로 다운로드</button>
-                        <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
-                        <button class="btn-nav" onclick="document.getElementById('import-file').click()">파일을 기록으로 업로드 (이전기록삭제)</button>
-                    </div>
+        <div class="bottom-panel">
+            <div class="footer">
+                <div class="footer-warning">본 프로그램은 의료용이 아닙니다. 개인식별정보 금지. 책임은 작성자에게 있습니다.</div>
+                <div class="footer-btns">
+                    <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">모든 기록을 파일로 다운로드</button>
+                    <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
+                    <button class="btn-nav" onclick="document.getElementById('import-file').click()">파일을 기록으로 업로드 (이전기록삭제)</button>
                 </div>
             </div>
         </div>
@@ -306,6 +311,13 @@
             <div class="menu-title">계정 관리</div>
             <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
             <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">데이터 관리</div>
+            <div class="menu-item" onclick="exportData()">💾 모든 기록을 파일로 다운로드</div>
+            <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
+            <div class="menu-item" onclick="document.getElementById('import-file').click()">📂 파일을 기록으로 업로드 (이전기록삭제)</div>
         </div>
 
         <div class="menu-section">
@@ -369,8 +381,21 @@
     const krHolidays = {
         '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
         '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일', '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
-        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석'
-        // (필요 시 2040년까지 추가)
+        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석',
+        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-05-13':'석가탄신일', '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석',
+        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-05-02':'석가탄신일', '2028-10-02':'추석', '2028-10-03':'개천절/추석', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
+        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일', '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석',
+        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-09':'석가탄신일', '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
+        '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일', '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
+        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일', '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일',
+        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일', '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-09':'추석', '2033-10-10':'대체공휴일',
+        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일', '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
+        '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일', '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
+        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-05-02':'석가탄신일', '2036-10-03':'추석', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
+        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-05-22':'석가탄신일', '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석',
+        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일', '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일',
+        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일', '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석',
+        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
     const items = [
@@ -384,12 +409,14 @@
         { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', type: 'check' },
         { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', type: 'check' },
         { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', type: 'mixed' },
+        
         { id: 's_anx', label: '두려움/소심함/걱정/불안', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_ang', label: '짜증/분노', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_mot', label: '관심/흥미/즐거움/소비/계획', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_act', label: '활동량', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_tsp', label: '생각의 속도와 양', desc: '-4 매우 느리고 적음, 0 적당, 4 극히 빠르고 많음', section: 'scale', type: 'scale' },
         { id: 's_tct', label: '생각의 내용', desc: '-4 극히 부정적, 0 적당, 4 극히 긍정적', section: 'scale', type: 'scale' },
+
         { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간', section: 'body', type: 'sleep' },
         { id: 'weight',label: '체중 (kg) *일요일만', desc: '일요일 권장', section: 'body', type: 'weight' },
         { id: 'period',label: '생리기간', desc: '', section: 'body', type: 'check' },
@@ -408,28 +435,26 @@
     let modalTarget = { day: null, id: null };
     let myChart = null; 
 
-    // [NEW] 스크롤 화살표 로직
-    const scrollContainer = document.getElementById('scroll-container');
-    const arrowDown = document.getElementById('arrow-down');
-    const arrowRight = document.getElementById('arrow-right');
+    // [NEW] 플로팅 스크롤 화살표 로직
+    const gridWrapper = document.getElementById('grid-container');
+    const aDown = document.getElementById('arrow-down');
+    const aRight = document.getElementById('arrow-right');
 
-    scrollContainer.addEventListener('scroll', checkScroll);
+    gridWrapper.addEventListener('scroll', checkScroll);
     
     function checkScroll() {
         // 하단 스크롤 확인
-        const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-        if (maxScrollTop > 0 && scrollContainer.scrollTop < maxScrollTop - 20) {
-            arrowDown.classList.add('visible');
+        if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) {
+            aDown.classList.add('visible');
         } else {
-            arrowDown.classList.remove('visible');
+            aDown.classList.remove('visible');
         }
 
         // 우측 스크롤 확인
-        const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-        if (maxScrollLeft > 0 && scrollContainer.scrollLeft < maxScrollLeft - 20) {
-            arrowRight.classList.add('visible');
+        if (gridWrapper.scrollWidth - gridWrapper.scrollLeft > gridWrapper.clientWidth + 20) {
+            aRight.classList.add('visible');
         } else {
-            arrowRight.classList.remove('visible');
+            aRight.classList.remove('visible');
         }
     }
 
@@ -611,15 +636,13 @@
         document.getElementById('score-ls').value = '';
         document.getElementById('score-mssi').value = '';
         
-        // 오늘 날짜로 자동 스크롤
         if(isCurMonth) {
             setTimeout(() => {
                 const todayHeader = document.querySelector('.today-header');
                 if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
-            }, 300);
+            }, 100);
         }
         
-        // 스크롤 화살표 초기 확인
         setTimeout(checkScroll, 500);
 
         if(target) loadData();
