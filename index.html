@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 1.14 | 분당서울대학교병원</title>
+<title>기분기록지 1.15 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,7 +20,7 @@
         --text: #2c3e50;
         --border: #ccc;
         
-        /* 섹션별 기본 배경 (기분 섹션은 개별 컬러 적용으로 제외) */
+        /* 섹션별 배경색 (기분은 그라데이션으로 대체) */
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
@@ -58,7 +58,7 @@
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 2. 상단 월간 평가 바 (고정) */
+    /* 2. 상단 월간 평가 바 (헤더와 그리드 사이) */
     .top-assessment-bar { 
         height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
         display: flex; align-items: center; justify-content: center; gap: 8px; 
@@ -69,10 +69,10 @@
         width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold;
     }
 
-    /* 3. 스크롤 영역 (테이블만 존재, 하단바 삭제됨) */
+    /* 3. 스크롤 영역 (테이블만 존재) */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
     
-    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 0; }
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 50px; }
     
     th, td { 
         border-right: 1px solid #ddd; 
@@ -98,7 +98,8 @@
     }
 
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
-    /* 기분 섹션 배경색은 JS에서 인라인 스타일로 처리 (그라데이션) */
+    
+    /* 섹션 배경 */
     .bg-scale { background-color: var(--bg-block-scale); }
     .bg-body { background-color: var(--bg-block-body); }
     .bg-event { background-color: var(--bg-block-event); }
@@ -137,13 +138,13 @@
         animation: floatArrow 1.5s infinite ease-in-out;
     }
     .scroll-arrow.visible { opacity: 1; }
-    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } /* 하단바 제거로 위치 조정 */
+    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } 
     .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
 
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 사이드바, 모달, 의료진패널 등 공통 스타일 */
+    /* 사이드바 등 공통 스타일 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -173,6 +174,12 @@
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
 
+    .tooltip-target:hover::after {
+        content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left;
+    }
+    .tooltip-target[data-tip=""]:hover::after { display: none; }
+
     @media (max-width: 768px) {
         :root { --col-w: 130px; }
     }
@@ -201,7 +208,7 @@
             <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜+생년월일 (필수)">
             <div style="font-size:11px; color:#888; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305</div>
             <div class="legal-text">
-                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 가입정보를 잊어버리면 계정을 복구할 수 없습니다.
             </div>
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
@@ -214,14 +221,6 @@
 
 <div id="main-screen" class="hidden">
     <div class="container">
-        <div class="top-assessment-bar">
-            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
-            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
-            <span style="color:#ddd">|</span>
-            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
-            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
-        </div>
-
         <div class="header">
             <div class="month-nav">
                 <button class="btn-nav" onclick="moveMonth(-1)">◀</button>
@@ -229,6 +228,14 @@
                 <button class="btn-nav" onclick="moveMonth(1)">▶</button>
             </div>
             <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+        </div>
+
+        <div class="top-assessment-bar">
+            <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
+            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
+            <span style="color:#ddd">|</span>
+            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
+            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
         </div>
 
         <div class="grid-wrapper" id="grid-container">
@@ -239,7 +246,6 @@
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
-            <div style="height: 50px;"></div>
         </div>
 
         <div id="arrow-down" class="scroll-arrow arrow-down">▼</div>
@@ -360,18 +366,17 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-    // [색상 적용: 기분 섹션 그라데이션]
-    // +4(진한빨강) ~ 0(흰색) ~ -4(진한파랑)
+    // [수정] 기분 섹션 배경색 그라데이션 적용 (진한 빨강 -> 흰색 -> 진한 파랑)
     const items = [
-        { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 82, 82, 0.25)', type: 'check' },
-        { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', color: 'rgba(255, 82, 82, 0.18)', type: 'check' },
-        { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', section: 'mood', color: 'rgba(255, 82, 82, 0.12)', type: 'check' },
-        { id: 'm_p1', label: '+1 미세한 상승', desc: '미미한 변화, 본인은 기분 좋음', section: 'mood', color: 'rgba(255, 82, 82, 0.06)', type: 'check' },
+        { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 50, 50, 0.3)', type: 'check' },
+        { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', color: 'rgba(255, 50, 50, 0.2)', type: 'check' },
+        { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', section: 'mood', color: 'rgba(255, 50, 50, 0.1)', type: 'check' },
+        { id: 'm_p1', label: '+1 미세한 상승', desc: '미미한 변화, 본인은 기분 좋음', section: 'mood', color: 'rgba(255, 50, 50, 0.05)', type: 'check' },
         { id: 'm_0',  label: '0  보통 기분',   desc: '평온하고 정상적인 상태', section: 'mood', color: '#ffffff', type: 'check' }, 
-        { id: 'm_m1', label: '-1 미세한 저하', desc: '미미한 변화, 의욕 저하', section: 'mood', color: 'rgba(33, 150, 243, 0.06)', type: 'check' },
-        { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', section: 'mood', color: 'rgba(33, 150, 243, 0.12)', type: 'check' },
-        { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', color: 'rgba(33, 150, 243, 0.18)', type: 'check' },
-        { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(33, 150, 243, 0.25)', type: 'check' },
+        { id: 'm_m1', label: '-1 미세한 저하', desc: '미미한 변화, 의욕 저하', section: 'mood', color: 'rgba(50, 50, 255, 0.05)', type: 'check' },
+        { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', section: 'mood', color: 'rgba(50, 50, 255, 0.1)', type: 'check' },
+        { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', color: 'rgba(50, 50, 255, 0.2)', type: 'check' },
+        { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(50, 50, 255, 0.3)', type: 'check' },
         { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', color: '#f3e5f5', type: 'mixed' },
         
         { id: 's_anx', label: '두려움/소심함/걱정/불안', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
@@ -535,7 +540,7 @@
             }
             lastSection = item.section;
             
-            // [수정] 기분 섹션은 각 행마다 개별 컬러 적용
+            // [수정] 기분 섹션은 배경색을 item.color로 적용 (그라데이션 효과)
             if (item.section === 'mood' && item.color) {
                 tr.style.backgroundColor = item.color;
             } else {
@@ -544,8 +549,9 @@
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            // 항목명 칸도 배경색 맞춤
+            // 항목명 칸도 같은 배경색 적용
             if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
+            
             tr.appendChild(th);
 
             for(let d=1; d<=lastDay; d++) {
@@ -571,23 +577,16 @@
                         originClick(e);
                         if(user.role === 'doctor') return;
                         const isChecked = td.classList.contains('checked');
-                        const cnt = document.querySelectorAll(`tr td[data-d="${d}"][data-s="mood"].checked`).length; 
-                        // mixed 제외하고 카운트하려면 class로 구분해야 함. 
-                        // 하지만 단순화를 위해 현재 상태에서 mixed row 체크 여부를 뺌.
-                        // 정확히는 items 배열 순회해서 체크
-                        
-                        // 기분 섹션은 2개 제한 (혼재상태 제외)
+                        // 기분 섹션 체크 제한
                         if(item.id !== 'mixed') {
-                            // 현재 컬럼의 기분 체크 개수 계산 (DOM 탐색)
-                            let currentMoodChecks = 0;
-                            // items 중 section이 mood이고 id가 mixed가 아닌 것들의 id 리스트
-                            const moodIds = items.filter(i => i.section === 'mood' && i.id !== 'mixed').map(i => i.id);
-                            moodIds.forEach(mid => {
-                                const targetTd = document.querySelector(`td[data-d="${d}"][data-c="${mid}"]`);
-                                if(targetTd && targetTd.classList.contains('checked')) currentMoodChecks++;
+                            let cnt = 0;
+                            // 같은 날짜, 기분 섹션(mood) 중 mixed가 아닌 항목 체크 개수
+                            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+                            moodItems.forEach(i => {
+                                const t = document.querySelector(`td[data-d="${d}"][data-c="${i.id}"]`);
+                                if(t && t.classList.contains('checked')) cnt++;
                             });
-                            
-                            if(!isChecked && currentMoodChecks >= 2) return alert("기분은 하루 최대 2개입니다.");
+                            if(!isChecked && cnt >= 2) return alert("기분은 하루 최대 2개입니다.");
                         }
                         if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
                         else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
@@ -643,13 +642,11 @@
     async function updateMixedState(day) {
         setTimeout(() => {
             let cnt = 0;
-            // items 배열을 사용하여 mood 섹션이면서 mixed가 아닌 항목들의 DOM을 찾아 카운트
-            const moodIds = items.filter(i => i.section === 'mood' && i.id !== 'mixed').map(i => i.id);
-            moodIds.forEach(mid => {
-                const targetTd = document.querySelector(`td[data-d="${day}"][data-c="${mid}"]`);
-                if(targetTd && targetTd.classList.contains('checked')) cnt++;
+            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+            moodItems.forEach(i => {
+                const t = document.querySelector(`td[data-d="${day}"][data-c="${i.id}"]`);
+                if(t && t.classList.contains('checked')) cnt++;
             });
-
             const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
             if(cnt >= 2) { 
                 if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } 
@@ -732,7 +729,6 @@
         }
     }
 
-    // [선택 기능] 차트 함수
     async function openChartModal(type) {
         toggleSidebar(); 
         document.getElementById('chart-modal').style.display = 'flex';
