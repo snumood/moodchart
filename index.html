@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 1.21 | 분당서울대학교병원</title>
+<title>기분기록지 1.14 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,27 +20,26 @@
         --text: #2c3e50;
         --border: #ccc;
         
-        /* 섹션별 배경색 */
-        --bg-block-mood: #fff5f5;   
+        /* 섹션별 기본 배경 (기분 섹션은 개별 컬러 적용으로 제외) */
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
         
-        --top-bar-h: 36px;
         --header-h: 46px;      
-        --cell-h: 28px;        
-        --col-w: 160px;
-        --date-w: 42px; 
+        --top-bar-h: 38px; 
+        --cell-h: 30px;        
+        --col-w: 160px; 
+        --date-w: 42px;
     }
 
-    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 11px; overflow: hidden; }
+    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 11px; overflow: hidden; height: 100dvh; position: relative; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; }
 
     /* 로그인 화면 */
-    #auth-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; }
+    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; }
     .auth-box { width: 340px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
@@ -50,47 +49,30 @@
     .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f9f9f9; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
 
     /* 메인 컨테이너 */
-    .container { height: 100vh; display: flex; flex-direction: column; background: #fff; position: relative; }
+    .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
     
-    /* 상단 월간 평가 바 */
-    .top-assessment-bar { 
-        height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #ddd; 
-        display: flex; align-items: center; justify-content: center; gap: 8px; 
-        font-size: 11px; flex-shrink: 0; padding: 0 5px; overflow-x: auto; white-space: nowrap;
-    }
-    .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
-    .top-assessment-bar input { 
-        width: 50px; height: 24px; text-align: center; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; padding: 0;
-    }
-
-    /* 헤더 */
+    /* 1. 헤더 (고정) */
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
     .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 사이드바 */
-    #sidebar { 
-        position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
-        background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); 
-        z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; 
+    /* 2. 상단 월간 평가 바 (고정) */
+    .top-assessment-bar { 
+        height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
+        display: flex; align-items: center; justify-content: center; gap: 8px; 
+        font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90;
     }
-    #sidebar.open { right: 0; }
-    .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
-    .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
-    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1500; display: none; }
-    .sidebar-overlay.show { display: block; }
+    .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
+    .top-assessment-bar input { 
+        width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold;
+    }
 
-    .menu-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; }
-    .menu-item { display: block; padding: 10px 0; font-size: 13px; color: #333; cursor: pointer; }
-    .menu-item:hover { color: var(--primary); font-weight: bold; }
-    .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
-
-    /* 엑셀 그리드 */
+    /* 3. 스크롤 영역 (테이블만 존재, 하단바 삭제됨) */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
-    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
+    
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 0; }
     
     th, td { 
         border-right: 1px solid #ddd; 
@@ -102,24 +84,21 @@
         width: var(--date-w);
         min-width: var(--date-w);
         max-width: var(--date-w);
-        overflow: hidden;
-        white-space: nowrap;
+        overflow: hidden; white-space: nowrap;
     }
     
     thead th { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 2px solid #999; height: 34px; font-weight: 700; color: #444; }
     
+    /* 항목명 열 */
     .col-label { 
         position: sticky; left: 0; z-index: 20; 
-        width: var(--col-w) !important; 
-        min-width: var(--col-w) !important; 
-        max-width: var(--col-w) !important;
+        width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important;
         border-right: 2px solid #999; text-align: left; padding-left: 10px; 
-        font-weight: 700; font-size: 11px; color: #222; 
-        background: #fff; 
+        font-weight: 700; font-size: 11px; color: #222; background: #fff; 
     }
 
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
-    .bg-mood { background-color: var(--bg-block-mood); }
+    /* 기분 섹션 배경색은 JS에서 인라인 스타일로 처리 (그라데이션) */
     .bg-scale { background-color: var(--bg-block-scale); }
     .bg-body { background-color: var(--bg-block-body); }
     .bg-event { background-color: var(--bg-block-event); }
@@ -128,7 +107,6 @@
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
-    /* 선택 강조 */
     .active-row td { background-color: rgba(0, 94, 184, 0.08) !important; }
     .active-col { background-color: rgba(0, 94, 184, 0.08) !important; }
 
@@ -144,24 +122,11 @@
     .cell-mixed.checked::after { content: "✔"; }
     
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
-    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; }
+    .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
     .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; }
 
-    .tooltip-target:hover::after {
-        content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left;
-    }
-    .tooltip-target[data-tip=""]:hover::after { display: none; }
-
-    /* 하단 섹션 */
-    .bottom-panel { height: var(--footer-h); flex-shrink: 0; background: #f8f9fa; border-top: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; }
-    
-    .footer { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; color: #666; background: #f9f9f9; }
-    .footer-warning { line-height: 1.3; max-width: 60%; word-break: keep-all; font-weight: 500; }
-    .footer-btns { display: flex; gap: 8px; }
-
-    /* [NEW] 플로팅 스크롤 화살표 */
+    /* 플로팅 화살표 */
     .scroll-arrow {
         position: absolute; width: 36px; height: 36px; border-radius: 50%;
         background: rgba(0, 94, 184, 0.6); color: white;
@@ -172,14 +137,30 @@
         animation: floatArrow 1.5s infinite ease-in-out;
     }
     .scroll-arrow.visible { opacity: 1; }
-    
-    .arrow-down { bottom: 80px; left: 50%; transform: translateX(-50%); }
+    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } /* 하단바 제거로 위치 조정 */
     .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
 
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 모달 */
+    /* 사이드바, 모달, 의료진패널 등 공통 스타일 */
+    #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
+    #sidebar.open { right: 0; }
+    .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
+    .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1500; display: none; }
+    .sidebar-overlay.show { display: block; }
+    .menu-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .menu-title { font-weight: bold; font-size: 13px; color: #666; margin-bottom: 10px; }
+    .menu-item { display: block; padding: 10px 0; font-size: 13px; color: #333; cursor: pointer; }
+    .menu-item:hover { color: var(--primary); font-weight: bold; }
+    .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+
+    #doc-panel { display: none; margin-bottom: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; }
+    #doc-panel.active { display: block; }
+    #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
+    #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
+
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     .chart-modal-content { background: white; padding: 20px; border-radius: 20px; width: 95%; height: 80%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
@@ -192,17 +173,8 @@
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
 
-    /* 의료진 패널 */
-    #doc-panel { display: none; margin-bottom: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; }
-    #doc-panel.active { display: block; }
-    #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
-    #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
-
     @media (max-width: 768px) {
         :root { --col-w: 130px; }
-        .header { padding: 5px 10px; }
-        .footer { flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 5px; }
-        .footer-btns { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
     }
 </style>
 </head>
@@ -267,17 +239,7 @@
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
-        </div>
-
-        <div class="bottom-panel">
-            <div class="footer">
-                <div class="footer-warning">본 프로그램은 의료용이 아닙니다. 개인식별정보 금지. 책임은 작성자에게 있습니다.</div>
-                <div class="footer-btns">
-                    <button class="btn-nav" onclick="exportData()" style="border-color:var(--primary); color:var(--primary);">모든 기록을 파일로 다운로드</button>
-                    <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
-                    <button class="btn-nav" onclick="document.getElementById('import-file').click()">파일을 기록으로 업로드 (이전기록삭제)</button>
-                </div>
-            </div>
+            <div style="height: 50px;"></div>
         </div>
 
         <div id="arrow-down" class="scroll-arrow arrow-down">▼</div>
@@ -398,17 +360,19 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-05-19':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
+    // [색상 적용: 기분 섹션 그라데이션]
+    // +4(진한빨강) ~ 0(흰색) ~ -4(진한파랑)
     const items = [
-        { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', type: 'check' },
-        { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', type: 'check' },
-        { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', section: 'mood', type: 'check' },
-        { id: 'm_p1', label: '+1 미세한 상승', desc: '미미한 변화, 본인은 기분 좋음', section: 'mood', type: 'check' },
-        { id: 'm_0',  label: '0  보통 기분',   desc: '평온하고 정상적인 상태', section: 'mood', type: 'check' }, 
-        { id: 'm_m1', label: '-1 미세한 저하', desc: '미미한 변화, 의욕 저하', section: 'mood', type: 'check' },
-        { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', section: 'mood', type: 'check' },
-        { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', type: 'check' },
-        { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', type: 'check' },
-        { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', type: 'mixed' },
+        { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 82, 82, 0.25)', type: 'check' },
+        { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', color: 'rgba(255, 82, 82, 0.18)', type: 'check' },
+        { id: 'm_p2', label: '+2 분명한 상승', desc: '다소 지장, 전과 다르다는 지적', section: 'mood', color: 'rgba(255, 82, 82, 0.12)', type: 'check' },
+        { id: 'm_p1', label: '+1 미세한 상승', desc: '미미한 변화, 본인은 기분 좋음', section: 'mood', color: 'rgba(255, 82, 82, 0.06)', type: 'check' },
+        { id: 'm_0',  label: '0  보통 기분',   desc: '평온하고 정상적인 상태', section: 'mood', color: '#ffffff', type: 'check' }, 
+        { id: 'm_m1', label: '-1 미세한 저하', desc: '미미한 변화, 의욕 저하', section: 'mood', color: 'rgba(33, 150, 243, 0.06)', type: 'check' },
+        { id: 'm_m2', label: '-2 분명한 저하', desc: '일상을 유지하려 노력 필요', section: 'mood', color: 'rgba(33, 150, 243, 0.12)', type: 'check' },
+        { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', color: 'rgba(33, 150, 243, 0.18)', type: 'check' },
+        { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(33, 150, 243, 0.25)', type: 'check' },
+        { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', color: '#f3e5f5', type: 'mixed' },
         
         { id: 's_anx', label: '두려움/소심함/걱정/불안', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_ang', label: '짜증/분노', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
@@ -435,7 +399,7 @@
     let modalTarget = { day: null, id: null };
     let myChart = null; 
 
-    // [NEW] 플로팅 스크롤 화살표 로직
+    // 플로팅 화살표 로직
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
     const aRight = document.getElementById('arrow-right');
@@ -443,14 +407,11 @@
     gridWrapper.addEventListener('scroll', checkScroll);
     
     function checkScroll() {
-        // 하단 스크롤 확인
         if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) {
             aDown.classList.add('visible');
         } else {
             aDown.classList.remove('visible');
         }
-
-        // 우측 스크롤 확인
         if (gridWrapper.scrollWidth - gridWrapper.scrollLeft > gridWrapper.clientWidth + 20) {
             aRight.classList.add('visible');
         } else {
@@ -573,10 +534,18 @@
                 tr.classList.add('block-divider');
             }
             lastSection = item.section;
-            tr.classList.add('bg-' + item.section);
+            
+            // [수정] 기분 섹션은 각 행마다 개별 컬러 적용
+            if (item.section === 'mood' && item.color) {
+                tr.style.backgroundColor = item.color;
+            } else {
+                tr.classList.add('bg-' + item.section);
+            }
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
+            // 항목명 칸도 배경색 맞춤
+            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
             tr.appendChild(th);
 
             for(let d=1; d<=lastDay; d++) {
@@ -602,12 +571,27 @@
                         originClick(e);
                         if(user.role === 'doctor') return;
                         const isChecked = td.classList.contains('checked');
-                        const cnt = document.querySelectorAll(`tr.bg-mood td[data-d="${d}"].checked`).length;
+                        const cnt = document.querySelectorAll(`tr td[data-d="${d}"][data-s="mood"].checked`).length; 
+                        // mixed 제외하고 카운트하려면 class로 구분해야 함. 
+                        // 하지만 단순화를 위해 현재 상태에서 mixed row 체크 여부를 뺌.
+                        // 정확히는 items 배열 순회해서 체크
+                        
+                        // 기분 섹션은 2개 제한 (혼재상태 제외)
                         if(item.id !== 'mixed') {
-                            if(!isChecked && cnt >= 2) return alert("기분은 하루 최대 2개입니다.");
+                            // 현재 컬럼의 기분 체크 개수 계산 (DOM 탐색)
+                            let currentMoodChecks = 0;
+                            // items 중 section이 mood이고 id가 mixed가 아닌 것들의 id 리스트
+                            const moodIds = items.filter(i => i.section === 'mood' && i.id !== 'mixed').map(i => i.id);
+                            moodIds.forEach(mid => {
+                                const targetTd = document.querySelector(`td[data-d="${d}"][data-c="${mid}"]`);
+                                if(targetTd && targetTd.classList.contains('checked')) currentMoodChecks++;
+                            });
+                            
+                            if(!isChecked && currentMoodChecks >= 2) return alert("기분은 하루 최대 2개입니다.");
                         }
                         if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
                         else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                        
                         if(item.id !== 'mixed') updateMixedState(d);
                     };
                 } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
@@ -659,11 +643,13 @@
     async function updateMixedState(day) {
         setTimeout(() => {
             let cnt = 0;
-            const moodRows = document.querySelectorAll('tr.bg-mood');
-            moodRows.forEach(tr => {
-                const td = tr.querySelector(`td[data-d="${day}"]`);
-                if(td && td.dataset.c !== 'mixed' && td.classList.contains('checked')) cnt++;
+            // items 배열을 사용하여 mood 섹션이면서 mixed가 아닌 항목들의 DOM을 찾아 카운트
+            const moodIds = items.filter(i => i.section === 'mood' && i.id !== 'mixed').map(i => i.id);
+            moodIds.forEach(mid => {
+                const targetTd = document.querySelector(`td[data-d="${day}"][data-c="${mid}"]`);
+                if(targetTd && targetTd.classList.contains('checked')) cnt++;
             });
+
             const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
             if(cnt >= 2) { 
                 if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } 
