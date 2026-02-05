@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.21 | 분당서울대학교병원</title>
+<title>기분기록지 2.3 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -19,7 +19,6 @@
         --bg-block-mood: #fff5f5; --bg-block-scale: #fffdeb; --bg-block-body: #e8f5e9; --bg-block-event: #ffffff;
         --header-h: 46px; --top-bar-h: 42px; --cell-h: 30px; --col-w: 160px; --date-w: 42px;
     }
-    /* 테마 */
     [data-theme="pink"] { --primary: #d81b60; --bg-main: #fce4ec; --bg-block-mood: #ffcdd2; --bg-block-scale: #e1bee7; --bg-block-body: #f8bbd0; }
     [data-theme="green"] { --primary: #2e7d32; --bg-main: #e8f5e9; --bg-block-mood: #c8e6c9; --bg-block-scale: #dcedc8; --bg-block-body: #b9f6ca; }
     [data-theme="dark"] { --primary: #90caf9; --text: #eeeeee; --bg-main: #121212; --bg-white: #1e1e1e; --border: #444; --bg-block-mood: #263238; --bg-block-scale: #37474f; --bg-block-body: #212121; --bg-block-event: #212121; }
@@ -30,7 +29,6 @@
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; }
 
-    /* 로그인 화면 */
     #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; background: url('https://github.com/snumood/moodchart/blob/main/bg.jpg?raw=true') no-repeat center center fixed; background-size: cover; }
     #auth-screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: -1; }
     .auth-box { width: 420px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
@@ -41,7 +39,6 @@
     .toggle-auth { margin-top: 20px; font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; display: inline-block; }
     .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f1f3f5; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
 
-    /* 메인 UI */
     .container { height: 100dvh; display: flex; flex-direction: column; background: var(--bg-white); position: relative; }
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: var(--bg-white); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text); }
@@ -71,7 +68,6 @@
     .today-header { background-color: var(--today-bg) !important; color: #d50000; border: 2px solid var(--today-border) !important; border-bottom: none !important; position: sticky; top: 0; z-index: 15; }
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
-
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
@@ -105,8 +101,9 @@
     .sticker-list { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
     .inv-item { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; border-radius: 4px; transition: 0.2s; }
     .inv-item:hover { background: #f0f0f0; transform: scale(1.2); }
+    .gift-btn { grid-column: span 6; margin-top: 10px; padding: 8px; background: #FF6B6B; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-    /* 사이드바, 모달 */
+    /* 사이드바 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--bg-white); box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; color: var(--text); }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -130,6 +127,9 @@
     #doc-panel input { width: 70%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; }
     #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
 
+    /* 경고 문구 항상 표시 */
+    .footer-legal { font-size: 10px; color: #999; line-height: 1.4; margin-top: 20px; word-break: keep-all; background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee; }
+
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: var(--bg-white); color: var(--text); padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     .icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; max-height: 120px; overflow-y: auto; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; }
@@ -149,17 +149,14 @@
 
     .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
     .tooltip-target[data-tip=""]:hover::after { display: none; }
-
-    @media (max-width: 768px) {
-        :root { --col-w: 130px; }
-    }
+    @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.2</h2>
+        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.3</h2>
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
@@ -231,8 +228,9 @@
                 <span style="font-weight:bold;">✨ 보상 스티커북</span>
                 <span style="cursor:pointer;" onclick="toggleStickerInventory()">✕</span>
             </div>
-            <div style="font-size:11px; color:#666; margin-bottom:10px;">월간 점수를 입력하면 희귀한 스티커가 나와요! (매주 1회 획득)</div>
+            <div style="font-size:11px; color:#666; margin-bottom:10px;">기록하면 스티커가 생겨요! 붙이면 사라집니다. (드래그)</div>
             <div id="sticker-list-container"></div>
+            <button class="gift-btn" onclick="sendGiftMode()">🎁 랜덤 친구에게 선물하기</button>
         </div>
     </div>
 </div>
@@ -263,7 +261,7 @@
         <div class="menu-section"><div class="menu-title">계정 관리</div><div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div><div class="menu-item" onclick="doLogout()">🚪 로그아웃</div></div>
         <div class="menu-section"><div class="menu-title">데이터 관리</div><div class="menu-item" onclick="exportData()">💾 모든 기록을 파일로 다운로드</div><input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)"><div class="menu-item" onclick="document.getElementById('import-file').click()">📂 파일을 기록으로 업로드 (이전기록삭제)</div></div>
         <div class="menu-section"><div class="menu-title">안내</div><a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="menu-item">📖 기분기록지 작성방법 보기</a></div>
-        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">본 프로그램은 의료용이 아니며 사용 책임은 작성자에게 있습니다.</div>
+        <div class="footer-legal">본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.</div>
     </div>
 </div>
 
@@ -289,19 +287,17 @@
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- Helper Functions (Defined FIRST) ---
+    // --- Helper Functions ---
     async function hashPassword(str) {
         const msgBuffer = new TextEncoder().encode(str);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
-
     function createSelect(min, max) {
         let s = document.createElement('select'); s.className = 'cell-select'; s.add(new Option('', ''));
         for(let i=min; i<=max; i++) s.add(new Option(i, i));
         return s;
     }
-
     function updateVisuals(cell, item, value) {
         cell.style.backgroundColor = ''; 
         if (value === '' || value === null) return;
@@ -324,37 +320,31 @@
             if (value && value.trim() !== '') cell.style.backgroundColor = 'rgba(255, 245, 157, 0.5)';
         }
     }
-
     function isTimely(record) {
         if (!record.updated_at) return true;
         const targetDate = new Date(record.record_date);
         const writeDate = new Date(record.updated_at);
-        const diffTime = writeDate - targetDate;
-        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        const diffDays = (writeDate - targetDate) / (1000 * 60 * 60 * 24);
         return diffDays <= 8 && diffDays >= -1; 
     }
-
     function checkMin(el) { if(el.value < 0) el.value = 0; }
-
+    
     async function saveData(day, cat, val) {
         if(user.role==='doctor') return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
-
     async function saveMonthlyScore(type, val) {
         if(user.role==='doctor') return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
     }
-    
     function getFixedRandomIcon(dateStr, type) {
         const list = type === 'meds' ? medsIcons : exerIcons;
         let hash = 0; for (let i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
         return list[Math.abs(hash) % list.length];
     }
-    // --- End Helper Functions ---
 
     const krHolidays = {
         '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '07-17': '제헌절', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
@@ -432,149 +422,12 @@
     let currentTheme = localStorage.getItem('mood_theme') || 'default';
     let selectedIcon = '';
     
-    // 안전한 위치에 renderTable 선언
-    function renderTable() {
-        const year = curDate.getFullYear(), month = curDate.getMonth();
-        document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
-        const today = new Date();
-        const isCurMonth = today.getFullYear()===year && today.getMonth()===month;
-        const todayDate = today.getDate();
-        const lastDay = new Date(year, month+1, 0).getDate();
-        
-        const header = document.getElementById('header-row');
-        const dowRow = document.getElementById('dow-row');
-        const body = document.getElementById('table-body');
-        
-        while(header.children.length > 1) header.removeChild(header.lastChild);
-        while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
-        body.innerHTML = '';
-
-        const days = ['일','월','화','수','목','금','토'];
-        for(let d=1; d<=lastDay; d++) {
-            const dt = new Date(year, month, d);
-            const dayIdx = dt.getDay();
-            const kShort = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const kFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const hol = krHolidays[kFull] || krHolidays[kShort];
-            const isRed = dayIdx === 0 || hol;
-            const isToday = isCurMonth && d === todayDate;
-
-            let th = document.createElement('th'); 
-            if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
-            if(isRed) th.className = 'day-holiday'; if(hol) th.title = hol;
-            if(dayIdx===6 && !isRed) th.className = 'day-sat';
-            if(isToday) th.classList.add('today-header'); 
-            header.appendChild(th);
-
-            let td = document.createElement('th'); td.innerText = days[dayIdx];
-            if(isRed) td.className = 'day-holiday'; if(dayIdx===6 && !isRed) td.className = 'day-sat';
-            if(isToday) td.classList.add('today-dow'); 
-            dowRow.appendChild(td);
-        }
-
-        let lastSection = null;
-        items.forEach(item => {
-            let tr = document.createElement('tr');
-            if(lastSection && lastSection !== item.section) tr.classList.add('block-divider');
-            lastSection = item.section;
-            if (item.section === 'mood' && item.color) tr.style.backgroundColor = item.color;
-            else tr.classList.add('bg-' + item.section);
-
-            let th = document.createElement('th');
-            th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
-            tr.appendChild(th);
-
-            for(let d=1; d<=lastDay; d++) {
-                const dt = new Date(year, month, d);
-                const kDate = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                let td = document.createElement('td');
-                if(dt.getDay() === 0) td.style.borderRight = "2px solid #bbb"; 
-                td.dataset.d = d; td.dataset.c = item.id; td.dataset.s = item.section;
-
-                td.onclick = function(e) {
-                    if(item.type !== 'event') {
-                        document.querySelectorAll('.active-row, .active-col').forEach(el => { el.classList.remove('active-row'); el.classList.remove('active-col'); });
-                        tr.classList.add('active-row');
-                        document.querySelectorAll(`td:nth-child(${d+1})`).forEach(cell => cell.classList.add('active-col'));
-                    }
-                };
-
-                if(item.id === 'meds' || item.id === 'exer') {
-                    td.className = 'cell-check cell-icon'; 
-                    const originClick = td.onclick;
-                    td.onclick = (e) => {
-                        originClick(e); if(user.role === 'doctor') return;
-                        const hasVal = td.innerText !== '' || td.classList.contains('checked');
-                        if(hasVal) {
-                            td.innerText = ''; td.classList.remove('checked'); saveData(d, item.id, null); updateVisuals(td, item, null);
-                        } else {
-                            const icon = getFixedRandomIcon(kDate, item.id);
-                            td.innerText = icon; saveData(d, item.id, icon); updateVisuals(td, item, 'Y');
-                        }
-                    };
-                } 
-                else if(item.type === 'check' && item.section === 'mood') {
-                    td.className = 'cell-check';
-                    const originClick = td.onclick;
-                    td.onclick = (e) => {
-                        originClick(e); if(user.role === 'doctor') return;
-                        const isChecked = td.classList.contains('checked');
-                        if(item.id !== 'mixed') {
-                            let cnt = 0;
-                            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
-                            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${d}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
-                            if(!isChecked && cnt >= 2) return alert("기분은 하루 최대 2개입니다.");
-                        }
-                        if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
-                        else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
-                        if(item.id !== 'mixed') updateMixedState(d);
-                    };
-                } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
-                else if(item.type === 'check') {
-                    td.className = 'cell-check'; 
-                    const originClick = td.onclick;
-                    td.onclick = (e) => { 
-                        originClick(e); if(user.role!=='doctor') { 
-                            let val = td.classList.toggle('checked') ? 'Y' : null; 
-                            saveData(d, item.id, val); updateVisuals(td, item, val); 
-                        }
-                    };
-                } else if(item.type === 'scale') {
-                    let sel = createSelect(-4, 4); 
-                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
-                    td.appendChild(sel);
-                } else if(item.type === 'sleep') {
-                    let sel = createSelect(0, 24); 
-                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
-                    td.appendChild(sel);
-                } else if(item.type === 'weight') {
-                    let inp = document.createElement('input'); 
-                    inp.type='text'; inp.inputMode='decimal'; inp.className='cell-input';
-                    if(dt.getDay() !== 0) { td.className = 'disabled-cell'; inp.disabled = true; } 
-                    else inp.onblur = (e) => saveData(d, item.id, e.target.value);
-                    td.appendChild(inp);
-                } else if(item.type === 'event') {
-                    td.className = 'cell-event'; 
-                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); };
-                }
-                tr.appendChild(td);
-            }
-            body.appendChild(tr);
-        });
-        
-        document.getElementById('score-ls').value = '';
-        document.getElementById('score-mssi').value = '';
-        if(isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
-        setTimeout(checkScroll, 500);
-        if(target) loadData();
-    }
-
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
     const aRight = document.getElementById('arrow-right');
-    if(gridWrapper) gridWrapper.addEventListener('scroll', checkScroll);
-    
+    if (gridWrapper) {
+        gridWrapper.addEventListener('scroll', checkScroll);
+    }
     function checkScroll() {
         if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
         else aDown.classList.remove('visible');
@@ -626,7 +479,20 @@
             loadUserStickers(); 
             loadPlacedStickers(); 
             renderTable(); 
+            checkMyGifts(); // 로그인 시 선물 확인
         }
+    }
+
+    async function searchPatient() {
+        const q = document.getElementById('search-id').value.trim();
+        if(!q) return alert("ID 또는 환자번호를 입력하세요.");
+        target = q; 
+        alert(`${target} 님을 조회합니다.`); 
+        toggleSidebar(); 
+        
+        // 중요: 타겟이 바뀌었으니 테이블을 다시 그리기 전 데이터를 먼저 로드해야 함
+        // renderTable 내부에서 loadData 호출하므로 renderTable만 호출하면 됨
+        renderTable(); 
     }
 
     async function checkUnlockStatus(id, pw, role) {
@@ -746,38 +612,75 @@
         const newIcon = tierIcons[Math.floor(Math.random() * tierIcons.length)];
         const myKey = `my_stickers_${user.username}`;
         let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
-        if (!myStickers.includes(newIcon)) {
-            myStickers.push(newIcon);
-            localStorage.setItem(myKey, JSON.stringify(myStickers));
-            let itemName = "반짝이는 아이템";
-            let msg = "꾸준히 기분을 관찰하신 당신에게";
-            if(tier===2) { itemName = "귀여운 친구"; msg = "스스로를 잘 돌보시는군요!"; }
-            if(tier===3) { itemName = "특별한 오브젝트"; msg = "정말 대단해요! 훌륭합니다."; }
-            if(tier===4) { itemName = "전설의 아이콘"; msg = "당신의 기록은 전설이 될 거예요!"; }
-            alert(`${msg}\n[${newIcon} ${itemName}] 스티커가 생겼어요!\n기분기록지 어디든 붙여보세요!`);
-            loadUserStickers(); 
-        }
+        myStickers.push(newIcon);
+        localStorage.setItem(myKey, JSON.stringify(myStickers));
+        let itemName = "반짝이는 아이템";
+        let msg = "꾸준히 기분을 관찰하신 당신에게";
+        if(tier===2) { itemName = "귀여운 친구"; msg = "스스로를 잘 돌보시는군요!"; }
+        if(tier===3) { itemName = "특별한 오브젝트"; msg = "정말 대단해요! 훌륭합니다."; }
+        if(tier===4) { itemName = "전설의 아이콘"; msg = "당신의 기록은 전설이 될 거예요!"; }
+        alert(`${msg}\n[${newIcon} ${itemName}] 스티커가 생겼어요!\n기분기록지 어디든 붙여보세요!`);
+        loadUserStickers(); 
     }
 
+    // --- 스티커 로직 (소모성) ---
     function loadUserStickers() {
         const myKey = `my_stickers_${user.username}`;
-        let earned = JSON.parse(localStorage.getItem(myKey) || "[]");
-        let allStickers = [...stickerDB[1]]; 
-        earned.forEach(s => { if(!allStickers.includes(s)) allStickers.push(s); });
+        // 기본 3개만 초기 지급 (별, 하트, 클로버)
+        if (!localStorage.getItem(myKey)) {
+            localStorage.setItem(myKey, JSON.stringify(['⭐️', '❤️', '🍀']));
+        }
+        let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+
         const container = document.getElementById('sticker-list-container');
         container.innerHTML = '';
         const listDiv = document.createElement('div');
         listDiv.className = 'sticker-list';
-        allStickers.forEach(icon => {
+        
+        myStickers.forEach((icon, index) => {
             const div = document.createElement('div');
             div.className = 'inv-item';
             div.innerText = icon;
-            div.draggable = true;
-            div.ondragstart = (e) => { e.dataTransfer.setData("text/plain", icon); toggleStickerInventory(); };
-            div.onclick = (e) => { spawnSticker(icon, 150, window.scrollY + 200); toggleStickerInventory(); };
+            // 클릭/터치 시 차트에 붙이기 (그리고 가방에서 제거)
+            div.onclick = () => { 
+                useSticker(index, icon);
+            };
             listDiv.appendChild(div);
         });
         container.appendChild(listDiv);
+    }
+
+    function useSticker(index, icon) {
+        // 가방에서 제거
+        const myKey = `my_stickers_${user.username}`;
+        let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+        myStickers.splice(index, 1); // 1개 제거
+        localStorage.setItem(myKey, JSON.stringify(myStickers));
+        
+        // 화면에 생성 (차트 상단)
+        spawnSticker(icon, 150, window.scrollY + 200); 
+        
+        // 인벤토리 닫고 갱신
+        toggleStickerInventory();
+        loadUserStickers();
+    }
+
+    // 차트에서 스티커 삭제 시 (가방으로 복구)
+    async function removeSticker(el) {
+        if(confirm('이 스티커를 가방으로 되돌릴까요?')) {
+            // DB 삭제
+            if(el.dataset.dbId && user.role !== 'doctor') {
+                await sb.rpc('delete_sticker_secure', { p_user: user.username, p_pw: user.password, p_id: parseInt(el.dataset.dbId) });
+            }
+            // 가방에 추가
+            const myKey = `my_stickers_${user.username}`;
+            let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+            myStickers.push(el.innerText);
+            localStorage.setItem(myKey, JSON.stringify(myStickers));
+            
+            el.remove();
+            loadUserStickers(); // 가방 갱신
+        }
     }
 
     function toggleStickerInventory() {
@@ -793,8 +696,10 @@
         el.style.left = x + 'px';
         el.style.top = y + 'px';
         if (dbId) el.dataset.dbId = dbId; 
+
         let isDragging = false;
         let startX, startY, initLeft, initTop;
+
         const startDrag = (cx, cy) => { isDragging = true; startX = cx; startY = cy; initLeft = parseFloat(el.style.left); initTop = parseFloat(el.style.top); el.style.zIndex = 1000; };
         const moveDrag = (cx, cy) => { if (!isDragging) return; el.style.left = (initLeft + cx - startX) + 'px'; el.style.top = (initTop + cy - startY) + 'px'; };
         const endDrag = async () => {
@@ -803,24 +708,22 @@
             if (user.role !== 'doctor') {
                 const finalX = parseFloat(el.style.left);
                 const finalY = parseFloat(el.style.top);
+                // 위치 저장 (ID 있으면 삭제 후 재생성 방식이 안전)
                 if(el.dataset.dbId) await sb.rpc('delete_sticker_secure', { p_user: user.username, p_pw: user.password, p_id: parseInt(el.dataset.dbId) });
                 const { error } = await sb.rpc('save_sticker_secure', { p_user: user.username, p_pw: user.password, p_icon: icon, p_x: finalX, p_y: finalY });
+                // Note: 실제로는 새로 생긴 ID를 받아와야 완벽하지만, 간소화를 위해 재접속 시 로드됨.
             }
         };
+
         el.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); });
         window.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); });
         el.addEventListener('mouseup', endDrag);
         el.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
         window.addEventListener('touchmove', e => { moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
         el.addEventListener('touchend', endDrag);
-        el.ondblclick = async () => {
-            if(confirm('이 스티커를 삭제할까요?')) {
-                if(el.dataset.dbId && user.role !== 'doctor') {
-                    await sb.rpc('delete_sticker_secure', { p_user: user.username, p_pw: user.password, p_id: parseInt(el.dataset.dbId) });
-                }
-                el.remove();
-            }
-        };
+
+        // 더블클릭 -> 가방으로 복구
+        el.ondblclick = () => removeSticker(el);
         layer.appendChild(el);
     }
 
@@ -831,37 +734,60 @@
         if (data) { data.forEach(s => spawnSticker(s.icon, s.pos_x, s.pos_y, s.id)); }
     }
 
-    const gridEl2 = document.getElementById('grid-container');
-    if(gridEl2) {
-        gridEl2.ondragover = (e) => e.preventDefault();
-        gridEl2.ondrop = (e) => {
-            e.preventDefault();
-            const icon = e.dataTransfer.getData("text/plain");
-            if (icon) {
-                const rect = gridEl2.getBoundingClientRect();
-                const x = e.clientX - rect.left + gridEl2.scrollLeft;
-                const y = e.clientY - rect.top + gridEl2.scrollTop;
-                spawnSticker(icon, x, y);
-                if (user.role !== 'doctor') {
-                    sb.rpc('save_sticker_secure', { p_user: user.username, p_pw: user.password, p_icon: icon, p_x: x, p_y: y });
-                }
-            }
-        };
+    // --- 선물 기능 ---
+    async function sendGiftMode() {
+        const myKey = `my_stickers_${user.username}`;
+        let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+        if (myStickers.length === 0) return alert("선물할 스티커가 없어요!");
+        
+        // 가장 마지막 스티커를 선물 (UI 단순화)
+        const iconToGift = myStickers.pop();
+        if(!confirm(`[${iconToGift}] 스티커를 랜덤한 친구에게 보낼까요?`)) {
+            myStickers.push(iconToGift); return;
+        }
+
+        const { data: res, error } = await sb.rpc('send_gift_anonymously', { p_user: user.username, p_pw: user.password, p_icon: iconToGift });
+        if (res === 'no_users') {
+            alert("받을 친구가 없어서 선물이 돌아왔어요.");
+            myStickers.push(iconToGift);
+        } else if (res === 'success') {
+            alert("선물을 보냈습니다! 🎁");
+            localStorage.setItem(myKey, JSON.stringify(myStickers));
+            loadUserStickers();
+        } else {
+            alert("오류 발생");
+            myStickers.push(iconToGift);
+        }
     }
 
+    async function checkMyGifts() {
+        const { data, error } = await sb.rpc('check_my_gifts', { p_user: user.username, p_pw: user.password });
+        if (data && data.length > 0) {
+            const gift = data[0];
+            alert(`🎁 띵동! 누군가 [${gift.icon}] 스티커를 보냈어요!\n스티커 가방에 추가됩니다.`);
+            
+            const myKey = `my_stickers_${user.username}`;
+            let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+            myStickers.push(gift.icon);
+            localStorage.setItem(myKey, JSON.stringify(myStickers));
+            loadUserStickers();
+        }
+    }
+
+    // --- 기타 함수들 ---
     function unlockTheme(themeName, alertMsg) {
         const btn = document.getElementById(`theme-${themeName}`);
         if (btn && btn.classList.contains('locked')) {
             btn.classList.remove('locked'); btn.innerHTML = btn.innerHTML.replace('🔒', ''); 
             if(alertMsg) {
                 const storageKey = `unlocked_${themeName}_${user.username}`;
-                if (!localStorage.getItem(storageKey)) { alert(`🎉 축하합니다! 꾸준한 기록 덕분에 [${themeName}] 테마가 해제되었습니다!`); localStorage.setItem(storageKey, 'true'); }
+                if (!localStorage.getItem(storageKey)) { alert(`🎉 축하합니다! [${themeName}] 테마 해제!`); localStorage.setItem(storageKey, 'true'); }
             }
         }
     }
     function setTheme(themeName) {
         const btn = document.getElementById(`theme-${themeName}`);
-        if (btn.classList.contains('locked')) return alert("아직 잠겨있는 테마입니다. 꾸준히 기록해보세요!");
+        if (btn.classList.contains('locked')) return alert("잠겨있는 테마입니다.");
         currentTheme = themeName; localStorage.setItem('mood_theme', themeName); applyTheme(themeName);
     }
     function applyTheme(themeName) {
@@ -870,7 +796,6 @@
         const targetBtn = document.getElementById(`theme-${themeName}`);
         if(targetBtn) targetBtn.classList.add('active');
     }
-
     function renderIconGrid() {
         const container = document.getElementById('icon-container');
         container.innerHTML = '';
@@ -882,14 +807,12 @@
             container.appendChild(div);
         });
     }
-    
     function selectIcon(el, icon) {
         document.querySelectorAll('.icon-item.selected').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
         selectedIcon = icon;
         document.getElementById('selected-icon').value = icon;
     }
-
     function openEventModal(day, id, txt) { 
         modalTarget = { day, id }; 
         document.getElementById('modal-title').innerText = `${day}일 생활사건`;
@@ -908,7 +831,6 @@
         document.getElementById('modal-text').value = content;
         document.getElementById('event-modal').style.display = 'flex'; 
     }
-    
     function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
     function saveEventFromModal() { 
         let txt = document.getElementById('modal-text').value.trim();
@@ -918,7 +840,6 @@
         saveData(modalTarget.day, modalTarget.id, txt); 
         closeEventModal(); 
     }
-    
     function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     function doLogout() { location.reload(); }
