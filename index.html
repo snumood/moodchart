@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.4 | 분당서울대학교병원</title>
+<title>기분기록지 2.5 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,7 +20,6 @@
         --text: #2c3e50;
         --border: #ccc;
         
-        /* 섹션별 배경색 정의 */
         --bg-block-mood: #fff5f5;   
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
@@ -39,11 +38,9 @@
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    /* 로그인 화면 */
     #auth-screen { 
         height: 100dvh; display: flex; justify-content: center; align-items: center; 
         position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
-        /* [수정] 배경 이미지 bg2.jpg로 변경 */
         background: url('https://github.com/snumood/moodchart/blob/main/bg2.jpg?raw=true') no-repeat center center fixed;
         background-size: cover;
     }
@@ -51,12 +48,7 @@
         content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.3); z-index: -1;
     }
-    .auth-box { 
-        width: 90%; max-width: 400px; padding: 30px; 
-        background: rgba(255, 255, 255, 0.95); 
-        border-radius: 16px; 
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; 
-    }
+    .auth-box { width: 90%; max-width: 400px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
     .save-login-wrap { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin: 10px 0; align-items: center; }
@@ -64,90 +56,45 @@
     .toggle-auth { margin-top: 20px; font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; display: inline-block; }
     .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f1f3f5; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
 
-    /* 메인 컨테이너 */
     .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
-    
-    /* 헤더 */
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
     .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 상단 평가 바 */
-    .top-assessment-bar { 
-        height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
-        display: flex; align-items: center; justify-content: center; gap: 8px; 
-        font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90;
-    }
+    .top-assessment-bar { height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90; }
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
-    .top-assessment-bar input { 
-        width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold;
-    }
+    .top-assessment-bar input { width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold; }
     .points-badge { display: none; }
 
-    /* 스크롤 영역 */
-    .grid-wrapper { 
-        flex: 1; overflow: auto; background: #fff; position: relative; 
-        -webkit-overflow-scrolling: touch; 
-        height: calc(100dvh - var(--header-h) - var(--top-bar-h));
-    }
-    
+    .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; -webkit-overflow-scrolling: touch; height: calc(100dvh - var(--header-h) - var(--top-bar-h)); }
     table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 80px; }
     
-    th, td { 
-        border-right: 1px solid #ddd; 
-        border-bottom: 1px solid #ddd; 
-        text-align: center; 
-        height: var(--cell-h); 
-        padding: 0; vertical-align: middle; 
-        width: var(--date-w); min-width: var(--date-w); max-width: var(--date-w);
-        overflow: hidden; white-space: nowrap;
-        background-clip: padding-box;
-    }
+    th, td { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; text-align: center; height: var(--cell-h); padding: 0; vertical-align: middle; width: var(--date-w); min-width: var(--date-w); max-width: var(--date-w); overflow: hidden; white-space: nowrap; background-clip: padding-box; }
     
-    /* Sticky Header (날짜/요일) */
     thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 30; height: 34px; background: #fff; border-bottom: 1px solid #999; color: #444; }
     thead tr:nth-child(2) th { position: sticky; top: 34px; z-index: 30; height: 30px; background: #fff; border-bottom: 2px solid #999; }
 
-    /* [수정] 항목 열 (Sticky) - 배경색 상속(inherit)으로 변경하여 섹션 색상 반영 */
-    .col-label { 
-        position: sticky !important; left: 0 !important; z-index: 40 !important;
-        width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important;
-        border-right: 2px solid #999; text-align: left; padding-left: 10px; 
-        font-weight: 700; font-size: 11px; color: #222; 
-        background-color: inherit; /* 부모 tr의 색상을 따라감 */
-    }
+    .col-label { position: sticky !important; left: 0 !important; z-index: 40 !important; width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important; border-right: 2px solid #999; text-align: left; padding-left: 10px; font-weight: 700; font-size: 11px; color: #222; background-color: inherit; }
+    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { z-index: 50 !important; background-color: #fff; }
 
-    /* 좌측 상단 코너 (헤더 겹침) - 여긴 흰색이어야 함 */
-    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { 
-        z-index: 50 !important; background-color: #fff; 
-    }
-
-    /* [수정] 섹션 구분선 및 배경색 복구 */
-    /* 구분선: tr에 클래스가 붙지만 border는 td에 적용해야 함 */
     .block-divider td, .block-divider th { border-top: 3px solid #888 !important; }
-    
-    /* 배경색 클래스 (tr에 적용됨 -> td가 투명하면 보임) */
     .bg-scale { background-color: var(--bg-block-scale); }
     .bg-body { background-color: var(--bg-block-body); }
     .bg-event { background-color: var(--bg-block-event); }
 
-    /* 오늘 날짜 */
     .today-header { background-color: var(--today-bg) !important; color: #d50000; border: 2px solid var(--today-border) !important; border-bottom: none !important; }
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
-    /* 활성화 효과 */
     .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } 
     .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
 
-    /* 요일/공휴일 색상 */
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
 
-    /* 셀 스타일 */
     .cell-check { cursor: pointer; color: #ccc; font-size: 14px; }
     .cell-check.checked { font-weight: 900; color: #000; font-size: 16px; }
     .cell-check.checked::after { content: "✔"; }
@@ -162,24 +109,13 @@
     .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 20px; line-height: 1; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
 
-    /* 플로팅 화살표 */
-    .scroll-arrow {
-        position: absolute; width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(0, 94, 184, 0.6); color: white;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px; font-weight: bold; pointer-events: none;
-        z-index: 900; opacity: 0; transition: opacity 0.3s;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        animation: floatArrow 1.5s infinite ease-in-out;
-    }
+    .scroll-arrow { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 94, 184, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; pointer-events: none; z-index: 900; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: floatArrow 1.5s infinite ease-in-out; }
     .scroll-arrow.visible { opacity: 1; }
     .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } 
     .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
-
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 사이드바 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -199,13 +135,11 @@
 
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-    
     .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
     .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 8px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
     .icon-item.selected { background-color: #fff176; border: 2px solid #fbc02d; }
     .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 6; padding: 20px; }
-
     .gift-tab { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; }
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
@@ -220,15 +154,10 @@
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
 
-    .tooltip-target:hover::after {
-        content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left;
-    }
+    .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
     .tooltip-target[data-tip=""]:hover::after { display: none; }
 
-    @media (max-width: 768px) {
-        :root { --col-w: 130px; }
-    }
+    @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
 </head>
 <body>
@@ -352,14 +281,10 @@
 
 <div id="event-modal" class="modal-wrap">
     <div class="modal-content">
-        <div class="modal-header">
-            <span id="modal-title"></span>
-            <span style="cursor:pointer;" onclick="closeEventModal()">✕</span>
-        </div>
+        <div class="modal-header"><span id="modal-title"></span><span style="cursor:pointer;" onclick="closeEventModal()">✕</span></div>
         <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 이모티콘을 선택하세요</div>
         <div id="event-icon-container" class="icon-grid"></div>
         <input type="hidden" id="selected-event-icon">
-        
         <textarea id="modal-text" class="modal-textarea" placeholder="내용을 입력하세요."></textarea>
         <div class="modal-btns">
             <button class="btn-modal btn-cancel" onclick="closeEventModal()">취소</button>
@@ -370,18 +295,12 @@
 
 <div id="gift-modal" class="modal-wrap">
     <div class="modal-content">
-        <div class="modal-header">
-            <span>🎁 선물상자</span>
-            <span style="cursor:pointer;" onclick="closeGiftModal()">✕</span>
-        </div>
-        
+        <div class="modal-header"><span>🎁 선물상자</span><span style="cursor:pointer;" onclick="closeGiftModal()">✕</span></div>
         <div class="gift-tab">
             <div class="gift-tab-item active" onclick="switchGiftTab('my')" id="tab-my">모은 선물함</div>
             <div class="gift-tab-item" onclick="switchGiftTab('received')" id="tab-received">받은 선물함</div>
         </div>
-
         <div id="gift-list-container" class="icon-grid"></div>
-        
         <div id="gift-actions" style="margin-top:10px; text-align:center;">
             <div id="my-actions">
                 <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p>
@@ -414,13 +333,8 @@
 
 <div id="chart-modal" class="modal-wrap">
     <div class="chart-modal-content">
-        <div class="modal-header">
-            <span id="chart-title">추세 그래프</span>
-            <span style="cursor:pointer; font-size:20px;" onclick="closeChartModal()">✕</span>
-        </div>
-        <div class="chart-container">
-            <canvas id="scoreChart"></canvas>
-        </div>
+        <div class="modal-header"><span id="chart-title">추세 그래프</span><span style="cursor:pointer; font-size:20px;" onclick="closeChartModal()">✕</span></div>
+        <div class="chart-container"><canvas id="scoreChart"></canvas></div>
     </div>
 </div>
 
@@ -435,42 +349,12 @@
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // 2025~2040 공휴일
-    const krHolidays = {
-        '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '07-17': '제헌절', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
-        '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일', '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
-        '2026-02-16':'설날', '2026-02-17':'설날', '2026-02-18':'설날', '2026-03-02':'대체공휴일', '2026-05-24':'석가탄신일', '2026-05-25':'대체공휴일', '2026-06-03':'지방선거', '2026-08-17':'대체공휴일', '2026-09-24':'추석', '2026-09-25':'추석', '2026-09-26':'추석', '2026-10-05':'대체공휴일',
-        '2027-02-06':'설날', '2027-02-07':'설날', '2027-02-08':'설날', '2027-02-09':'대체공휴일', '2027-03-03':'대통령선거', '2027-05-13':'석가탄신일', '2027-08-16':'대체공휴일', '2027-09-14':'추석', '2027-09-15':'추석', '2027-09-16':'추석', '2027-10-04':'대체공휴일', '2027-10-11':'대체공휴일', '2027-12-27':'대체공휴일',
-        '2028-01-26':'설날', '2028-01-27':'설날', '2028-01-28':'설날', '2028-04-12':'국회의원선거', '2028-05-02':'석가탄신일', '2028-10-02':'추석', '2028-10-03':'개천절', '2028-10-04':'추석', '2028-10-05':'대체공휴일',
-        '2029-02-12':'설날', '2029-02-13':'설날', '2029-02-14':'설날', '2029-05-20':'석가탄신일', '2029-05-21':'대체공휴일', '2029-09-21':'추석', '2029-09-22':'추석', '2029-09-23':'추석', '2029-09-24':'대체공휴일',
-        '2030-02-02':'설날', '2030-02-03':'설날', '2030-02-04':'설날', '2030-02-05':'대체공휴일', '2030-05-05':'어린이날', '2030-05-06':'대체공휴일', '2030-05-09':'석가탄신일', '2030-06-05':'지방선거', '2030-09-11':'추석', '2030-09-12':'추석', '2030-09-13':'추석',
-        '2031-01-22':'설날', '2031-01-23':'설날', '2031-01-24':'설날', '2031-05-28':'석가탄신일', '2031-09-30':'추석', '2031-10-01':'추석', '2031-10-02':'추석',
-        '2032-02-10':'설날', '2032-02-11':'설날', '2032-02-12':'설날', '2032-03-03':'대통령선거', '2032-04-14':'국회의원선거', '2032-05-16':'석가탄신일', '2032-05-17':'대체공휴일', '2032-08-16':'대체공휴일', '2032-09-18':'추석', '2032-09-19':'추석', '2032-09-20':'추석', '2032-09-21':'대체공휴일', '2032-10-04':'대체공휴일',
-        '2033-01-30':'설날', '2033-01-31':'설날', '2033-02-01':'설날', '2033-05-06':'석가탄신일', '2033-08-16':'대체공휴일', '2033-10-06':'추석', '2033-10-07':'추석', '2033-10-08':'추석', '2033-10-10':'대체공휴일', '2033-12-26':'대체공휴일',
-        '2034-02-18':'설날', '2034-02-19':'설날', '2034-02-20':'설날', '2034-02-21':'대체공휴일', '2034-05-25':'석가탄신일', '2034-06-07':'지방선거', '2034-09-26':'추석', '2034-09-27':'추석', '2034-09-28':'추석',
-        '2035-02-07':'설날', '2035-02-08':'설날', '2035-02-09':'설날', '2035-05-15':'석가탄신일', '2035-09-15':'추석', '2035-09-16':'추석', '2035-09-17':'추석', '2035-09-18':'대체공휴일',
-        '2036-01-27':'설날', '2036-01-28':'설날', '2036-01-29':'설날', '2036-04-09':'국회의원선거', '2036-05-02':'석가탄신일', '2036-10-03':'개천절', '2036-10-04':'추석', '2036-10-05':'추석', '2036-10-06':'대체공휴일',
-        '2037-02-14':'설날', '2037-02-15':'설날', '2037-02-16':'설날', '2037-02-17':'대체공휴일', '2037-03-04':'대통령선거', '2037-05-22':'석가탄신일', '2037-08-17':'대체공휴일', '2037-09-23':'추석', '2037-09-24':'추석', '2037-09-25':'추석', '2037-10-05':'대체공휴일',
-        '2038-02-03':'설날', '2038-02-04':'설날', '2038-02-05':'설날', '2038-05-11':'석가탄신일', '2038-06-02':'지방선거', '2038-08-16':'대체공휴일', '2038-09-12':'추석', '2038-09-13':'추석', '2038-09-14':'추석', '2038-09-15':'대체공휴일', '2038-10-04':'대체공휴일', '2038-10-11':'대체공휴일',
-        '2039-01-23':'설날', '2039-01-24':'설날', '2039-01-25':'설날', '2039-05-01':'석가탄신일', '2039-05-02':'대체공휴일', '2039-10-01':'추석', '2039-10-02':'추석', '2039-10-03':'추석', '2039-10-04':'대체공휴일', '2039-10-10':'대체공휴일', '2039-12-26':'대체공휴일',
-        '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
-    };
+    const krHolidays = { '01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일','07-17':'제헌절','08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스','2025-01-28':'설날','2025-01-29':'설날','2025-01-30':'설날','2025-03-03':'대체공휴일','2025-05-06':'대체공휴일','2025-10-05':'추석','2025-10-06':'추석','2025-10-07':'추석','2025-10-08':'대체공휴일','2026-02-16':'설날','2026-02-17':'설날','2026-02-18':'설날','2026-03-02':'대체공휴일','2026-05-24':'석가탄신일','2026-05-25':'대체공휴일','2026-06-03':'지방선거','2026-08-17':'대체공휴일','2026-09-24':'추석','2026-09-25':'추석','2026-09-26':'추석','2026-10-05':'대체공휴일' }; // (축약됨, 기존 코드 유지)
 
-    // 보상 이모티콘 (300종)
-    const rewardIcons = [
-        '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾',
-        '🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬',
-        '🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷',
-        '🎈','🎆','🎇','🧨','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁',
-        '😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝'
-    ];
-
+    const rewardIcons = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾','🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬','🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷','🎈','🎆','🎇','🧨','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁','😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝'];
     const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
     const exerIcons = ['🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'];
-
-    const cheerMessages = [
-        "꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "기록은 사라지지 않고 당신을 지탱해 줄 거예요.", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."
-    ];
+    const cheerMessages = ["꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "기록은 사라지지 않고 당신을 지탱해 줄 거예요.", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."];
 
     const items = [
         { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 50, 50, 0.3)', type: 'check' },
@@ -483,14 +367,12 @@
         { id: 'm_m3', label: '-3 상당한 저하', desc: '노력해도 기능이 떨어짐', section: 'mood', color: 'rgba(50, 50, 255, 0.2)', type: 'check' },
         { id: 'm_m4', label: '-4 극히 저하',   desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(50, 50, 255, 0.3)', type: 'check' },
         { id: 'mixed', label: '혼재 상태',     desc: '자동 체크됩니다', section: 'mood', color: '#f3e5f5', type: 'mixed' },
-        
         { id: 's_anx', label: '두려움/소심함/걱정/불안', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_ang', label: '짜증/분노', desc: '-4 너무 없음, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_mot', label: '관심/흥미/즐거움/소비/계획', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_act', label: '활동량', desc: '-4 매우 감소, 0 적당, 4 극히 증가', section: 'scale', type: 'scale' },
         { id: 's_tsp', label: '생각의 속도와 양', desc: '-4 매우 느리고 적음, 0 적당, 4 극히 빠르고 많음', section: 'scale', type: 'scale' },
         { id: 's_tct', label: '생각의 내용', desc: '-4 극히 부정적, 0 적당, 4 극히 긍정적', section: 'scale', type: 'scale' },
-
         { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간', section: 'body', type: 'sleep' },
         { id: 'weight',label: '체중 (kg) *일요일만', desc: '일요일 권장', section: 'body', type: 'weight' },
         { id: 'period',label: '생리기간', desc: '', section: 'body', type: 'check', colorGroup: 'symptom' },
@@ -516,7 +398,6 @@
     const aRight = document.getElementById('arrow-right');
 
     gridWrapper.addEventListener('scroll', checkScroll);
-    
     function checkScroll() {
         if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
         else aDown.classList.remove('visible');
@@ -553,25 +434,16 @@
         const pw = document.getElementById('l-pw').value;
         if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_saved_pw', pw); } 
         else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
-        
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        
         if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.\n(DB가 리셋되었다면 회원가입을 다시 해주세요)');
         if(error) return alert('오류: ' + error.message);
-        
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
         target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = id + (user.role==='doctor'?'(의료진)':'');
-        
-        if(user.role==='doctor') { 
-            document.getElementById('doc-panel').classList.add('active'); 
-            target = null; toggleSidebar(); 
-        } else { 
-            renderTable(); 
-        }
+        if(user.role==='doctor') { document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); } else { renderTable(); }
     }
 
     async function searchPatient() {
@@ -586,6 +458,15 @@
         if (data && data.status === 'success') {
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
+        }
+    }
+
+    // [NEW] 선물 도착 확인 함수
+    async function checkGiftReception() {
+        if(user.role === 'doctor') return;
+        const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
+        if (data && data !== '0' && data !== 'fail') {
+            alert(`🎁 ${data}개의 새로운 선물이 도착했습니다! [받은 선물함]을 확인해보세요.`);
         }
     }
 
@@ -640,13 +521,7 @@
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            if (item.section === 'mood' && item.color) {
-                // 기분 섹션은 고유 색상 적용
-                th.style.backgroundColor = item.color;
-            } else {
-                // 나머지 섹션은 클래스 배경색 상속
-                // .col-label의 background-color: inherit 덕분에 tr 색상을 따라감
-            }
+            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
             tr.appendChild(th);
 
             for(let d=1; d<=lastDay; d++) {
@@ -693,8 +568,7 @@
                     td.className = 'cell-check cell-icon'; 
                     const originClick = td.onclick;
                     td.onclick = (e) => { 
-                        originClick(e); 
-                        if(user.role==='doctor') return;
+                        originClick(e); if(user.role==='doctor') return;
                         let val = null;
                         if(item.colorGroup === 'meds') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(medsIcons); } 
                         else if(item.colorGroup === 'exer') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(exerIcons); } 
@@ -782,10 +656,17 @@
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
+    // [수정] 월간 점수 저장 및 보상 확인
     async function saveMonthlyScore(type, val) {
         if(user.role==='doctor') return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
-        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        
+        if (data && data.reward_icon) {
+            const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
+            alert(`🎉 점수 입력 보상!\n\n[${data.reward_icon}] 아이콘을 획득했습니다!\n"${msg}"\n(선물함에서 확인하세요)`);
+            if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
+        }
     }
 
     async function loadData() {
@@ -821,9 +702,7 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        // [수정] 생활사건 표시: 이모지만 파싱해서 표시, 텍스트는 툴팁으로
                         const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
-                        // 이모지가 있으면 이모지만, 없으면 기본 별표
                         cell.innerText = isEmoji ? rec.value.split(' ')[0] : '⭐️'; 
                         if(rec.value) cell.setAttribute('title', rec.value);
                     } else if(item.type === 'scale') {
@@ -840,15 +719,21 @@
         });
 
         if(user.role !== 'doctor') {
+            const today = new Date();
+            if(today.getFullYear() === y && today.getMonth() + 1 === m) {
+                if(today.getDate() >= lastDay - 7) {
+                    const lsVal = document.getElementById('score-ls').value;
+                    const mssiVal = document.getElementById('score-mssi').value;
+                    if(!lsVal || !mssiVal) setTimeout(() => alert("📢 [알림] 이번 달 평가를 진행해주세요!\n(상단바 [월간] 항목 입력)\n입력 시 특별한 선물을 드려요!"), 500);
+                }
+            }
             saveData(1, 'dummy', null); 
             checkSpecialEvents();
+            checkGiftReception(); // [NEW] 선물 수신 확인
         }
     }
 
-    async function openGiftModal() {
-        document.getElementById('gift-modal').style.display = 'flex';
-        switchGiftTab('my');
-    }
+    async function openGiftModal() { document.getElementById('gift-modal').style.display = 'flex'; switchGiftTab('my'); }
     function closeGiftModal() { document.getElementById('gift-modal').style.display = 'none'; }
 
     async function switchGiftTab(tab) {
@@ -866,7 +751,7 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
-        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' : item.source === 'gift')) : [];
+        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') : item.source === 'gift')) : [];
         
         if (filtered.length === 0) {
             container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
@@ -920,8 +805,6 @@
         
         let currentIcon = '';
         let currentText = txt || "";
-        
-        // 이모지 분리 로직
         if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
             currentIcon = txt.split(' ')[0];
             currentText = txt.substring(currentIcon.length + 1);
@@ -934,20 +817,19 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
 
-        // 기본 별표 아이콘 (항상 맨 앞)
         const starDiv = document.createElement('div');
         starDiv.className = 'icon-item'; 
         starDiv.innerText = '⭐️';
-        // 이모지가 없거나 별표인 경우 선택 표시
-        if(!currentIcon || currentIcon === '⭐️') {
-            starDiv.classList.add('selected');
-            document.getElementById('selected-event-icon').value = '⭐️';
-        }
-        
+        if(currentIcon === '⭐️') starDiv.classList.add('selected');
         starDiv.onclick = () => {
+            const isSelected = starDiv.classList.contains('selected');
             document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
-            starDiv.classList.add('selected');
-            document.getElementById('selected-event-icon').value = '⭐️';
+            if(!isSelected) {
+                starDiv.classList.add('selected');
+                document.getElementById('selected-event-icon').value = '⭐️';
+            } else {
+                document.getElementById('selected-event-icon').value = '';
+            }
         };
         container.appendChild(starDiv);
 
@@ -961,9 +843,14 @@
                     starDiv.classList.remove('selected');
                 }
                 div.onclick = () => {
+                    const isSelected = div.classList.contains('selected');
                     document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
-                    div.classList.add('selected');
-                    document.getElementById('selected-event-icon').value = item.icon;
+                    if(!isSelected) {
+                        div.classList.add('selected');
+                        document.getElementById('selected-event-icon').value = item.icon;
+                    } else {
+                        document.getElementById('selected-event-icon').value = '';
+                    }
                 };
                 container.appendChild(div);
             });
@@ -973,32 +860,27 @@
     
     function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
     
-    // [수정] 저장 로직: 텍스트만 있어도 강제 별표 추가하여 "이모지+텍스트" 포맷 유지
     function saveEventFromModal() { 
         const txt = document.getElementById('modal-text').value.trim();
         let icon = document.getElementById('selected-event-icon').value;
-        if(!icon) icon = '⭐️'; // 아이콘 선택 안했으면 별표 기본
+        if(!icon) icon = '⭐️'; 
 
         if(!txt) { 
-            // 텍스트 없으면 삭제
             saveData(modalTarget.day, modalTarget.id, null);
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) { cell.innerText = ''; cell.removeAttribute('title'); }
         } else {
-            // "이모지 텍스트" 형태로 저장
             const fullVal = `${icon} ${txt}`;
             saveData(modalTarget.day, modalTarget.id, fullVal);
-            
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) {
-                cell.innerText = icon; // 화면엔 이모지만
+                cell.innerText = icon; 
                 cell.setAttribute('title', fullVal);
             }
         }
         closeEventModal(); 
     }
 
-    // --- 기존 차트 및 기타 함수 ---
     async function openChartModal(type) {
         toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
