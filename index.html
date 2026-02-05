@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <style>
-    /* --- 스타일 정의 --- */
+    /* --- 디자인 시스템 --- */
     :root { 
         --primary: #005eb8; --primary-dark: #004a94; --today-bg: #fffde7; --today-border: #d50000; --text: #2c3e50; --border: #ccc;
         --bg-block-mood: #fff5f5; --bg-block-scale: #fffdeb; --bg-block-body: #e8f5e9; --bg-block-event: #ffffff;
@@ -51,7 +51,7 @@
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
     .top-assessment-bar input { width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold; }
 
-    /* 그리드 및 테이블 */
+    /* 그리드 */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; -webkit-overflow-scrolling: touch; height: calc(100dvh - var(--header-h) - var(--top-bar-h)); }
     table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 80px; }
     th, td { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; text-align: center; height: var(--cell-h); padding: 0; vertical-align: middle; width: var(--date-w); min-width: var(--date-w); max-width: var(--date-w); overflow: hidden; white-space: nowrap; background-clip: padding-box; }
@@ -76,7 +76,6 @@
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
 
-    /* 셀 스타일 */
     .cell-check { cursor: pointer; color: #ccc; font-size: 14px; }
     .cell-check.checked { font-weight: 900; color: #000; font-size: 16px; }
     .cell-check.checked::after { content: "✔"; }
@@ -96,7 +95,6 @@
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 사이드바 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -114,9 +112,9 @@
     #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
     #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
 
-    /* 모달 */
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    
     .icon-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-height: 180px; overflow-y: auto; overflow-x: hidden; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
     .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 4px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
@@ -127,7 +125,7 @@
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
 
-    /* [최신] 황금빛 이모지 스타일 */
+    /* 황금빛 이모지 스타일 */
     .gold-tier-1 { background: linear-gradient(135deg, #fffde7, #fff9c4) !important; border: 1px solid #fbc02d !important; }
     .gold-tier-2 { background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; border: 2px solid #fbc02d !important; box-shadow: 0 0 8px rgba(251, 192, 45, 0.4); }
     .gold-tier-3 { background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; background-size: 200% 200% !important; border: 2px solid #e65100 !important; box-shadow: 0 0 15px rgba(251, 192, 45, 0.7); animation: shimmer 3s infinite linear; }
@@ -148,9 +146,6 @@
     .btn-modal { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
-
-    .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
-    .tooltip-target[data-tip=""]:hover::after { display: none; }
     
     @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
@@ -326,12 +321,27 @@
     let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
     let myChart = null;
 
+    // [중요] 페이지 로드 시 초기화 (이전 버전에서 누락되었던 부분)
+    window.onload = () => {
+        const savedId = localStorage.getItem('mood_saved_id');
+        const savedPw = localStorage.getItem('mood_saved_pw'); 
+        if(savedId && savedPw) {
+            document.getElementById('l-id').value = savedId;
+            document.getElementById('l-pw').value = savedPw; 
+            document.getElementById('remember-me').checked = true;
+        }
+    };
+
     async function login() {
         const id = document.getElementById('l-id').value, pw = document.getElementById('l-pw').value;
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         if(error) return alert('로그인 실패: 정보를 확인하세요.');
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; target = id;
+        
+        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_saved_pw', pw); } 
+        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
+
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = id;
@@ -388,14 +398,14 @@
             div.className = 'icon-item';
             div.innerText = item.icon;
             
-            // 황금 이펙트 로직 (마일스톤 보상 or 전승된 특별 선물)
+            // 황금 이펙트 로직
             if(item.source.startsWith('milestone_')) {
                 const count = parseInt(item.source.split('_')[2]);
                 if(count >= 100) div.classList.add('gold-tier-3');
                 else if(count >= 50) div.classList.add('gold-tier-2');
                 else div.classList.add('gold-tier-1');
             } else if(item.source.includes('special')) {
-                div.classList.add('gold-tier-3'); // 받은 특별 선물은 최고 등급 효과
+                div.classList.add('gold-tier-3'); 
             }
 
             div.onclick = () => selectGiftItem(div, item.id, item.icon, item.source);
@@ -420,7 +430,6 @@
         const btn = document.getElementById('btn-gift-action');
 
         if (currentGiftTab === 'received') {
-            // gift_special도 일반 선물처럼 보답 가능
             if (source === 'gift' || source === 'gift_special') {
                 btn.innerText = "🎁 보답하기 (내 선물 보내기)";
                 btn.onclick = () => { replyTargetItemId = id; switchGiftTab('my'); alert("보답으로 보낼 아이콘을 선택하세요."); };
@@ -461,7 +470,6 @@
 
         if(error) return alert("오류: " + error.message);
         
-        // JSON 응답 정상 처리
         if(data && (data.status === 'success' || data === 'success')) {
             alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
             replyTargetItemId = null; 
@@ -500,7 +508,6 @@
         switchGiftTab(currentGiftTab);
     }
 
-    // 관리자 통계 모달
     async function openAdminStats() {
         toggleSidebar(); 
         document.getElementById('admin-modal').style.display='flex';
