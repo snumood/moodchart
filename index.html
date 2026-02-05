@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 3.5 | 분당서울대학교병원</title>
+<title>기분기록지 1.0 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <style>
-    /* --- 디자인 시스템 --- */
+    /* --- 디자인 시스템 (기존 틀 유지) --- */
     :root { 
         --primary: #005eb8; 
         --primary-dark: #004a94;
@@ -140,10 +140,23 @@
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
 
-    /* [업데이트] 황금빛 이모지 스타일 */
-    .gold-tier-1 { /* 10회 */ background: linear-gradient(135deg, #fffde7, #fff9c4) !important; border: 1px solid #fbc02d !important; }
-    .gold-tier-2 { /* 50회 */ background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; border: 2px solid #fbc02d !important; box-shadow: 0 0 8px rgba(251, 192, 45, 0.4); }
-    .gold-tier-3 { /* 100회 */ background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; background-size: 200% 200% !important; border: 2px solid #e65100 !important; box-shadow: 0 0 15px rgba(251, 192, 45, 0.7); animation: shimmer 3s infinite linear; }
+    /* [NEW] 황금빛 이모지 스타일 */
+    .gold-tier-1 { /* 10회 달성 */
+        background: linear-gradient(135deg, #fffde7, #fff9c4) !important; 
+        border: 1px solid #fbc02d !important; 
+    }
+    .gold-tier-2 { /* 50회 달성 */
+        background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; 
+        border: 2px solid #fbc02d !important;
+        box-shadow: 0 0 8px rgba(251, 192, 45, 0.4);
+    }
+    .gold-tier-3 { /* 100회 이상 달성 */
+        background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; 
+        background-size: 200% 200% !important;
+        border: 2px solid #e65100 !important;
+        box-shadow: 0 0 15px rgba(230, 81, 0, 0.5);
+        animation: shimmer 3s infinite linear;
+    }
     @keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; transform: scale(1.03); } 100% { background-position: 0% 50%; } }
 
     .chart-modal-content { background: white; padding: 20px; border-radius: 20px; width: 95%; height: 80%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
@@ -171,7 +184,9 @@
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
             <div class="save-login-wrap">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="remember-me"> 아이디/비밀번호 저장</label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="remember-me"> 아이디/비밀번호 저장
+                </label>
                 <div class="warning-text">※공용기기에서 비밀번호유출주의</div>
             </div>
             <button class="btn-auth" onclick="login()">로그인</button>
@@ -185,7 +200,9 @@
             <div class="legal-text">
                 본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
             </div>
-            <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;"><input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.</label>
+            <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
+                <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
+            </label>
             <button class="btn-auth" style="background:#28a745;" onclick="join()">가입완료</button>
             <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
         </div>
@@ -202,45 +219,77 @@
             </div>
             <button class="btn-menu" onclick="toggleSidebar()">☰</button>
         </div>
+
         <div class="top-assessment-bar">
             <a href="https://snumood.github.io/homepage/ls.html" target="_blank">월간생활습관점수</a>
-            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onblur="saveMonthlyScore('ls', this.value)">
+            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
             <span style="color:#ddd">|</span>
             <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
-            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onblur="saveMonthlyScore('mssi', this.value)">
+            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
         </div>
+
         <div class="grid-wrapper" id="grid-container">
             <table id="mood-table">
-                <thead><tr id="header-row"><th class="col-label">항목 / 날짜</th></tr><tr id="dow-row"><th class="col-label" style="background:#fff;">요일</th></tr></thead>
+                <thead>
+                    <tr id="header-row"><th class="col-label">항목 / 날짜</th></tr>
+                    <tr id="dow-row"><th class="col-label" style="background:#fff;">요일</th></tr>
+                </thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
+
+        <div id="arrow-down" class="scroll-arrow arrow-down">▼</div>
+        <div id="arrow-right" class="scroll-arrow arrow-right">▶</div>
     </div>
 </div>
 
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="sidebar">
-    <div class="sidebar-header"><span style="cursor:pointer; font-size:20px; font-weight:bold;" onclick="toggleSidebar()">✕</span></div>
+    <div class="sidebar-header">
+        <span style="cursor:pointer; font-size:20px; font-weight:bold;" onclick="toggleSidebar()">✕</span>
+    </div>
     <div class="sidebar-content">
         <div class="user-badge" id="user-badge"></div>
-        <div id="doc-panel" class="hidden"><div style="font-weight:bold; margin-bottom:5px;">환자 조회</div><div style="display:flex; gap:5px;"><input id="search-id" placeholder="ID/번호" style="flex:1; padding:5px;"><button onclick="searchPatient()">검색</button></div></div>
-        <div class="menu-section"><div class="menu-title">계정 관리</div><div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div><div class="menu-item" onclick="doLogout()">🚪 로그아웃</div></div>
-        <div class="menu-section"><div class="menu-title">선물함</div><div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div></div>
+        
+        <div id="doc-panel">
+            <div style="font-weight:bold; margin-bottom:5px; color:#1565c0;">환자 조회</div>
+            <div style="display:flex; justify-content:space-between;">
+                <input id="search-id" placeholder="ID 또는 번호">
+                <button onclick="searchPatient()">검색</button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">계정 관리</div>
+            <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
+            <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">분석 리포트</div>
+            <div class="menu-item" onclick="openChartModal('ls')">📊 월간생활습관점수 추세보기</div>
+            <div class="menu-item" onclick="openChartModal('mssi')">📈 기분안정성평가점수 추세보기</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">선물</div>
+            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">데이터 관리</div>
+            <div class="menu-item" onclick="exportData()">💾 모든 기록을 파일로 다운로드</div>
+            <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
+            <div class="menu-item" onclick="document.getElementById('import-file').click()">📂 파일을 기록으로 업로드 (이전기록삭제)</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">안내</div>
+            <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="menu-item">📖 기분기록지 작성방법 보기</a>
+        </div>
+        
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
             본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
-        </div>
-    </div>
-</div>
-
-<div id="gift-modal" class="modal-wrap">
-    <div class="modal-content">
-        <div class="modal-header"><span>🎁 선물상자</span><span style="cursor:pointer;" onclick="closeGiftModal()">✕</span></div>
-        <div class="gift-tab"><div class="gift-tab-item active" onclick="switchGiftTab('my')" id="tab-my">모은 선물함</div><div class="gift-tab-item" onclick="switchGiftTab('received')" id="tab-received">받은 선물함</div></div>
-        <div id="gift-list-container" class="icon-grid"></div>
-        <div id="gift-actions" style="margin-top:10px; text-align:center;">
-            <div id="my-actions"><p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p><button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button></div>
-            <div id="received-actions" class="hidden"><p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건기록에 사용할 수 있어요.</p></div>
-            <div id="selected-gift-action" class="hidden" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;"><div style="font-size:30px; margin-bottom:5px;" id="preview-icon"></div><button id="btn-gift-action" class="btn-modal" style="background:#ff9800; color:white; width:100%;">누군가에게 선물하기</button><div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 선물함에서 사라집니다!</div></div>
         </div>
     </div>
 </div>
@@ -252,15 +301,48 @@
         <div id="event-icon-container" class="icon-grid"></div>
         <input type="hidden" id="selected-event-icon">
         <textarea id="modal-text" class="modal-textarea" placeholder="내용을 입력하세요."></textarea>
-        <div class="modal-btns"><button class="btn-modal btn-cancel" onclick="closeEventModal()">취소</button><button class="btn-modal btn-save" onclick="saveEventFromModal()">저장하기</button></div>
+        <div class="modal-btns">
+            <button class="btn-modal btn-cancel" onclick="closeEventModal()">취소</button>
+            <button class="btn-modal btn-save" onclick="saveEventFromModal()">저장하기</button>
+        </div>
+    </div>
+</div>
+
+<div id="gift-modal" class="modal-wrap">
+    <div class="modal-content">
+        <div class="modal-header"><span>🎁 선물상자</span><span style="cursor:pointer;" onclick="closeGiftModal()">✕</span></div>
+        <div class="gift-tab">
+            <div class="gift-tab-item active" onclick="switchGiftTab('my')" id="tab-my">모은 선물함</div>
+            <div class="gift-tab-item" onclick="switchGiftTab('received')" id="tab-received">받은 선물함</div>
+        </div>
+        <div id="gift-list-container" class="icon-grid"></div>
+        <div id="gift-actions" style="margin-top:10px; text-align:center;">
+            <div id="my-actions">
+                <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p>
+                <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
+            </div>
+            <div id="received-actions" class="hidden">
+                 <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건기록에 사용할 수 있어요.</p>
+            </div>
+            <div id="selected-gift-action" class="hidden" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+                <div style="font-size:30px; margin-bottom:5px;" id="preview-icon"></div>
+                <button id="btn-gift-action" class="btn-modal" style="background:#ff9800; color:white; width:100%;" onclick="sendGiftToRandom()">✉️ 이 아이콘을 누군가에게 선물하기</button>
+                <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 선물함에서 사라집니다!</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="pw-modal" class="modal-wrap">
     <div class="modal-content">
         <div class="modal-header"><span>비밀번호 변경</span><span style="cursor:pointer;" onclick="closePwModal()">✕</span></div>
-        <input type="password" id="pw-old" class="modal-input" placeholder="현재 비밀번호"><input type="password" id="pw-new" class="modal-input" placeholder="새 비밀번호"><input type="password" id="pw-cfm" class="modal-input" placeholder="새 비밀번호 확인">
-        <div class="modal-btns"><button class="btn-modal btn-cancel" onclick="closePwModal()">취소</button><button class="btn-modal btn-save" onclick="changePassword()">변경하기</button></div>
+        <input type="password" id="pw-old" class="modal-input" placeholder="현재 비밀번호">
+        <input type="password" id="pw-new" class="modal-input" placeholder="새 비밀번호">
+        <input type="password" id="pw-cfm" class="modal-input" placeholder="새 비밀번호 확인">
+        <div class="modal-btns">
+            <button class="btn-modal btn-cancel" onclick="closePwModal()">취소</button>
+            <button class="btn-modal btn-save" onclick="changePassword()">변경하기</button>
+        </div>
     </div>
 </div>
 
@@ -276,7 +358,11 @@
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function hashPassword(str) { const msgBuffer = new TextEncoder().encode(str); const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+    async function hashPassword(str) {
+        const msgBuffer = new TextEncoder().encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
     const rewardIcons = ['💎','💍','💖','🏰','🦄','🍬','🍭','🎀','🦋','🧚','⛲','🎡','🎠','🔮','🎆','🎇','🌌','🪐','🌙','🌕','🌞','🏵️','🌺','🌹','🌷','🎈','🧸','🧁','🎂','🥞','🍓','🍒','🍑','🍇','🥂','🍹','🎻','🎹','🎼','🎨','🧵','👑','👜','🧥','👠','🕶️','🗝️','⚜️','✨','🎐','🏆','🥇','🏅','👑','🏵️','🎗️','🎁','💌','💎','✨','⚡','🔥','🌈','🌊','🐚','🪸','🧜','🧚','🧞','🐉','🦄','🦌','🕊️','🦢','🦚','💮','🪷','🌻','🍀','🍁','🍂','🍄','🌰','🍓','🍊','🍎','🍐','🍯','🥂','🍾','🍷','🍰','🎂','🍡','🍧','🍦','🧁','🥨','🍮','🍫','🍪'];
     const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
@@ -318,52 +404,384 @@
     let modalTarget = { day: null, id: null };
     let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
 
-    async function login() {
-        const id = document.getElementById('l-id').value, pw = document.getElementById('l-pw').value;
-        const hashedPw = await hashPassword(pw); 
-        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error) return alert('로그인 실패: 정보를 확인하세요.');
-        user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; target = id;
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = id;
-        renderTable();
+    const gridWrapper = document.getElementById('grid-container');
+    const aDown = document.getElementById('arrow-down');
+    const aRight = document.getElementById('arrow-right');
+
+    gridWrapper.addEventListener('scroll', checkScroll);
+    function checkScroll() {
+        if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
+        else aDown.classList.remove('visible');
+        if (gridWrapper.scrollWidth - gridWrapper.scrollLeft > gridWrapper.clientWidth + 20) aRight.classList.add('visible');
+        else aRight.classList.remove('visible');
     }
 
+    window.onload = () => {
+        const savedId = localStorage.getItem('mood_saved_id');
+        const savedPw = localStorage.getItem('mood_saved_pw'); 
+        if(savedId && savedPw) {
+            document.getElementById('l-id').value = savedId;
+            document.getElementById('l-pw').value = savedPw; 
+            document.getElementById('remember-me').checked = true;
+        }
+    };
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
+    function toggleAuth(m) { document.getElementById('login-form').classList.toggle('hidden', m !== 'login'); document.getElementById('join-form').classList.toggle('hidden', m !== 'join'); }
+
+    async function join() {
+        if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
+        const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
+        if(!id || !pw || !h) return alert('필수 입력 누락');
+        const hashedPw = await hashPassword(pw);
+        const { error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h });
+        if(error) alert('오류: ' + error.message);
+        else if(error && error.message.includes('duplicate')) alert('이미 존재하는 아이디입니다.'); 
+        else { alert('가입 완료.'); toggleAuth('login'); }
+    }
+
+    async function login() {
+        const id = document.getElementById('l-id').value;
+        const pw = document.getElementById('l-pw').value;
+        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_saved_pw', pw); } 
+        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
+        const hashedPw = await hashPassword(pw); 
+        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
+        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
+        if(error) return alert('오류: ' + error.message);
+        user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
+        target = id;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('user-badge').innerText = id + (user.role==='doctor'?'(의료진)':'');
+        if(user.role==='doctor') { document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); } else { renderTable(); }
+    }
+
+    async function searchPatient() {
+        const q = document.getElementById('search-id').value.trim();
+        if(!q) return alert("ID 또는 환자번호를 입력하세요.");
+        target = q; alert(`${target} 님을 조회합니다.`); toggleSidebar(); renderTable(); 
+    }
+
+    async function checkSpecialEvents() {
+        if(user.role === 'doctor') return; 
+        const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
+        if (data && data.status === 'success') {
+            alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
+            if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
+        }
+    }
+
+    // [수정] 객체 파싱 오류 수정
     async function checkGiftReception() {
         if(user.role === 'doctor') return;
-        const { data } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
+        const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
         
-        // [수정] 오류 방지 로직 (객체가 아니거나 none 상태면 종료)
-        if(!data || data.status === 'none') return;
+        if (!data || data.status === 'none') return; // 선물 없으면 조용히 리턴
 
         if(data.status === 'milestone') {
             alert(`🎉 축하합니다! ${data.msg}\n\n[${data.icon}] 아이콘이 선물함에 도착했습니다.`);
         } else if (data.status === 'normal' && data.count > 0) {
-            // [수정] data.count를 사용하여 메시지 출력
             alert(`🎁 누군가로부터 ${data.count}개의 새로운 선물이 도착했습니다! [받은 선물함]을 확인해보세요.`);
         }
     }
+
+    function renderTable() {
+        const year = curDate.getFullYear(), month = curDate.getMonth();
+        document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
+        const today = new Date();
+        const isCurMonth = today.getFullYear()===year && today.getMonth()===month;
+        const todayDate = today.getDate();
+        const lastDay = new Date(year, month+1, 0).getDate();
+        
+        const header = document.getElementById('header-row');
+        const dowRow = document.getElementById('dow-row');
+        const body = document.getElementById('table-body');
+        
+        while(header.children.length > 1) header.removeChild(header.lastChild);
+        while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
+        body.innerHTML = '';
+
+        const days = ['일','월','화','수','목','금','토'];
+        const limitDate = new Date();
+        limitDate.setDate(limitDate.getDate() + 4);
+        limitDate.setHours(23, 59, 59, 999);
+
+        for(let d=1; d<=lastDay; d++) {
+            const dt = new Date(year, month, d);
+            const dayIdx = dt.getDay();
+            const isRed = dayIdx === 0;
+            const isToday = isCurMonth && d === todayDate;
+
+            let th = document.createElement('th'); 
+            if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
+            if(isRed) th.className = 'day-holiday';
+            if(dayIdx===6 && !isRed) th.className = 'day-sat';
+            if(isToday) th.classList.add('today-header'); 
+            header.appendChild(th);
+
+            let td = document.createElement('th'); td.innerText = days[dayIdx];
+            if(isRed) td.className = 'day-holiday'; if(dayIdx===6 && !isRed) td.className = 'day-sat';
+            if(isToday) td.classList.add('today-dow'); 
+            dowRow.appendChild(td);
+        }
+
+        let lastSection = null;
+
+        items.forEach(item => {
+            let tr = document.createElement('tr');
+            if(lastSection && lastSection !== item.section) tr.classList.add('block-divider');
+            lastSection = item.section;
+            if (item.section === 'mood' && item.color) tr.style.backgroundColor = item.color;
+            else tr.classList.add('bg-' + item.section);
+
+            let th = document.createElement('th');
+            th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
+            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
+            tr.appendChild(th);
+
+            for(let d=1; d<=lastDay; d++) {
+                const dt = new Date(year, month, d);
+                const isFutureBlocked = dt > limitDate;
+                
+                let td = document.createElement('td');
+                if(dt.getDay() === 0) td.style.borderRight = "2px solid #bbb"; 
+                td.dataset.d = d; td.dataset.c = item.id; td.dataset.s = item.section;
+
+                if(isFutureBlocked) {
+                    td.className = 'disabled-cell';
+                    td.innerText = '-';
+                    tr.appendChild(td);
+                    continue;
+                }
+
+                td.onclick = function(e) {
+                    if(item.type !== 'event') {
+                        document.querySelectorAll('.active-row, .active-col').forEach(el => { el.classList.remove('active-row'); el.classList.remove('active-col'); });
+                        tr.classList.add('active-row');
+                        document.querySelectorAll(`td:nth-child(${d+1})`).forEach(cell => cell.classList.add('active-col'));
+                    }
+                };
+
+                if(item.type === 'check' && item.section === 'mood') {
+                    td.className = 'cell-check';
+                    const originClick = td.onclick;
+                    td.onclick = (e) => {
+                        originClick(e); if(user.role === 'doctor') return;
+                        const isChecked = td.classList.contains('checked');
+                        if(item.id !== 'mixed') {
+                            let cnt = 0;
+                            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+                            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${d}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
+                            if(!isChecked && cnt >= 2) return alert("기분은 하루 최대 2개입니다.");
+                        }
+                        if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
+                        else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                        if(item.id !== 'mixed') updateMixedState(d);
+                    };
+                } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
+                else if(item.type === 'check') {
+                    td.className = 'cell-check cell-icon'; 
+                    const originClick = td.onclick;
+                    td.onclick = (e) => { 
+                        originClick(e); if(user.role==='doctor') return;
+                        let val = null;
+                        if(item.colorGroup === 'meds') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(medsIcons); } 
+                        else if(item.colorGroup === 'exer') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(exerIcons); } 
+                        else { val = td.classList.toggle('checked') ? 'Y' : null; }
+                        updateCheckVisual(td, item, val);
+                        saveData(d, item.id, val);
+                    };
+                } else if(item.type === 'scale') {
+                    let sel = createSelect(-4, 4); 
+                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateScaleColor(td, e.target.value); }; 
+                    td.appendChild(sel);
+                } else if(item.type === 'sleep') {
+                    let sel = createSelect(0, 24); 
+                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateSleepColor(td, e.target.value); }; 
+                    td.appendChild(sel);
+                } else if(item.type === 'weight') {
+                    let inp = document.createElement('input'); 
+                    inp.type='text'; inp.inputMode='decimal'; inp.className='cell-input';
+                    if(dt.getDay() !== 0) { td.className = 'disabled-cell'; inp.disabled = true; } else inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    td.appendChild(inp);
+                } else if(item.type === 'event') {
+                    td.className = 'cell-event'; 
+                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.getAttribute('title')); };
+                }
+                tr.appendChild(td);
+            }
+            body.appendChild(tr);
+        });
+        
+        document.getElementById('score-ls').value = '';
+        document.getElementById('score-mssi').value = '';
+        if(isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
+        setTimeout(checkScroll, 500);
+        if(target) loadData();
+    }
+
+    function createSelect(min, max) {
+        let s = document.createElement('select'); s.className = 'cell-select'; s.add(new Option('', ''));
+        for(let i=min; i<=max; i++) s.add(new Option(i, i));
+        return s;
+    }
+    
+    function getRandomIcon(list) { return list[Math.floor(Math.random() * list.length)]; }
+
+    function updateCheckVisual(cell, item, val) {
+        cell.style.backgroundColor = ''; cell.innerText = ''; cell.classList.remove('checked');
+        if(!val) return; 
+        if(item.colorGroup === 'meds' || item.colorGroup === 'exer') { cell.innerText = val; } 
+        else { cell.classList.add('checked'); if(item.colorGroup === 'symptom') cell.style.backgroundColor = 'rgba(187, 222, 251, 0.5)'; }
+    }
+
+    function updateSleepColor(cell, value) {
+        if (value === '' || value === null) { cell.style.backgroundColor = ''; return; }
+        const v = parseInt(value);
+        if (v < 7) { const opacity = 0.6 * ((7 - v) / 7); cell.style.backgroundColor = `rgba(255, 82, 82, ${opacity})`; } 
+        else if (v > 8) { const opacity = 0.6 * ((v - 8) / 16); cell.style.backgroundColor = `rgba(33, 150, 243, ${opacity})`; } 
+        else { cell.style.backgroundColor = ''; }
+    }
+
+    function updateScaleColor(cell, value) {
+        if (value === '' || value === null) { cell.style.backgroundColor = ''; return; }
+        const val = parseInt(value);
+        if (val === 0) { cell.style.backgroundColor = '#ffffff'; } 
+        else if (val > 0) { const alpha = 0.05 + (val * 0.06); cell.style.backgroundColor = `rgba(255, 82, 82, ${alpha})`; } 
+        else { const alpha = 0.05 + (Math.abs(val) * 0.06); cell.style.backgroundColor = `rgba(33, 150, 243, ${alpha})`; }
+    }
+
+    function checkMin(el) { if(el.value < 0) el.value = 0; }
+
+    async function updateMixedState(day) {
+        setTimeout(() => {
+            let cnt = 0;
+            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${day}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
+            const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
+            if(cnt >= 2) { if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } } 
+            else { if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); } }
+        }, 50);
+    }
+
+    async function saveData(day, cat, val) {
+        if(user.role==='doctor') return;
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
+    }
+
+    async function saveMonthlyScore(type, val) {
+        if(user.role==='doctor') return;
+        const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
+        const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        
+        if (data && data.reward_icon) {
+            const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
+            alert(`🎉 점수 입력 보상!\n\n[${data.reward_icon}] 아이콘을 획득했습니다!\n"${msg}"\n(선물함에서 확인하세요)`);
+            if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
+        }
+    }
+
+    async function loadData() {
+        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
+        document.querySelectorAll('input, select').forEach(e => { 
+            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) {
+                e.value=''; if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
+            }
+        });
+        document.querySelectorAll('.cell-event').forEach(e => { e.innerText = ''; e.removeAttribute('title'); });
+
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const lastDay = new Date(y, m, 0).getDate();
+        const start = `${y}-${String(m).padStart(2,'0')}-01`;
+        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
+
+        const { data, error } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+        
+        if(error) return alert("조회 오류: " + error.message);
+        if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
+
+        data?.forEach(rec => {
+            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
+            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
+            else {
+                const day = new Date(rec.record_date).getDate();
+                const item = items.find(i => i.id === rec.category);
+                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
+                
+                if(cell && item) {
+                    if(item.type === 'check') {
+                         updateCheckVisual(cell, item, rec.value);
+                    } else if(rec.category === 'mixed' && rec.value === 'Y') {
+                        cell.classList.add('checked');
+                    } else if(item.type === 'event') {
+                        const chars = Array.from(rec.value);
+                        const firstChar = chars[0]; 
+                        if (/\p{Emoji}/u.test(firstChar)) {
+                            cell.innerText = firstChar;
+                        } else {
+                            cell.innerText = '⭐️'; 
+                        }
+                        if(rec.value) cell.setAttribute('title', rec.value);
+                    } else if(item.type === 'scale') {
+                        const sel = cell.querySelector('select');
+                        if(sel) { sel.value = rec.value; updateScaleColor(cell, rec.value); }
+                    } else if(item.type === 'sleep') {
+                        const sel = cell.querySelector('select');
+                        if(sel) { sel.value = rec.value; updateSleepColor(cell, rec.value); }
+                    } else if(cell.querySelector('input')) {
+                        cell.querySelector('input').value = rec.value;
+                    }
+                }
+            }
+        });
+
+        if(user.role !== 'doctor') {
+            const today = new Date();
+            if(today.getFullYear() === y && today.getMonth() + 1 === m) {
+                if(today.getDate() >= lastDay - 7) {
+                    const lsVal = document.getElementById('score-ls').value;
+                    const mssiVal = document.getElementById('score-mssi').value;
+                    if(!lsVal || !mssiVal) setTimeout(() => alert("📢 [알림] 이번 달 평가를 진행해주세요!\n(상단바 [월간] 항목 입력)\n입력 시 특별한 선물을 드려요!"), 500);
+                }
+            }
+            saveData(1, 'dummy', null); 
+            checkSpecialEvents();
+            checkGiftReception();
+        }
+    }
+
+    async function openGiftModal() { document.getElementById('gift-modal').style.display = 'flex'; switchGiftTab('my'); }
+    function closeGiftModal() { document.getElementById('gift-modal').style.display = 'none'; }
 
     async function switchGiftTab(tab) {
         currentGiftTab = tab;
         document.querySelectorAll('.gift-tab-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`tab-${tab}`).classList.add('active');
+        
         document.getElementById('my-actions').classList.toggle('hidden', tab !== 'my');
         document.getElementById('received-actions').classList.toggle('hidden', tab !== 'received');
         document.getElementById('selected-gift-action').classList.add('hidden');
+        
         if(tab === 'received') replyTargetItemId = null;
 
         const container = document.getElementById('gift-list-container');
+        container.innerHTML = '<div style="grid-column:span 6; text-align:center;">로딩중...</div>';
+        
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
         const filtered = data ? data.filter(item => {
-            if (tab === 'my') return !['gift','gift_reply'].includes(item.source) || item.source.startsWith('milestone_sent');
-            return ['gift','gift_reply'].includes(item.source) || item.source.startsWith('milestone_recv');
+            if (tab === 'my') {
+                return item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') || item.source === 'admin_init' || item.source === 'admin_full_set' || item.source.startsWith('milestone_sent');
+            } else {
+                return item.source === 'gift' || item.source === 'gift_reply' || item.source.startsWith('milestone_recv');
+            }
         }) : [];
-
-        if(filtered.length === 0) {
+        
+        if (filtered.length === 0) {
             container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
             return;
         }
@@ -372,61 +790,84 @@
             const div = document.createElement('div');
             div.className = 'icon-item';
             div.innerText = item.icon;
+            
+            // [업데이트] 마일스톤 이모지 황금 효과 적용
             if(item.source.startsWith('milestone_')) {
                 const count = parseInt(item.source.split('_')[2]);
                 if(count >= 100) div.classList.add('gold-tier-3');
                 else if(count >= 50) div.classList.add('gold-tier-2');
                 else div.classList.add('gold-tier-1');
             }
+
             div.onclick = () => selectGiftItem(div, item.id, item.icon, item.source);
             container.appendChild(div);
         });
+
+        if (tab === 'my' && replyTargetItemId) {
+             document.getElementById('my-actions').innerHTML = '<p style="color:#d32f2f; font-weight:bold;">🎁 보답으로 보낼 아이콘을 선택하세요!</p>';
+        } else if (tab === 'my') {
+             document.getElementById('my-actions').innerHTML = `
+                <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p>
+                <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
+             `;
+        }
     }
 
     function selectGiftItem(el, id, icon, source) {
         document.querySelectorAll('.icon-item.selected').forEach(e => e.classList.remove('selected'));
-        el.classList.add('selected'); selectedInventoryId = id;
+        el.classList.add('selected');
+        selectedInventoryId = id;
         document.getElementById('preview-icon').innerText = icon;
-        document.getElementById('selected-gift-action').classList.remove('hidden');
+        
+        const actionArea = document.getElementById('selected-gift-action');
         const btn = document.getElementById('btn-gift-action');
+        
+        actionArea.classList.remove('hidden');
 
         if (currentGiftTab === 'received') {
             if (source === 'gift') {
                 btn.innerText = "🎁 보답하기 (내 선물 보내기)";
-                btn.onclick = () => { replyTargetItemId = id; switchGiftTab('my'); alert("보답으로 보낼 아이콘을 선택하세요."); };
+                btn.onclick = () => prepareReply(id);
                 btn.disabled = false; btn.style.background = '#ff9800';
             } else {
                 btn.innerText = "💌 답례 또는 특별 선물입니다";
                 btn.disabled = true; btn.style.background = '#ccc';
             }
         } else {
-            btn.innerText = replyTargetItemId ? "📨 보답 선물 보내기" : "누군가에게 선물하기";
-            btn.onclick = replyTargetItemId ? sendReplyGift : sendGiftToRandom;
-            btn.disabled = false; btn.style.background = '#ff9800';
+            if (replyTargetItemId) {
+                btn.innerText = "📨 이 아이콘으로 보답 선물 보내기";
+                btn.onclick = () => sendReplyGift();
+                btn.disabled = false; btn.style.background = '#ff9800';
+            } else {
+                btn.innerText = "누군가에게 선물하기";
+                btn.onclick = () => sendGiftToRandom();
+                btn.disabled = false; btn.style.background = '#ff9800';
+            }
         }
     }
 
-    async function sendGiftToRandom() {
-        if(!confirm("정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)")) return;
-        const { data } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
-        
-        if(data?.status === 'milestone') {
-            alert(`🎁 선물이 누군가에게 배달되었습니다!\n\n🎉 [특별 보상] 따뜻한 마음을 가진 당신에게 특별한 선물 [${data.icon}]을 드려요!`);
-        } else if(data?.status === 'no_users') { 
-            // 활동 유저 없으면 admin에게 감 (내부 로직상 성공)
-            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
-        } else {
-            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
-        }
+    function prepareReply(receivedId) {
+        if(!confirm("이 선물에 대한 보답을 보내시겠습니까?\n'모은 선물함'으로 이동합니다.")) return;
+        replyTargetItemId = receivedId;
         switchGiftTab('my');
     }
 
     async function sendReplyGift() {
-        const { data, error } = await sb.rpc('send_reply_gift_secure', { p_user: user.username, p_pw: user.password, p_my_item_id: selectedInventoryId, p_received_item_id: replyTargetItemId });
-        if(error) return alert("오류 발생");
+        if(!replyTargetItemId || !selectedInventoryId) return;
+        if(!confirm("선택한 아이콘을 보답으로 보내시겠습니까?")) return;
+
+        const { data, error } = await sb.rpc('send_reply_gift_secure', { 
+            p_user: user.username, 
+            p_pw: user.password, 
+            p_my_item_id: selectedInventoryId, 
+            p_received_item_id: replyTargetItemId 
+        });
+
+        if(error) return alert("오류: " + error.message);
         if(data && data.status === 'success') {
             alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
-            replyTargetItemId = null; switchGiftTab('received');
+            replyTargetItemId = null; 
+            switchGiftTab('received');
         } else {
             alert("보낼 수 없는 상태입니다.");
         }
@@ -434,119 +875,164 @@
 
     async function tryUnlockGift() {
         const randIcon = rewardIcons[Math.floor(Math.random() * rewardIcons.length)];
-        const { data } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
-        if(data === 'success') {
-            alert(`🎉 축하합니다! [${randIcon}] 아이콘을 획득했습니다!\n\n"${cheerMessages[Math.floor(Math.random()*cheerMessages.length)]}"`);
-            switchGiftTab('my');
-        } else alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
+        const { data, error } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
+        
+        if(error) return alert("오류: " + error.message);
+        if(data === 'keep_going') return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
+        
+        const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
+        alert(`🎉 축하합니다! [${randIcon}] 아이콘을 획득했습니다!\n\n"${msg}"`);
+        switchGiftTab('my');
+        saveData(1, 'dummy', null); 
     }
 
-    function renderTable() {
-        const year = curDate.getFullYear(), month = curDate.getMonth(), lastDay = new Date(year, month+1, 0).getDate();
-        const header = document.getElementById('header-row'), dowRow = document.getElementById('dow-row'), body = document.getElementById('table-body');
-        header.innerHTML = '<th class="col-label">항목 / 날짜</th>'; dowRow.innerHTML = '<th class="col-label" style="background:#fff;">요일</th>'; body.innerHTML = '';
-        const days = ['일','월','화','수','목','금','토'];
-        for(let d=1; d<=lastDay; d++) {
-            const dt = new Date(year, month, d), isToday = new Date().toDateString() === dt.toDateString();
-            let th = document.createElement('th'); th.innerHTML = isToday ? `<span class='today-badge'>TODAY</span>${d}` : d;
-            if(dt.getDay()===0) th.className='day-holiday'; if(isToday) th.classList.add('today-header'); header.appendChild(th);
-            let td = document.createElement('th'); td.innerText = days[dt.getDay()];
-            if(dt.getDay()===0) td.className='day-holiday'; if(isToday) td.classList.add('today-dow'); dowRow.appendChild(td);
+    async function sendGiftToRandom() {
+        if(!selectedInventoryId) return;
+        if(!confirm("정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)")) return;
+        const { data, error } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
+        if(error) return alert("오류: " + error.message);
+        
+        if(data?.status === 'milestone') {
+            alert(`🎁 선물이 누군가에게 배달되었습니다!\n\n🎉 [특별 보상] 따뜻한 마음을 가진 당신에게 특별한 선물 [${data.icon}]을 드려요!`);
+        } else if(data?.status === 'no_users') { 
+            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
+        } else {
+            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
         }
-        items.forEach(item => {
-            let tr = document.createElement('tr'); tr.className = 'bg-' + item.section;
-            let th = document.createElement('th'); th.className = 'col-label'; th.innerText = item.label; tr.appendChild(th);
-            for(let d=1; d<=lastDay; d++) {
-                let td = document.createElement('td'); td.dataset.d = d; td.dataset.c = item.id;
-                if(item.type === 'check') td.onclick = () => { if(user.role==='doctor') return; const v = td.classList.toggle('checked') ? 'Y' : null; saveData(d, item.id, v); };
-                else if(item.type === 'sleep' || item.type === 'scale') {
-                    let s = document.createElement('select'); s.add(new Option('',''));
-                    const range = item.type==='sleep' ? [0,24] : [-4,4];
-                    for(let i=range[0]; i<=range[1]; i++) s.add(new Option(i,i));
-                    s.onchange = (e) => { saveData(d, item.id, e.target.value); if(item.type==='sleep') updateSleepColor(td, e.target.value); else updateScaleColor(td, e.target.value); };
-                    td.appendChild(s);
-                } else if(item.type === 'event') td.onclick = () => openEventModal(d, item.id, td.getAttribute('title'));
-                tr.appendChild(td);
-            }
-            body.appendChild(tr);
-        });
-        loadData();
+        switchGiftTab(currentGiftTab);
     }
-    async function saveData(d, c, v) { const y = curDate.getFullYear(), m = curDate.getMonth()+1; const date = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: c, p_val: v }); }
-    async function saveMonthlyScore(type, val) { const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`; const { data } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val }); if(data?.reward_icon) alert(`🎉 보상 획득! [${data.reward_icon}]`); }
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
-    function closeGiftModal() { document.getElementById('gift-modal').style.display='none'; }
-    function openGiftModal() { document.getElementById('gift-modal').style.display='flex'; switchGiftTab('my'); }
-    function moveMonth(n) { curDate.setMonth(curDate.getMonth()+n); renderTable(); }
-    function jumpToDate(v) { curDate = new Date(v); renderTable(); }
-    function updateCheckVisual(c, i, v) { c.classList.toggle('checked', v==='Y'); }
-    function updateSleepColor(c, v) { if(!v) {c.style.background=''; return;} const n=parseInt(v); c.style.background = n<7 ? '#ffcdd2' : (n>8 ? '#bbdefb' : ''); }
-    function updateScaleColor(c, v) { if(!v) {c.style.background=''; return;} const n=parseInt(v); c.style.background = n>0 ? `rgba(255,0,0,${n*0.1})` : (n<0 ? `rgba(0,0,255,${Math.abs(n)*0.1})` : ''); }
-    function openEventModal(d,id,t) { modalTarget={d,id}; document.getElementById('modal-title').innerText=`${d}일 생활사건`; document.getElementById('event-modal').style.display='flex'; 
-        let icon='', text=t||''; if(t){const chars=Array.from(t); if(/\p{Emoji}/u.test(chars[0])){icon=chars[0]; text=chars.slice(1).join('').trim();} else {text=t;}}
-        document.getElementById('modal-text').value=text; document.getElementById('selected-event-icon').value=icon;
-        const container = document.getElementById('event-icon-container'); container.innerHTML='로딩중...';
-        sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password }).then(({ data }) => {
-            container.innerHTML='';
-            const starDiv = document.createElement('div'); starDiv.className='icon-item'; starDiv.innerText='⭐️';
-            if(icon==='⭐️' || !icon) starDiv.classList.add('selected');
-            starDiv.onclick=()=>{ document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected')); starDiv.classList.add('selected'); document.getElementById('selected-event-icon').value='⭐️'; };
-            container.appendChild(starDiv);
-            data?.filter(i=>['earn','default','gift','gift_reply'].includes(i.source) || i.source.startsWith('milestone') || i.source.startsWith('event') || i.source.startsWith('monthly')).forEach(item=>{
-                const div=document.createElement('div'); div.className='icon-item'; div.innerText=item.icon;
-                if(item.icon===icon){div.classList.add('selected'); starDiv.classList.remove('selected');}
-                div.onclick=()=>{ document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected')); div.classList.add('selected'); document.getElementById('selected-event-icon').value=item.icon; };
+
+    async function openEventModal(day, id, txt) { 
+        modalTarget = { day, id }; 
+        document.getElementById('modal-title').innerText = `${day}일 생활사건`; 
+        
+        let currentIcon = '';
+        let currentText = txt || "";
+        
+        if (txt) {
+            const chars = Array.from(txt);
+            if (/\p{Emoji}/u.test(chars[0])) {
+                currentIcon = chars[0];
+                currentText = chars.slice(1).join('').trim(); 
+            } else {
+                currentText = txt;
+            }
+        }
+        document.getElementById('modal-text').value = currentText;
+        document.getElementById('selected-event-icon').value = currentIcon;
+
+        const container = document.getElementById('event-icon-container');
+        container.innerHTML = '로딩중...';
+        const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
+        container.innerHTML = '';
+
+        const starDiv = document.createElement('div');
+        starDiv.className = 'icon-item'; 
+        starDiv.innerText = '⭐️';
+        if(currentIcon === '⭐️') starDiv.classList.add('selected');
+        starDiv.onclick = () => {
+            const isSelected = starDiv.classList.contains('selected');
+            document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
+            if(!isSelected) {
+                starDiv.classList.add('selected');
+                document.getElementById('selected-event-icon').value = '⭐️';
+            } else {
+                document.getElementById('selected-event-icon').value = '';
+            }
+        };
+        container.appendChild(starDiv);
+
+        if(data) {
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'icon-item';
+                div.innerText = item.icon;
+                if(item.icon === currentIcon) {
+                    div.classList.add('selected');
+                    starDiv.classList.remove('selected');
+                }
+                div.onclick = () => {
+                    const isSelected = div.classList.contains('selected');
+                    document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
+                    if(!isSelected) {
+                        div.classList.add('selected');
+                        document.getElementById('selected-event-icon').value = item.icon;
+                    } else {
+                        document.getElementById('selected-event-icon').value = '';
+                    }
+                };
                 container.appendChild(div);
             });
-        });
+        }
+        document.getElementById('event-modal').style.display = 'flex'; 
     }
-    function closeEventModal() { document.getElementById('event-modal').style.display='none'; }
+    
+    function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
+    
     function saveEventFromModal() { 
-        const t=document.getElementById('modal-text').value.trim(), i=document.getElementById('selected-event-icon').value||'⭐️';
-        if(!t){ saveData(modalTarget.d, modalTarget.id, null); const c=document.querySelector(`td[data-d="${modalTarget.d}"][data-c="${modalTarget.id}"]`); if(c){c.innerText=''; c.removeAttribute('title');} }
-        else { const v=`${i} ${t}`; saveData(modalTarget.d, modalTarget.id, v); const c=document.querySelector(`td[data-d="${modalTarget.d}"][data-c="${modalTarget.id}"]`); if(c){c.innerText=i; c.setAttribute('title',v);} }
-        closeEventModal();
+        const txt = document.getElementById('modal-text').value.trim();
+        let icon = document.getElementById('selected-event-icon').value;
+        if(!icon) icon = '⭐️'; 
+
+        if(!txt) { 
+            saveData(modalTarget.day, modalTarget.id, null);
+            const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
+            if(cell) { cell.innerText = ''; cell.removeAttribute('title'); }
+        } else {
+            const fullVal = `${icon} ${txt}`;
+            saveData(modalTarget.day, modalTarget.id, fullVal);
+            const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
+            if(cell) {
+                cell.innerText = icon; 
+                cell.setAttribute('title', fullVal);
+            }
+        }
+        closeEventModal(); 
     }
-    function doLogout() { location.reload(); }
-    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display='flex'; }
-    function closePwModal() { document.getElementById('pw-modal').style.display='none'; }
-    async function changePassword() {
-        const o=document.getElementById('pw-old').value, n=document.getElementById('pw-new').value, c=document.getElementById('pw-cfm').value;
-        if(!o||!n) return alert("입력 필요"); if(n!==c) return alert("불일치");
-        const ho=await hashPassword(o), hn=await hashPassword(n);
-        const {data}=await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success'){alert("완료. 재로그인하세요."); location.reload();} else alert("실패");
+
+    async function openChartModal(type) {
+        toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
+        const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
+        document.getElementById('chart-title').innerText = title;
+        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+        if(!data || data.length === 0) return alert("데이터가 없습니다.");
+        const targetCat = `score_${type}`;
+        const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
+        drawDashboardChart(points, title, type === 'ls' ? '#10B981' : '#6366F1');
     }
-    async function exportData() { 
-        if(user.role==='doctor') return alert("불가");
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' });
-        if(!data?.length) return alert("데이터 없음");
-        let csv = "Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`);
-        const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8,"+csv); link.download = `mood_${user.username}.csv`; link.click();
-    }
-    async function importData(input) { 
-        const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다.")) return;
-        const r = new FileReader(); r.onload = async (e) => { 
-            const rows = e.target.result.split("\n").slice(1); 
-            for(let row of rows) { 
-                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
-                if(cols.length>=3) { const d=cols[0].trim(), c=cols[1].trim(), v=cols[2].replace(/^"|"$/g,'').trim(); if(d&&c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } 
-            } 
-            alert("업로드 완료"); loadData(); 
-        }; r.readAsText(f); 
-    }
-    function openChartModal(type) { 
-        toggleSidebar(); document.getElementById('chart-modal').style.display='flex';
-        sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' }).then(({ data }) => {
-            if(!data?.length) return alert("데이터 없음");
-            const points = data.filter(r => r.category === `score_${type}`).map(r => ({ x: r.record_date, y: parseFloat(r.value) })).sort((a,b)=>new Date(a.x)-new Date(b.x));
-            const ctx = document.getElementById('scoreChart').getContext('2d'); if(myChart) myChart.destroy();
-            const dates=points.map(p=>new Date(p.x).getTime()), minT=Math.min(...dates)-2e9, maxT=Math.max(...dates)+2e9;
-            const ann={}; for(let y=new Date(minT).getFullYear(); y<=new Date(maxT).getFullYear(); y++) ann['y'+y]={type:'box', xMin:luxon.DateTime.fromObject({year:y,month:1,day:1}).toMillis(), xMax:luxon.DateTime.fromObject({year:y,month:12,day:31}).toMillis(), backgroundColor:['rgba(248,250,252,0.6)','rgba(240,253,244,0.6)','rgba(239,246,255,0.6)','rgba(254,252,232,0.6)'][(y-2000)%4], borderWidth:0, label:{display:true, content:y+'년', position:'start', yAdjust:20, font:{size:12, weight:'bold'}, color:'#475569'}};
-            myChart = new Chart(ctx, { type: 'line', data: { datasets: [{ label: type==='ls'?'생활습관':'기분안정성', data: points, borderColor: type==='ls'?'#10B981':'#6366F1', backgroundColor: type==='ls'?'#10B98110':'#6366F110', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minT, max: maxT }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: ann }, legend: { display: false } } } });
+    function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
+    function drawDashboardChart(points, label, color) {
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        if(points.length === 0) return;
+        const dates = points.map(p => new Date(p.x).getTime());
+        const minTime = Math.min(...dates), maxTime = Math.max(...dates);
+        const buffer = 28 * 24 * 3600 * 1000;
+        const minYear = new Date(minTime - buffer).getFullYear(), maxYear = new Date(maxTime + buffer).getFullYear();
+        const annotations = {};
+        const bgColors = ['rgba(248, 250, 252, 0.6)', 'rgba(240, 253, 244, 0.6)', 'rgba(239, 246, 255, 0.6)', 'rgba(254, 252, 232, 0.6)'];
+        for (let y = minYear; y <= maxYear; y++) {
+            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:12, weight:'bold'}, color: '#475569' } };
+        }
+        myChart = new Chart(ctx, {
+            type: 'line', data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '10', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
         });
     }
-    function closeChartModal() { document.getElementById('chart-modal').style.display='none'; }
+    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
+    function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
+    function doLogout() { location.reload(); }
+    async function changePassword() {
+        const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
+        if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
+        const ho = await hashPassword(o), hn = await hashPassword(n);
+        const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
+        if(data==='success') { alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+    }
+    function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
+    function jumpToDate(val) { curDate = new Date(val); renderTable(); }
+    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${user.username}.csv`; link.click(); }
+    async function importData(input) { const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(d && c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
 </script>
 </body>
 </html>
