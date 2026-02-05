@@ -403,6 +403,7 @@
     let user = null, target = null, curDate = new Date();
     let modalTarget = { day: null, id: null };
     let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
+    let myChart = null; // [수정됨] 차트 변수 초기화 추가
 
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
@@ -713,7 +714,7 @@
                 
                 if(cell && item) {
                     if(item.type === 'check') {
-                         updateCheckVisual(cell, item, rec.value);
+                          updateCheckVisual(cell, item, rec.value);
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
