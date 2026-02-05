@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.5 | 분당서울대학교병원</title>
+<title>기분기록지 2.6 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -135,11 +135,35 @@
 
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-    .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
-    .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 8px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
+    
+    /* [수정] 아이콘 그리드 가로 스크롤 방지 수정 */
+    .icon-grid { 
+        display: grid; 
+        grid-template-columns: repeat(5, 1fr); /* 5열로 조정 */
+        gap: 4px; /* 간격 축소 */
+        max-height: 180px; 
+        overflow-y: auto; 
+        overflow-x: hidden; /* 가로 스크롤 숨김 */
+        margin-bottom: 15px; 
+        padding: 5px; 
+        border: 1px solid #eee; 
+        border-radius: 8px; 
+        background: #fafafa; 
+    }
+    .icon-item { 
+        cursor: pointer; 
+        font-size: 24px; 
+        text-align: center; 
+        padding: 4px; /* 패딩 축소 */
+        border-radius: 8px; 
+        background: white; 
+        border: 1px solid #eee; 
+        transition: all 0.2s; 
+    }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
     .icon-item.selected { background-color: #fff176; border: 2px solid #fbc02d; }
-    .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 6; padding: 20px; }
+    .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 5; padding: 20px; } /* span도 5로 수정 */
+
     .gift-tab { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; }
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
@@ -349,7 +373,7 @@
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    const krHolidays = { '01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일','07-17':'제헌절','08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스','2025-01-28':'설날','2025-01-29':'설날','2025-01-30':'설날','2025-03-03':'대체공휴일','2025-05-06':'대체공휴일','2025-10-05':'추석','2025-10-06':'추석','2025-10-07':'추석','2025-10-08':'대체공휴일','2026-02-16':'설날','2026-02-17':'설날','2026-02-18':'설날','2026-03-02':'대체공휴일','2026-05-24':'석가탄신일','2026-05-25':'대체공휴일','2026-06-03':'지방선거','2026-08-17':'대체공휴일','2026-09-24':'추석','2026-09-25':'추석','2026-09-26':'추석','2026-10-05':'대체공휴일' }; // (축약됨, 기존 코드 유지)
+    const krHolidays = { '01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일','07-17':'제헌절','08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스','2025-01-28':'설날','2025-01-29':'설날','2025-01-30':'설날','2025-03-03':'대체공휴일','2025-05-06':'대체공휴일','2025-10-05':'추석','2025-10-06':'추석','2025-10-07':'추석','2025-10-08':'대체공휴일','2026-02-16':'설날','2026-02-17':'설날','2026-02-18':'설날','2026-03-02':'대체공휴일','2026-05-24':'석가탄신일','2026-05-25':'대체공휴일','2026-06-03':'지방선거','2026-08-17':'대체공휴일','2026-09-24':'추석','2026-09-25':'추석','2026-09-26':'추석','2026-10-05':'대체공휴일' };
 
     const rewardIcons = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾','🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬','🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷','🎈','🎆','🎇','🧨','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁','😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝'];
     const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
@@ -436,7 +460,7 @@
         else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.)');
+        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
         if(error) return alert('오류: ' + error.message);
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
         target = id;
