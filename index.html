@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.10 | 분당서울대학교병원</title>
+<title>기분기록지 2.11 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -11,7 +11,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <style>
-    /* --- 디자인 시스템 --- */
     :root { 
         --primary: #005eb8; 
         --primary-dark: #004a94;
@@ -19,19 +18,16 @@
         --today-border: #d50000;
         --text: #2c3e50;
         --border: #ccc;
-        
         --bg-block-mood: #fff5f5;   
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
-        
         --header-h: 46px;      
         --top-bar-h: 38px; 
         --cell-h: 34px;        
         --col-w: 140px; 
         --date-w: 44px;
     }
-
     body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 12px; overflow: hidden; height: 100dvh; position: relative; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
@@ -70,12 +66,10 @@
 
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; -webkit-overflow-scrolling: touch; height: calc(100dvh - var(--header-h) - var(--top-bar-h)); }
     table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 80px; }
-    
     th, td { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; text-align: center; height: var(--cell-h); padding: 0; vertical-align: middle; width: var(--date-w); min-width: var(--date-w); max-width: var(--date-w); overflow: hidden; white-space: nowrap; background-clip: padding-box; }
     
     thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 30; height: 34px; background: #fff; border-bottom: 1px solid #999; color: #444; }
     thead tr:nth-child(2) th { position: sticky; top: 34px; z-index: 30; height: 30px; background: #fff; border-bottom: 2px solid #999; }
-
     .col-label { position: sticky !important; left: 0 !important; z-index: 40 !important; width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important; border-right: 2px solid #999; text-align: left; padding-left: 10px; font-weight: 700; font-size: 11px; color: #222; background-color: inherit; }
     thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { z-index: 50 !important; background-color: #fff; }
 
@@ -90,7 +84,6 @@
 
     .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } 
     .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
-
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
@@ -98,7 +91,6 @@
     .cell-check { cursor: pointer; color: #ccc; font-size: 14px; }
     .cell-check.checked { font-weight: 900; color: #000; font-size: 16px; }
     .cell-check.checked::after { content: "✔"; }
-    
     .cell-mixed { font-size: 14px; color: #ccc; pointer-events: none; }
     .cell-mixed.checked { color: #7b1fa2; font-weight: bold; }
     .cell-mixed.checked::after { content: "✔"; }
@@ -135,25 +127,11 @@
 
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-    
-    .icon-grid { 
-        display: grid; 
-        grid-template-columns: repeat(5, 1fr);
-        gap: 4px;
-        max-height: 180px; 
-        overflow-y: auto; 
-        overflow-x: hidden;
-        margin-bottom: 15px; 
-        padding: 5px; 
-        border: 1px solid #eee; 
-        border-radius: 8px; 
-        background: #fafafa; 
-    }
+    .icon-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-height: 180px; overflow-y: auto; overflow-x: hidden; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
     .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 4px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
     .icon-item.selected { background-color: #fff176; border: 2px solid #fbc02d; }
     .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 5; padding: 20px; }
-
     .gift-tab { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; }
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
@@ -288,7 +266,7 @@
         </div>
         
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
         </div>
     </div>
 </div>
@@ -321,12 +299,12 @@
                 <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
             </div>
             <div id="received-actions" class="hidden">
-                 <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건기록에 사용할 수 있어요.</p>
+                 <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건에 사용할 수 있어요.</p>
             </div>
             <div id="selected-gift-action" class="hidden" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
                 <div style="font-size:30px; margin-bottom:5px;" id="preview-icon"></div>
                 <button class="btn-modal" style="background:#ff9800; color:white; width:100%;" onclick="sendGiftToRandom()">✉️ 이 아이콘을 누군가에게 선물하기</button>
-                <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 내 선물상자에서 사라집니다!</div>
+                <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 내 인벤토리에서 사라집니다!</div>
             </div>
         </div>
     </div>
@@ -714,10 +692,8 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        // [수정] 이모지 파싱 오류 완벽 해결 (Array.from 사용)
                         const chars = Array.from(rec.value);
                         const firstChar = chars[0]; 
-                        // 첫 글자가 이모지인지 정규식 확인 (공백 포함 여부와 무관하게)
                         if (/\p{Emoji}/u.test(firstChar)) {
                             cell.innerText = firstChar;
                         } else {
@@ -825,7 +801,6 @@
         let currentIcon = '';
         let currentText = txt || "";
         
-        // 이모지 분리 로직 (Array.from 사용)
         if (txt) {
             const chars = Array.from(txt);
             if (/\p{Emoji}/u.test(chars[0])) {
