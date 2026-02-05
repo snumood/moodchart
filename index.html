@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.11 | 분당서울대학교병원</title>
+<title>기분기록지 3.0 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -11,39 +11,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <style>
-    :root { 
-        --primary: #005eb8; 
-        --primary-dark: #004a94;
-        --today-bg: #fffde7; 
-        --today-border: #d50000;
-        --text: #2c3e50;
-        --border: #ccc;
-        --bg-block-mood: #fff5f5;   
-        --bg-block-scale: #fffdeb;  
-        --bg-block-body: #e8f5e9;   
-        --bg-block-event: #ffffff;  
-        --header-h: 46px;      
-        --top-bar-h: 38px; 
-        --cell-h: 34px;        
-        --col-w: 140px; 
-        --date-w: 44px;
-    }
+    :root { --primary: #005eb8; --primary-dark: #004a94; --today-bg: #fffde7; --today-border: #d50000; --text: #2c3e50; --border: #ccc; --bg-block-mood: #fff5f5; --bg-block-scale: #fffdeb; --bg-block-body: #e8f5e9; --bg-block-event: #ffffff; --header-h: 46px; --top-bar-h: 38px; --cell-h: 34px; --col-w: 140px; --date-w: 44px; }
     body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 12px; overflow: hidden; height: 100dvh; position: relative; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    #auth-screen { 
-        height: 100dvh; display: flex; justify-content: center; align-items: center; 
-        position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
-        background: url('https://github.com/snumood/moodchart/blob/main/bg2.jpg?raw=true') no-repeat center center fixed;
-        background-size: cover;
-    }
-    #auth-screen::before {
-        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.3); z-index: -1;
-    }
+    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; background: url('https://github.com/snumood/moodchart/blob/main/bg2.jpg?raw=true') no-repeat center center fixed; background-size: cover; }
+    #auth-screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: -1; }
     .auth-box { width: 90%; max-width: 400px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
@@ -303,7 +279,7 @@
             </div>
             <div id="selected-gift-action" class="hidden" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
                 <div style="font-size:30px; margin-bottom:5px;" id="preview-icon"></div>
-                <button class="btn-modal" style="background:#ff9800; color:white; width:100%;" onclick="sendGiftToRandom()">✉️ 이 아이콘을 누군가에게 선물하기</button>
+                <button id="btn-gift-action" class="btn-modal" style="background:#ff9800; color:white; width:100%;" onclick="sendGiftToRandom()">✉️ 이 아이콘을 누군가에게 선물하기</button>
                 <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 내 인벤토리에서 사라집니다!</div>
             </div>
         </div>
@@ -384,6 +360,8 @@
     let myChart = null; 
     let currentGiftTab = 'my';
     let selectedInventoryId = null;
+    // [NEW] 보답 선물용 ID 저장
+    let replyTargetItemId = null;
 
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
@@ -731,6 +709,7 @@
     async function openGiftModal() { document.getElementById('gift-modal').style.display = 'flex'; switchGiftTab('my'); }
     function closeGiftModal() { document.getElementById('gift-modal').style.display = 'none'; }
 
+    // [수정] 탭 전환 로직 - 보답 기능 연동
     async function switchGiftTab(tab) {
         currentGiftTab = tab;
         document.querySelectorAll('.gift-tab-item').forEach(el => el.classList.remove('active'));
@@ -740,13 +719,23 @@
         document.getElementById('received-actions').classList.toggle('hidden', tab !== 'received');
         document.getElementById('selected-gift-action').classList.add('hidden');
         
+        // 탭 전환 시 보답 모드 해제 (단, 명시적 이동 제외)
+        if(tab === 'received') replyTargetItemId = null;
+
         const container = document.getElementById('gift-list-container');
         container.innerHTML = '<div style="grid-column:span 6; text-align:center;">로딩중...</div>';
         
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
-        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') || item.source === 'admin_init' || item.source === 'admin_full_set' : item.source === 'gift')) : [];
+        // 탭에 맞는 아이템 필터링
+        const filtered = data ? data.filter(item => {
+            if (tab === 'my') {
+                return item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') || item.source === 'admin_init' || item.source === 'admin_full_set';
+            } else {
+                return item.source === 'gift' || item.source === 'gift_reply';
+            }
+        }) : [];
         
         if (filtered.length === 0) {
             container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
@@ -758,17 +747,81 @@
             div.className = 'icon-item';
             div.innerText = item.icon;
             if(item.is_new) div.style.border = '2px solid red';
-            div.onclick = () => selectGiftItem(div, item.id, item.icon);
+            
+            // 클릭 이벤트
+            div.onclick = () => selectGiftItem(div, item.id, item.icon, item.source);
             container.appendChild(div);
         });
+
+        // 보답 모드일 경우 안내 문구 변경
+        if (tab === 'my' && replyTargetItemId) {
+             document.getElementById('my-actions').innerHTML = '<p style="color:#d32f2f; font-weight:bold;">🎁 보답으로 보낼 아이콘을 선택하세요!</p>';
+        } else if (tab === 'my') {
+             // 원래대로 복구
+             document.getElementById('my-actions').innerHTML = `
+                <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p>
+                <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
+             `;
+        }
     }
 
-    function selectGiftItem(el, id, icon) {
+    // [수정] 아이템 선택 로직 - 보답 기능 연동
+    function selectGiftItem(el, id, icon, source) {
         document.querySelectorAll('.icon-item.selected').forEach(e => e.classList.remove('selected'));
         el.classList.add('selected');
         selectedInventoryId = id;
         document.getElementById('preview-icon').innerText = icon;
-        document.getElementById('selected-gift-action').classList.remove('hidden');
+        
+        const actionArea = document.getElementById('selected-gift-action');
+        const btn = document.getElementById('btn-gift-action');
+        
+        actionArea.classList.remove('hidden');
+
+        if (currentGiftTab === 'received') {
+            if (source === 'gift') {
+                btn.innerText = "🎁 보답하기 (내 아이콘 선물)";
+                btn.onclick = () => prepareReply(id);
+            } else {
+                btn.innerText = "💌 답례로 받은 선물입니다 (보답 불가)";
+                btn.onclick = null;
+            }
+        } else {
+            // My 탭
+            if (replyTargetItemId) {
+                btn.innerText = "📨 이 아이콘으로 보답 선물 보내기";
+                btn.onclick = () => sendReplyGift();
+            } else {
+                btn.innerText = "✉️ 이 아이콘을 누군가에게 선물하기";
+                btn.onclick = () => sendGiftToRandom();
+            }
+        }
+    }
+
+    // [NEW] 보답 준비
+    function prepareReply(receivedId) {
+        if(!confirm("이 선물에 대한 보답을 보내시겠습니까?\n'모은 선물함'으로 이동합니다.")) return;
+        replyTargetItemId = receivedId;
+        switchGiftTab('my');
+    }
+
+    // [NEW] 보답 전송
+    async function sendReplyGift() {
+        if(!replyTargetItemId || !selectedInventoryId) return;
+        if(!confirm("선택한 아이콘을 보답으로 보내시겠습니까?")) return;
+
+        const { data, error } = await sb.rpc('send_reply_gift_secure', { 
+            p_user: user.username, 
+            p_pw: user.password, 
+            p_my_item_id: selectedInventoryId, 
+            p_received_item_id: replyTargetItemId 
+        });
+
+        if(error) return alert("오류: " + error.message);
+        if(data === 'cannot_reply_again') return alert("이미 답례로 받은 선물에는 다시 답할 수 없습니다.");
+        
+        alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
+        replyTargetItemId = null; // 초기화
+        switchGiftTab('received');
     }
 
     async function tryUnlockGift() {
@@ -789,7 +842,7 @@
         if(!confirm("정말 이 아이콘을 랜덤한 누군가에게 선물하시겠습니까?\n(보낸 후에는 사라집니다)")) return;
         const { data, error } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
         if(error) return alert("오류: " + error.message);
-        if(data === 'no_users') return alert("선물할 다른 유저가 없습니다.");
+        if(data === 'no_users') return alert("최근 활동한 유저가 없어 선물을 보낼 수 없습니다.");
         alert("🎁 선물이 익명의 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
         switchGiftTab(currentGiftTab);
     }
@@ -801,6 +854,7 @@
         let currentIcon = '';
         let currentText = txt || "";
         
+        // 이모지 분리 로직 (Array.from 사용)
         if (txt) {
             const chars = Array.from(txt);
             if (/\p{Emoji}/u.test(chars[0])) {
