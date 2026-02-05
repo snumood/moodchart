@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.4 (통합) | 분당서울대학교병원</title>
+<title>기분기록지 2.5 (Fix) | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -30,8 +30,8 @@
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; }
 
-    /* 로그인 화면 */
-    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; background: url('https://github.com/snumood/moodchart/blob/main/bg.jpg?raw=true') no-repeat center center fixed; background-size: cover; }
+    /* 로그인 화면 (배경 변경) */
+    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; background: url('https://github.com/snumood/moodchart/blob/main/bg2.gif?raw=true') no-repeat center center fixed; background-size: cover; }
     #auth-screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: -1; }
     .auth-box { width: 420px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
@@ -107,7 +107,7 @@
     .inv-item:hover { background: #f0f0f0; transform: scale(1.2); }
     .gift-btn { grid-column: span 6; margin-top: 10px; padding: 8px; background: #FF6B6B; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
 
-    /* 사이드바 */
+    /* 사이드바, 모달 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--bg-white); box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; color: var(--text); }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -156,7 +156,7 @@
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.4</h2>
+        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.5</h2>
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
@@ -201,7 +201,7 @@
             <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
             
             <div style="display:flex; gap:5px; margin-left:8px;">
-                <span id="total-days-display" class="stat-badge">작성 0일</span>
+                <span id="total-days-display" class="stat-badge">관찰 0일</span>
                 <span id="streak-display" class="stat-badge streak-badge hidden">연속 0일</span>
                 <span id="badge-container"></span>
             </div>
@@ -228,7 +228,7 @@
                 <span style="font-weight:bold;">✨ 보상 스티커북</span>
                 <span style="cursor:pointer;" onclick="toggleStickerInventory()">✕</span>
             </div>
-            <div style="font-size:11px; color:#666; margin-bottom:10px;">꾸준히 기록하면 스티커를 드려요! (드래그해서 붙이세요)</div>
+            <div style="font-size:11px; color:#666; margin-bottom:10px;">월간 점수를 입력하면 희귀한 스티커가 나와요! (매주 1회 획득)</div>
             <div id="sticker-list-container"></div>
             <button class="gift-btn" onclick="sendGiftMode()">🎁 누군가에게 선물하기</button>
         </div>
@@ -351,6 +351,18 @@
         let hash = 0; for (let i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
         return list[Math.abs(hash) % list.length];
     }
+
+    // 혼재 상태 업데이트 함수 복구
+    async function updateMixedState(day) {
+        setTimeout(() => {
+            let cnt = 0;
+            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${day}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
+            const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
+            if(cnt >= 2) { if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } } 
+            else { if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); } }
+        }, 50);
+    }
     // --- End Helper Functions ---
 
     const krHolidays = {
@@ -426,12 +438,14 @@
     let modalTarget = { day: null, id: null };
     let myChart = null; 
     let currentTheme = localStorage.getItem('mood_theme') || 'default';
+    let selectedIcon = '';
     
     // 안전한 위치에 renderTable 선언
     function renderTable() {
         const year = curDate.getFullYear(), month = curDate.getMonth();
         document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
-        const today = new Date();
+        const today = new Date(); today.setHours(0,0,0,0); // 시간 초기화
+
         const isCurMonth = today.getFullYear()===year && today.getMonth()===month;
         const todayDate = today.getDate();
         const lastDay = new Date(year, month+1, 0).getDate();
@@ -495,10 +509,30 @@
                     }
                 };
 
+                // 미래 날짜 방지 (3일 후)
+                const diffTime = dt - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                // 오늘이 1일이면, 2일(1일차), 3일(2일차), 4일(3일차)까지 가능. 5일(4일차)부터 불가능.
+                // diffDays calculation: if dt=today, diff=0. if dt=tomorrow, diff=1.
+                // Request: "오늘로부터 3일 이후날짜는 미리 작성할 수 없도록". 
+                // e.g. Today 5th. 6,7,8 OK. 9th NO.
+                const isFutureBlocked = diffDays > 3;
+
+                // 클릭 핸들러 감싸기 (미래 체크)
+                const checkFuture = (callback) => {
+                    return (e) => {
+                        if (isFutureBlocked && user.role !== 'doctor') {
+                            alert("3일 뒤의 미래는 미리 작성할 수 없습니다.");
+                            return;
+                        }
+                        callback(e);
+                    };
+                };
+
                 if(item.id === 'meds' || item.id === 'exer') {
                     td.className = 'cell-check cell-icon'; 
                     const originClick = td.onclick;
-                    td.onclick = (e) => {
+                    td.onclick = checkFuture((e) => {
                         originClick(e); if(user.role === 'doctor') return;
                         const hasVal = td.innerText !== '' || td.classList.contains('checked');
                         if(hasVal) {
@@ -507,12 +541,12 @@
                             const icon = getFixedRandomIcon(kDate, item.id);
                             td.innerText = icon; saveData(d, item.id, icon); updateVisuals(td, item, 'Y');
                         }
-                    };
+                    });
                 } 
                 else if(item.type === 'check' && item.section === 'mood') {
                     td.className = 'cell-check';
                     const originClick = td.onclick;
-                    td.onclick = (e) => {
+                    td.onclick = checkFuture((e) => {
                         originClick(e); if(user.role === 'doctor') return;
                         const isChecked = td.classList.contains('checked');
                         if(item.id !== 'mixed') {
@@ -524,34 +558,39 @@
                         if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
                         else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
                         if(item.id !== 'mixed') updateMixedState(d);
-                    };
+                    });
                 } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
                 else if(item.type === 'check') {
                     td.className = 'cell-check'; 
                     const originClick = td.onclick;
-                    td.onclick = (e) => { 
+                    td.onclick = checkFuture((e) => { 
                         originClick(e); if(user.role!=='doctor') { 
                             let val = td.classList.toggle('checked') ? 'Y' : null; 
                             saveData(d, item.id, val); updateVisuals(td, item, val); 
                         }
-                    };
+                    });
                 } else if(item.type === 'scale') {
                     let sel = createSelect(-4, 4); 
+                    if(isFutureBlocked && user.role !== 'doctor') sel.disabled = true;
                     sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
                     td.appendChild(sel);
                 } else if(item.type === 'sleep') {
                     let sel = createSelect(0, 24); 
+                    if(isFutureBlocked && user.role !== 'doctor') sel.disabled = true;
                     sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
                     td.appendChild(sel);
                 } else if(item.type === 'weight') {
                     let inp = document.createElement('input'); 
                     inp.type='text'; inp.inputMode='decimal'; inp.className='cell-input';
                     if(dt.getDay() !== 0) { td.className = 'disabled-cell'; inp.disabled = true; } 
-                    else inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    else {
+                        if(isFutureBlocked && user.role !== 'doctor') inp.disabled = true;
+                        inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    }
                     td.appendChild(inp);
                 } else if(item.type === 'event') {
                     td.className = 'cell-event'; 
-                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); };
+                    td.onclick = checkFuture(() => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); });
                 }
                 tr.appendChild(td);
             }
@@ -586,7 +625,7 @@
             document.getElementById('remember-me').checked = true;
         }
         applyTheme(currentTheme);
-        // renderIconGrid(); 삭제
+        // renderIconGrid(); 삭제됨
     };
 
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
@@ -641,7 +680,7 @@
             const validData = data.filter(r => isTimely(r));
             const uniqueDates = Array.from(new Set(validData.map(r => r.record_date))).sort();
             const activeDays = uniqueDates.length;
-            document.getElementById('total-days-display').innerText = `작성 ${activeDays}일째`; // 수정: 작성 일수
+            document.getElementById('total-days-display').innerText = `작성 ${activeDays}일째`;
             
             const streak = calculateStreak(uniqueDates);
             updateBadgeDisplay(streak);
@@ -762,6 +801,7 @@
         loadUserStickers(); 
     }
 
+    // --- 스티커 로직 (소모성) ---
     function loadUserStickers() {
         const myKey = `my_stickers_${user.username}`;
         if (!localStorage.getItem(myKey)) {
@@ -798,18 +838,17 @@
     }
 
     async function removeSticker(el) {
-        if(confirm('이 스티커를 가방으로 되돌릴까요?')) {
-            if(el.dataset.dbId && user.role !== 'doctor') {
-                await sb.rpc('delete_sticker_secure', { p_user: user.username, p_pw: user.password, p_id: parseInt(el.dataset.dbId) });
-            }
-            const myKey = `my_stickers_${user.username}`;
-            let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
-            myStickers.push(el.innerText);
-            localStorage.setItem(myKey, JSON.stringify(myStickers));
-            
-            el.remove();
-            loadUserStickers(); 
+        // 수정: 경고창 없이 바로 되돌리기
+        if(el.dataset.dbId && user.role !== 'doctor') {
+            await sb.rpc('delete_sticker_secure', { p_user: user.username, p_pw: user.password, p_id: parseInt(el.dataset.dbId) });
         }
+        const myKey = `my_stickers_${user.username}`;
+        let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
+        myStickers.push(el.innerText);
+        localStorage.setItem(myKey, JSON.stringify(myStickers));
+        
+        el.remove();
+        loadUserStickers(); 
     }
 
     function toggleStickerInventory() {
@@ -867,11 +906,10 @@
         if (myStickers.length === 0) return alert("선물할 스티커가 없어요!");
         
         const iconToGift = myStickers.pop();
-        if(!confirm(`[${iconToGift}] 스티커를 누군가에게 보낼까요?`)) { // 수정: 랜덤 -> 누군가에게
+        if(!confirm(`[${iconToGift}] 스티커를 누군가에게 보낼까요?`)) { 
             myStickers.push(iconToGift); return;
         }
 
-        // RPC 호출 실패 시 (SQL 미실행 대비) 예외 처리
         try {
             const { data: res, error } = await sb.rpc('send_gift_anonymously', { p_user: user.username, p_pw: user.password, p_icon: iconToGift });
             if (error) throw error;
