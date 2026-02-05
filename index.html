@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 1.9 | 분당서울대학교병원</title>
+<title>기분기록지 2.0 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -83,13 +83,7 @@
     .top-assessment-bar input { 
         width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold;
     }
-    /* 포인트 배지 */
-    .points-badge {
-        background: #fff3e0; color: #ef6c00; padding: 3px 8px; 
-        border-radius: 12px; font-weight: bold; font-size: 11px; 
-        border: 1px solid #ffe0b2; margin-left: 5px; cursor: pointer;
-    }
-
+    
     /* 3. 스크롤 영역 */
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; scroll-behavior: smooth; }
     
@@ -148,7 +142,10 @@
     
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
-    .cell-event { cursor: pointer; text-align: left; padding: 0 5px; color: var(--primary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+    /* [수정] 생활사건 셀 스타일 */
+    .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 12px; font-weight:bold; }
+    
     .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
 
     /* 플로팅 화살표 */
@@ -279,8 +276,6 @@
             <span style="color:#ddd">|</span>
             <a href="https://snumood.github.io/homepage/mssi.html" target="_blank">기분안정성평가점수</a>
             <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
-            
-            <div class="points-badge hidden" id="points-display" onclick="openGiftModal()">🎁</div>
         </div>
 
         <div class="grid-wrapper" id="grid-container">
@@ -317,7 +312,7 @@
 
         <div class="menu-section">
             <div class="menu-title">선물</div>
-            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자 열기</div>
+            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
         </div>
 
         <div class="menu-section">
@@ -345,7 +340,7 @@
         </div>
         
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
         </div>
     </div>
 </div>
@@ -356,7 +351,7 @@
             <span id="modal-title"></span>
             <span style="cursor:pointer;" onclick="closeEventModal()">✕</span>
         </div>
-        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 이모티콘을 선택하세요</div>
+        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 아이콘을 선택하세요</div>
         <div id="event-icon-container" class="icon-grid"></div>
         <input type="hidden" id="selected-event-icon">
         
@@ -376,16 +371,16 @@
         </div>
         
         <div class="gift-tab">
-            <div class="gift-tab-item active" onclick="switchGiftTab('my')" id="tab-my">보유 아이콘</div>
-            <div class="gift-tab-item" onclick="switchGiftTab('received')" id="tab-received">받은 선물</div>
+            <div class="gift-tab-item active" onclick="switchGiftTab('my')" id="tab-my">모은 선물함</div>
+            <div class="gift-tab-item" onclick="switchGiftTab('received')" id="tab-received">받은 선물함</div>
         </div>
 
         <div id="gift-list-container" class="icon-grid"></div>
         
         <div id="gift-actions" style="margin-top:10px; text-align:center;">
             <div id="my-actions">
-                <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 포인트를 모아 선물을 열 수 있어요!</p>
-                <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">7포인트로 선물 열기 (현재: <span id="current-points">0</span>P)</button>
+                <p style="font-size:12px; color:#666; margin-bottom:10px;">성실히 기록하면 새로운 선물을 발견할 수 있어요!</p>
+                <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
             </div>
             <div id="received-actions" class="hidden">
                  <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건에 사용할 수 있어요.</p>
@@ -456,17 +451,33 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-    // 보상 이모티콘
-    const rewardIcons = ['⭐️','❤️','🍀','🎀','🎈','🧸','🎵','🍔','🍕','🍩','🚗','✈️','🚀','🏠','🐶','🐱','🐰','🦊','🦁','🐯','🦄','🌈','💎','🔮','🏰','🎡','🎢','🏖️','🏔️','🌋','🧜‍♀️','🧚‍♀️','🧞‍♂️','🧛‍♂️','🧟‍♂️','👻','👽','🤖','👾','🤡','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎱','🥇','🥈','🥉','🏅','🎖️','🏆','🎟️','🎫','🎭','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️'];
-    // [NEW] 약물/운동 랜덤 아이콘 리스트
-    const medsIcons = ['💊','🧡','💛','🥰','✨','🌞','🌻','🧸','🍵','🎵','🍊','🍯','🛡️','🧘','🛌'];
-    const exerIcons = ['🏃','🏋️','🧘','🚴','🏊','🧗','🚶','🤸','🥊','⚽','🏸','🎾','🛹','⛸️','🎿'];
-
-    const cheerMessages = [
-        "꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "기록은 사라지지 않고 당신을 지탱해 줄 거예요.", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."
+// 보상 이모티콘 (동물, 식물, 음식, 사물, 자연 등 대폭 추가 - 약 300종)
+    const rewardIcons = [
+        // 동물 & 생물
+        '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾',
+        // 식물 & 자연
+        '🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬',
+        // 음식 & 달콤함
+        '🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷',
+        // 사물 & 취미 & 귀여운 것
+        '🎈','🎆','🎇','🧨','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁',
+        // 표정 & 사랑
+        '😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝'
     ];
 
-    // [수정] colorGroup 속성 추가 (blue=symptom, pos=meds/exer)
+    // 약물/운동 랜덤 아이콘 리스트 (따뜻함/치유/안정 vs 활동/에너지/스포츠)
+    const medsIcons = [
+        '💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'
+    ];
+
+    const exerIcons = [
+        '🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'
+    ];
+
+    const cheerMessages = [
+        "꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "이렇게 꾸준히 자기 기분을 살펴보면 점점 더 기분을 조절할 수 있을거에요!", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."
+    ];
+
     const items = [
         { id: 'm_p4', label: '+4 극히 상승', desc: '아무것도 할 수 없거나 입원', section: 'mood', color: 'rgba(255, 50, 50, 0.3)', type: 'check' },
         { id: 'm_p3', label: '+3 상당한 상승', desc: '상당한 지장, 주변에서 힘들어함', section: 'mood', color: 'rgba(255, 50, 50, 0.2)', type: 'check' },
@@ -564,7 +575,6 @@
             document.getElementById('doc-panel').classList.add('active'); 
             target = null; toggleSidebar(); 
         } else { 
-            document.getElementById('points-display').classList.remove('hidden'); 
             renderTable(); 
         }
     }
@@ -575,7 +585,7 @@
         target = q; alert(`${target} 님을 조회합니다.`); toggleSidebar(); renderTable(); 
     }
 
-    // [NEW] 기념일 및 생일 체크 함수
+    // 기념일 및 생일 체크 함수
     async function checkSpecialEvents() {
         if(user.role === 'doctor') return; 
         const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
@@ -665,7 +675,6 @@
                     }
                 };
 
-                // [수정] 렌더링 로직 강화 (신체증상 컬러, 약물/운동 이모지 등)
                 if(item.type === 'check' && item.section === 'mood') {
                     td.className = 'cell-check';
                     const originClick = td.onclick;
@@ -684,7 +693,6 @@
                     };
                 } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
                 else if(item.type === 'check') {
-                    // [NEW] 약물/운동 이모지 + 증상 컬러 처리
                     td.className = 'cell-check cell-icon'; 
                     const originClick = td.onclick;
                     td.onclick = (e) => { 
@@ -693,20 +701,14 @@
                         
                         let val = null;
                         if(item.colorGroup === 'meds') {
-                            // 약물은 체크 시 랜덤 이모지
                             const hasVal = td.innerText !== '';
                             if(!hasVal) val = getRandomIcon(medsIcons); 
-                            // 이미 있으면 null (삭제)
                         } else if(item.colorGroup === 'exer') {
-                            // 운동도 체크 시 랜덤 이모지
                             const hasVal = td.innerText !== '';
                             if(!hasVal) val = getRandomIcon(exerIcons);
                         } else {
-                            // 일반 체크박스 (신체증상 등)
                             val = td.classList.toggle('checked') ? 'Y' : null; 
                         }
-                        
-                        // 화면 업데이트 & 저장
                         updateCheckVisual(td, item, val);
                         saveData(d, item.id, val);
                     };
@@ -715,7 +717,6 @@
                     sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateScaleColor(td, e.target.value); }; 
                     td.appendChild(sel);
                 } else if(item.type === 'sleep') {
-                    // [NEW] 수면 그라데이션
                     let sel = createSelect(0, 24); 
                     sel.onchange = (e) => { 
                         saveData(d, item.id, e.target.value); 
@@ -729,7 +730,7 @@
                     td.appendChild(inp);
                 } else if(item.type === 'event') {
                     td.className = 'cell-event'; 
-                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); };
+                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.getAttribute('title')); };
                 }
                 tr.appendChild(td);
             }
@@ -751,39 +752,33 @@
     
     function getRandomIcon(list) { return list[Math.floor(Math.random() * list.length)]; }
 
-    // [NEW] 체크박스형 셀 비주얼 업데이트 (배경색, 이모지 등)
     function updateCheckVisual(cell, item, val) {
-        // 초기화
         cell.style.backgroundColor = '';
         cell.innerText = '';
         cell.classList.remove('checked');
 
-        if(!val) return; // 값 없으면 리턴
+        if(!val) return; 
 
         if(item.colorGroup === 'meds' || item.colorGroup === 'exer') {
-            cell.innerText = val; // 이모지 표시
+            cell.innerText = val; 
         } else {
-            cell.classList.add('checked'); // 체크 표시
+            cell.classList.add('checked'); 
             if(item.colorGroup === 'symptom') {
-                cell.style.backgroundColor = 'rgba(187, 222, 251, 0.5)'; // 파란색 계열 (Blue 100)
+                cell.style.backgroundColor = 'rgba(187, 222, 251, 0.5)';
             }
         }
     }
 
-    // [NEW] 수면시간 그라데이션 (0=Red, 24=Blue)
     function updateSleepColor(cell, value) {
         if (value === '' || value === null) { cell.style.backgroundColor = ''; return; }
         const v = parseInt(value);
         if (v < 7) {
-            // 7시간 미만: 0으로 갈수록 빨강
             const opacity = 0.6 * ((7 - v) / 7);
             cell.style.backgroundColor = `rgba(255, 82, 82, ${opacity})`;
         } else if (v > 8) {
-            // 8시간 초과: 24로 갈수록 파랑
             const opacity = 0.6 * ((v - 8) / 16);
             cell.style.backgroundColor = `rgba(33, 150, 243, ${opacity})`;
         } else {
-            // 7~8시간: 흰색/투명 (적정)
             cell.style.backgroundColor = '';
         }
     }
@@ -813,13 +808,7 @@
         if(user.role==='doctor') return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
-        
-        if (data) {
-            const pts = parseFloat(data.points);
-            document.getElementById('points-display').innerText = pts + "P";
-            document.getElementById('current-points').innerText = pts;
-        }
+        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
     async function saveMonthlyScore(type, val) {
@@ -835,7 +824,7 @@
                 e.value=''; if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
             }
         });
-        document.querySelectorAll('.cell-event').forEach(e => e.innerText = '');
+        document.querySelectorAll('.cell-event').forEach(e => { e.innerText = ''; e.removeAttribute('title'); });
 
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const lastDay = new Date(y, m, 0).getDate();
@@ -852,20 +841,19 @@
             else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
             else {
                 const day = new Date(rec.record_date).getDate();
-                // [NEW] 항목 찾기 (items 배열에서 id로 찾음)
                 const item = items.find(i => i.id === rec.category);
                 const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
                 
                 if(cell && item) {
                     if(item.type === 'check') {
-                         // [NEW] 이모지/체크/색상 로드
                          updateCheckVisual(cell, item, rec.value);
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
+                        // [NEW] 생활사건 표시 로직
                         const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
-                        cell.innerText = isEmoji ? rec.value : (rec.value ? 'O' : '');
-                        if(!isEmoji && rec.value) cell.setAttribute('title', rec.value);
+                        cell.innerText = isEmoji ? rec.value.split(' ')[0] : (rec.value ? 'O' : ''); // 아이콘 또는 O
+                        if(rec.value) cell.setAttribute('title', rec.value); // 툴팁에 전체 내용
                     } else if(item.type === 'scale') {
                         const sel = cell.querySelector('select');
                         if(sel) { sel.value = rec.value; updateScaleColor(cell, rec.value); }
@@ -908,7 +896,7 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
-        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' : item.source === 'gift')) : [];
+        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' : item.source === 'gift')) : [];
         
         if (filtered.length === 0) {
             container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
@@ -934,12 +922,14 @@
     }
 
     async function tryUnlockGift() {
-        if(!confirm("7포인트를 사용하여 선물을 엽니다. 진행할까요?")) return;
         const randIcon = rewardIcons[Math.floor(Math.random() * rewardIcons.length)];
         const { data, error } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
         
         if(error) return alert("오류: " + error.message);
-        if(data === 'not_enough_points') return alert("포인트가 부족합니다! (7P 필요)");
+        
+        if(data === 'keep_going') {
+            return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
+        }
         
         const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
         alert(`🎉 축하합니다! [${randIcon}] 아이콘을 획득했습니다!\n\n"${msg}"`);
@@ -964,8 +954,11 @@
         modalTarget = { day, id }; 
         document.getElementById('modal-title').innerText = `${day}일 생활사건`; 
         
+        // 텍스트에서 아이콘 분리 (저장된 데이터: "🚗 여행감" 또는 "그냥쉼")
         let currentIcon = '';
         let currentText = txt || "";
+        
+        // 아이콘이 있다면 텍스트 맨 앞에 붙어있고 공백으로 구분됨
         if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
             currentIcon = txt.split(' ')[0];
             currentText = txt.substring(currentIcon.length + 1);
@@ -979,7 +972,9 @@
         container.innerHTML = '';
 
         const noneDiv = document.createElement('div');
-        noneDiv.className = 'icon-item'; noneDiv.innerText = '❌'; noneDiv.style.fontSize='14px'; noneDiv.innerText = '선택안함';
+        noneDiv.className = 'icon-item'; noneDiv.innerText = '⭕'; noneDiv.style.fontSize='14px'; 
+        // 선택안함 텍스트 대신 기본 아이콘(O) 느낌
+        noneDiv.innerHTML = '<span style="font-size:12px; display:block;">선택안함<br>(기본 O)</span>';
         noneDiv.onclick = () => { 
             document.getElementById('selected-event-icon').value = ''; 
             document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
@@ -1010,14 +1005,31 @@
     function saveEventFromModal() { 
         const txt = document.getElementById('modal-text').value.trim();
         const icon = document.getElementById('selected-event-icon').value;
-        const fullVal = icon ? `${icon} ${txt}` : txt;
         
-        const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
-        if(cell) {
-            if(icon) cell.innerText = fullVal;
-            else cell.innerText = txt ? 'O' : '';
+        // 아이콘이 있으면 "아이콘 텍스트", 없으면 "텍스트" 그대로 저장
+        // 텍스트가 없는데 아이콘만 선택할 수도 있음 -> "아이콘 " (뒤 공백 중요)
+        // 텍스트만 있으면 "텍스트"
+        let fullVal = "";
+        if(icon) {
+            fullVal = icon + " " + txt;
+        } else {
+            fullVal = txt;
         }
-        saveData(modalTarget.day, modalTarget.id, fullVal); 
+        fullVal = fullVal.trim();
+
+        if(!fullVal) { // 내용 없음
+            saveData(modalTarget.day, modalTarget.id, null);
+            const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
+            if(cell) { cell.innerText = ''; cell.removeAttribute('title'); }
+        } else {
+            saveData(modalTarget.day, modalTarget.id, fullVal);
+            const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
+            if(cell) {
+                if(icon) cell.innerText = icon;
+                else cell.innerText = 'O';
+                cell.setAttribute('title', fullVal);
+            }
+        }
         closeEventModal(); 
     }
 
