@@ -436,7 +436,7 @@
         else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.\n(DB가 리셋되었다면 회원가입을 다시 해주세요)');
+        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.)');
         if(error) return alert('오류: ' + error.message);
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
         target = id;
