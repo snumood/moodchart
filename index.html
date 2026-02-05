@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.3 | 분당서울대학교병원</title>
+<title>기분기록지 2.4 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -20,7 +20,7 @@
         --text: #2c3e50;
         --border: #ccc;
         
-        /* 섹션별 배경색 */
+        /* 섹션별 배경색 정의 */
         --bg-block-mood: #fff5f5;   
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
@@ -28,7 +28,7 @@
         
         --header-h: 46px;      
         --top-bar-h: 38px; 
-        --cell-h: 34px; /* 모바일 터치 편의를 위해 약간 키움 */       
+        --cell-h: 34px;        
         --col-w: 140px; 
         --date-w: 44px;
     }
@@ -43,6 +43,7 @@
     #auth-screen { 
         height: 100dvh; display: flex; justify-content: center; align-items: center; 
         position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
+        /* [수정] 배경 이미지 bg2.jpg로 변경 */
         background: url('https://github.com/snumood/moodchart/blob/main/bg2.jpg?raw=true') no-repeat center center fixed;
         background-size: cover;
     }
@@ -66,14 +67,14 @@
     /* 메인 컨테이너 */
     .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
     
-    /* 1. 헤더 (고정) */
+    /* 헤더 */
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222; }
     .btn-nav { background: white; border: 1px solid #ccc; padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
     #date-picker { border: 1px solid #ccc; padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: #333; padding: 0 5px; }
 
-    /* 2. 상단 월간 평가 바 (고정) */
+    /* 상단 평가 바 */
     .top-assessment-bar { 
         height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; 
         display: flex; align-items: center; justify-content: center; gap: 8px; 
@@ -85,80 +86,68 @@
     }
     .points-badge { display: none; }
 
-    /* 3. 스크롤 영역 (핵심 수정: 고정 헤더 구현) */
+    /* 스크롤 영역 */
     .grid-wrapper { 
-        flex: 1; 
-        overflow: auto; 
-        background: #fff; 
-        position: relative; 
-        /* 모바일 스크롤 부드럽게 */
+        flex: 1; overflow: auto; background: #fff; position: relative; 
         -webkit-overflow-scrolling: touch; 
-        /* 헤더 높이를 뺀 나머지 영역 */
         height: calc(100dvh - var(--header-h) - var(--top-bar-h));
     }
     
-    table { 
-        border-collapse: separate; 
-        border-spacing: 0; 
-        table-layout: fixed; 
-        width: max-content; 
-        margin-bottom: 80px; /* 하단 여백 */
-    }
+    table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 80px; }
     
     th, td { 
         border-right: 1px solid #ddd; 
         border-bottom: 1px solid #ddd; 
         text-align: center; 
         height: var(--cell-h); 
-        padding: 0; 
-        vertical-align: middle; 
-        width: var(--date-w);
-        min-width: var(--date-w);
-        max-width: var(--date-w);
-        overflow: hidden; 
-        white-space: nowrap;
-        background-clip: padding-box; /* 테두리 겹침 방지 */
+        padding: 0; vertical-align: middle; 
+        width: var(--date-w); min-width: var(--date-w); max-width: var(--date-w);
+        overflow: hidden; white-space: nowrap;
+        background-clip: padding-box;
     }
     
-    /* --- [핵심] Sticky Header 설정 --- */
-    
-    /* 1행 (날짜) */
-    thead tr:nth-child(1) th { 
-        position: sticky; top: 0; z-index: 30; 
-        height: 34px; background: #fff; border-bottom: 1px solid #999; color: #444; 
-    }
-    /* 2행 (요일) */
-    thead tr:nth-child(2) th { 
-        position: sticky; top: 34px; z-index: 30; 
-        height: 30px; background: #fff; border-bottom: 2px solid #999; 
-    }
+    /* Sticky Header (날짜/요일) */
+    thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 30; height: 34px; background: #fff; border-bottom: 1px solid #999; color: #444; }
+    thead tr:nth-child(2) th { position: sticky; top: 34px; z-index: 30; height: 30px; background: #fff; border-bottom: 2px solid #999; }
 
-    /* 좌측 열 (항목명) */
+    /* [수정] 항목 열 (Sticky) - 배경색 상속(inherit)으로 변경하여 섹션 색상 반영 */
     .col-label { 
         position: sticky !important; left: 0 !important; z-index: 40 !important;
         width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important;
         border-right: 2px solid #999; text-align: left; padding-left: 10px; 
-        font-weight: 700; font-size: 11px; color: #222; background: #fff; 
+        font-weight: 700; font-size: 11px; color: #222; 
+        background-color: inherit; /* 부모 tr의 색상을 따라감 */
     }
 
-    /* 좌측 상단 코너 (헤더와 열이 겹치는 부분) - 최상위 고정 */
-    thead tr:nth-child(1) th.col-label { z-index: 50 !important; top: 0; left: 0; }
-    thead tr:nth-child(2) th.col-label { z-index: 50 !important; top: 34px; left: 0; }
+    /* 좌측 상단 코너 (헤더 겹침) - 여긴 흰색이어야 함 */
+    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { 
+        z-index: 50 !important; background-color: #fff; 
+    }
 
-    /* 오늘 날짜 강조 */
+    /* [수정] 섹션 구분선 및 배경색 복구 */
+    /* 구분선: tr에 클래스가 붙지만 border는 td에 적용해야 함 */
+    .block-divider td, .block-divider th { border-top: 3px solid #888 !important; }
+    
+    /* 배경색 클래스 (tr에 적용됨 -> td가 투명하면 보임) */
+    .bg-scale { background-color: var(--bg-block-scale); }
+    .bg-body { background-color: var(--bg-block-body); }
+    .bg-event { background-color: var(--bg-block-event); }
+
+    /* 오늘 날짜 */
     .today-header { background-color: var(--today-bg) !important; color: #d50000; border: 2px solid var(--today-border) !important; border-bottom: none !important; }
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
     .today-badge { display: block; font-size: 9px; color: #fff; background: var(--today-border); border-radius: 4px; width: 36px; margin: 0 auto; line-height: 1.3; margin-bottom: 2px; font-weight: 800; }
 
-    /* 활성화 셀 */
+    /* 활성화 효과 */
     .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } 
     .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
 
+    /* 요일/공휴일 색상 */
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
 
-    /* 셀 내용 스타일 */
+    /* 셀 스타일 */
     .cell-check { cursor: pointer; color: #ccc; font-size: 14px; }
     .cell-check.checked { font-weight: 900; color: #000; font-size: 16px; }
     .cell-check.checked::after { content: "✔"; }
@@ -168,11 +157,8 @@
     .cell-mixed.checked::after { content: "✔"; }
     
     .cell-icon { cursor: pointer; font-size: 18px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
-    
-    /* [수정] 생활사건: 이모지만 크게 보이도록 */
     .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 20px; line-height: 1; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
 
@@ -193,7 +179,7 @@
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 사이드바 등 공통 스타일 */
+    /* 사이드바 */
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
     .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; background: var(--primary); color: white; height: 50px; }
@@ -214,16 +200,8 @@
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     
-    /* 아이콘 그리드 스타일 */
-    .icon-grid { 
-        display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; 
-        max-height: 180px; overflow-y: auto; margin-bottom: 15px; 
-        padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa;
-    }
-    .icon-item { 
-        cursor: pointer; font-size: 24px; text-align: center; padding: 8px; border-radius: 8px; 
-        background: white; border: 1px solid #eee; transition: all 0.2s;
-    }
+    .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+    .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 8px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
     .icon-item.selected { background-color: #fff176; border: 2px solid #fbc02d; }
     .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 6; padding: 20px; }
@@ -457,6 +435,7 @@
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // 2025~2040 공휴일
     const krHolidays = {
         '01-01': '신정', '03-01': '삼일절', '05-05': '어린이날', '06-06': '현충일', '07-17': '제헌절', '08-15': '광복절', '10-03': '개천절', '10-09': '한글날', '12-25': '크리스마스',
         '2025-01-28':'설날', '2025-01-29':'설날', '2025-01-30':'설날', '2025-03-03':'대체공휴일', '2025-05-06':'대체공휴일', '2025-10-05':'추석', '2025-10-06':'추석', '2025-10-07':'추석', '2025-10-08':'대체공휴일',
@@ -477,6 +456,7 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
+    // 보상 이모티콘 (300종)
     const rewardIcons = [
         '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾',
         '🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬',
@@ -660,7 +640,13 @@
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
+            if (item.section === 'mood' && item.color) {
+                // 기분 섹션은 고유 색상 적용
+                th.style.backgroundColor = item.color;
+            } else {
+                // 나머지 섹션은 클래스 배경색 상속
+                // .col-label의 background-color: inherit 덕분에 tr 색상을 따라감
+            }
             tr.appendChild(th);
 
             for(let d=1; d<=lastDay; d++) {
@@ -835,8 +821,9 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        // [핵심] 생활사건 표시 로직 (이모지만 표시)
+                        // [수정] 생활사건 표시: 이모지만 파싱해서 표시, 텍스트는 툴팁으로
                         const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
+                        // 이모지가 있으면 이모지만, 없으면 기본 별표
                         cell.innerText = isEmoji ? rec.value.split(' ')[0] : '⭐️'; 
                         if(rec.value) cell.setAttribute('title', rec.value);
                     } else if(item.type === 'scale') {
@@ -927,13 +914,14 @@
         switchGiftTab(currentGiftTab);
     }
 
-    // [수정] 생활사건 모달 (선택안함 제거, ⭐️ 기본)
     async function openEventModal(day, id, txt) { 
         modalTarget = { day, id }; 
         document.getElementById('modal-title').innerText = `${day}일 생활사건`; 
         
         let currentIcon = '';
         let currentText = txt || "";
+        
+        // 이모지 분리 로직
         if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
             currentIcon = txt.split(' ')[0];
             currentText = txt.substring(currentIcon.length + 1);
@@ -970,7 +958,6 @@
                 div.innerText = item.icon;
                 if(item.icon === currentIcon) {
                     div.classList.add('selected');
-                    // 별표 선택 해제
                     starDiv.classList.remove('selected');
                 }
                 div.onclick = () => {
@@ -986,11 +973,11 @@
     
     function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
     
-    // [수정] 생활사건 저장 로직 (빈 텍스트면 삭제, 텍스트만 있으면 별표 추가)
+    // [수정] 저장 로직: 텍스트만 있어도 강제 별표 추가하여 "이모지+텍스트" 포맷 유지
     function saveEventFromModal() { 
         const txt = document.getElementById('modal-text').value.trim();
         let icon = document.getElementById('selected-event-icon').value;
-        if(!icon) icon = '⭐️'; // 아이콘 없으면 강제 별표
+        if(!icon) icon = '⭐️'; // 아이콘 선택 안했으면 별표 기본
 
         if(!txt) { 
             // 텍스트 없으면 삭제
@@ -1005,7 +992,7 @@
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) {
                 cell.innerText = icon; // 화면엔 이모지만
-                cell.setAttribute('title', fullVal); // 전체 내용은 툴팁(PC) 또는 모달(모바일) 확인
+                cell.setAttribute('title', fullVal);
             }
         }
         closeEventModal(); 
