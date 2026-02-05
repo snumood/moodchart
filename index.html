@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 3.7 | 분당서울대학교병원</title>
+<title>기분기록지 3.6 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -11,13 +11,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <style>
-    /* --- 디자인 시스템 --- */
     :root { 
         --primary: #005eb8; --primary-dark: #004a94; --today-bg: #fffde7; --today-border: #d50000; --text: #2c3e50; --border: #ccc;
         --bg-block-mood: #fff5f5; --bg-block-scale: #fffdeb; --bg-block-body: #e8f5e9; --bg-block-event: #ffffff;
         --header-h: 46px; --top-bar-h: 38px; --cell-h: 34px; --col-w: 140px; --date-w: 44px;
     }
-
     body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; background: #f0f2f5; color: var(--text); font-size: 12px; overflow: hidden; height: 100dvh; position: relative; }
     .hidden { display: none !important; }
     input, button, select, textarea { outline: none; font-family: inherit; font-size: inherit; }
@@ -79,14 +77,6 @@
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
     .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 22px; line-height: 1; }
-    .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
-
-    .scroll-arrow { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 94, 184, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; pointer-events: none; z-index: 900; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: floatArrow 1.5s infinite ease-in-out; }
-    .scroll-arrow.visible { opacity: 1; }
-    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } 
-    .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
-    @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
-    @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
@@ -119,10 +109,10 @@
     /* 황금빛 이모지 스타일 */
     .gold-tier-1 { background: linear-gradient(135deg, #fffde7, #fff9c4) !important; border: 1px solid #fbc02d !important; }
     .gold-tier-2 { background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; border: 2px solid #fbc02d !important; box-shadow: 0 0 8px rgba(251, 192, 45, 0.4); }
-    .gold-tier-3 { background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; background-size: 200% 200% !important; border: 2px solid #e65100 !important; box-shadow: 0 0 15px rgba(230, 81, 0, 0.5); animation: shimmer 3s infinite linear; }
+    .gold-tier-3 { background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; background-size: 200% 200% !important; border: 2px solid #e65100 !important; box-shadow: 0 0 15px rgba(251, 192, 45, 0.7); animation: shimmer 3s infinite linear; }
     @keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; transform: scale(1.03); } 100% { background-position: 0% 50%; } }
 
-    /* 관리자 통계 모달 스타일 */
+    /* 관리자 통계 */
     .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #eee; }
     .stat-val { font-size: 24px; font-weight: bold; color: var(--primary); margin-top: 5px; }
@@ -137,6 +127,9 @@
     .btn-modal { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
+
+    .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
+    .tooltip-target[data-tip=""]:hover::after { display: none; }
     
     @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
@@ -374,13 +367,14 @@
             div.className = 'icon-item';
             div.innerText = item.icon;
             
+            // 황금 이펙트 로직
             if(item.source.startsWith('milestone_')) {
                 const count = parseInt(item.source.split('_')[2]);
                 if(count >= 100) div.classList.add('gold-tier-3');
                 else if(count >= 50) div.classList.add('gold-tier-2');
                 else div.classList.add('gold-tier-1');
             } else if(item.source.includes('special')) {
-                div.classList.add('gold-tier-3'); 
+                div.classList.add('gold-tier-3'); // 받은 특별 선물은 최고 등급 효과
             }
 
             div.onclick = () => selectGiftItem(div, item.id, item.icon, item.source);
@@ -405,6 +399,7 @@
         const btn = document.getElementById('btn-gift-action');
 
         if (currentGiftTab === 'received') {
+            // [수정] gift_special도 일반 선물처럼 보답 가능해야 함
             if (source === 'gift' || source === 'gift_special') {
                 btn.innerText = "🎁 보답하기 (내 선물 보내기)";
                 btn.onclick = () => { replyTargetItemId = id; switchGiftTab('my'); alert("보답으로 보낼 아이콘을 선택하세요."); };
@@ -432,7 +427,6 @@
         switchGiftTab('my');
     }
 
-    // [수정] JSON 응답 처리 로직 수정
     async function sendReplyGift() {
         if(!replyTargetItemId || !selectedInventoryId) return;
         if(!confirm("선택한 아이콘을 보답으로 보내시겠습니까?")) return;
@@ -446,7 +440,8 @@
 
         if(error) return alert("오류: " + error.message);
         
-        if(data && (data.status === 'success' || data === 'success')) {
+        // [수정] JSON 응답 처리 로직 수정
+        if(data && data.status === 'success') {
             alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
             replyTargetItemId = null; 
             switchGiftTab('received');
@@ -484,7 +479,7 @@
         switchGiftTab(currentGiftTab);
     }
 
-    // [NEW] 관리자 통계
+    // [NEW] 관리자 통계 모달 관련 함수
     async function openAdminStats() {
         toggleSidebar(); 
         document.getElementById('admin-modal').style.display='flex';
