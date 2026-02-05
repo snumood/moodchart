@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 2.6 | 분당서울대학교병원</title>
+<title>기분기록지 2.10 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -106,7 +106,7 @@
     .cell-icon { cursor: pointer; font-size: 18px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
-    .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 20px; line-height: 1; }
+    .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 22px; line-height: 1; }
     .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
 
     .scroll-arrow { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 94, 184, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; pointer-events: none; z-index: 900; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: floatArrow 1.5s infinite ease-in-out; }
@@ -136,33 +136,23 @@
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     
-    /* [수정] 아이콘 그리드 가로 스크롤 방지 수정 */
     .icon-grid { 
         display: grid; 
-        grid-template-columns: repeat(5, 1fr); /* 5열로 조정 */
-        gap: 4px; /* 간격 축소 */
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
         max-height: 180px; 
         overflow-y: auto; 
-        overflow-x: hidden; /* 가로 스크롤 숨김 */
+        overflow-x: hidden;
         margin-bottom: 15px; 
         padding: 5px; 
         border: 1px solid #eee; 
         border-radius: 8px; 
         background: #fafafa; 
     }
-    .icon-item { 
-        cursor: pointer; 
-        font-size: 24px; 
-        text-align: center; 
-        padding: 4px; /* 패딩 축소 */
-        border-radius: 8px; 
-        background: white; 
-        border: 1px solid #eee; 
-        transition: all 0.2s; 
-    }
+    .icon-item { cursor: pointer; font-size: 24px; text-align: center; padding: 4px; border-radius: 8px; background: white; border: 1px solid #eee; transition: all 0.2s; }
     .icon-item:hover { background-color: #fff9c4; transform: scale(1.1); }
     .icon-item.selected { background-color: #fff176; border: 2px solid #fbc02d; }
-    .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 5; padding: 20px; } /* span도 5로 수정 */
+    .icon-empty { font-size: 11px; color: #999; text-align: center; grid-column: span 5; padding: 20px; }
 
     .gift-tab { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; }
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
@@ -298,7 +288,7 @@
         </div>
         
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
         </div>
     </div>
 </div>
@@ -331,12 +321,12 @@
                 <button class="btn-modal btn-save" style="width:100%;" onclick="tryUnlockGift()">상자 열어보기</button>
             </div>
             <div id="received-actions" class="hidden">
-                 <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건에 사용할 수 있어요.</p>
+                 <p style="font-size:12px; color:#666;">누군가에게 받은 선물은 생활사건기록에 사용할 수 있어요.</p>
             </div>
             <div id="selected-gift-action" class="hidden" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
                 <div style="font-size:30px; margin-bottom:5px;" id="preview-icon"></div>
                 <button class="btn-modal" style="background:#ff9800; color:white; width:100%;" onclick="sendGiftToRandom()">✉️ 이 아이콘을 누군가에게 선물하기</button>
-                <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 내 인벤토리에서 사라집니다!</div>
+                <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 내 선물상자에서 사라집니다!</div>
             </div>
         </div>
     </div>
@@ -485,7 +475,6 @@
         }
     }
 
-    // [NEW] 선물 도착 확인 함수
     async function checkGiftReception() {
         if(user.role === 'doctor') return;
         const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
@@ -680,7 +669,6 @@
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
-    // [수정] 월간 점수 저장 및 보상 확인
     async function saveMonthlyScore(type, val) {
         if(user.role==='doctor') return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
@@ -726,8 +714,15 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
-                        cell.innerText = isEmoji ? rec.value.split(' ')[0] : '⭐️'; 
+                        // [수정] 이모지 파싱 오류 완벽 해결 (Array.from 사용)
+                        const chars = Array.from(rec.value);
+                        const firstChar = chars[0]; 
+                        // 첫 글자가 이모지인지 정규식 확인 (공백 포함 여부와 무관하게)
+                        if (/\p{Emoji}/u.test(firstChar)) {
+                            cell.innerText = firstChar;
+                        } else {
+                            cell.innerText = '⭐️'; 
+                        }
                         if(rec.value) cell.setAttribute('title', rec.value);
                     } else if(item.type === 'scale') {
                         const sel = cell.querySelector('select');
@@ -753,7 +748,7 @@
             }
             saveData(1, 'dummy', null); 
             checkSpecialEvents();
-            checkGiftReception(); // [NEW] 선물 수신 확인
+            checkGiftReception();
         }
     }
 
@@ -775,7 +770,7 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
-        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') : item.source === 'gift')) : [];
+        const filtered = data ? data.filter(item => (tab === 'my' ? item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') || item.source === 'admin_init' || item.source === 'admin_full_set' : item.source === 'gift')) : [];
         
         if (filtered.length === 0) {
             container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
@@ -829,9 +824,16 @@
         
         let currentIcon = '';
         let currentText = txt || "";
-        if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
-            currentIcon = txt.split(' ')[0];
-            currentText = txt.substring(currentIcon.length + 1);
+        
+        // 이모지 분리 로직 (Array.from 사용)
+        if (txt) {
+            const chars = Array.from(txt);
+            if (/\p{Emoji}/u.test(chars[0])) {
+                currentIcon = chars[0];
+                currentText = chars.slice(1).join('').trim(); 
+            } else {
+                currentText = txt;
+            }
         }
         document.getElementById('modal-text').value = currentText;
         document.getElementById('selected-event-icon').value = currentIcon;
