@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.0 | 분당서울대학교병원</title>
+<title>기분기록지 2.1 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -143,9 +143,7 @@
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
     
-    /* [수정] 생활사건 셀 스타일 */
     .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 12px; font-weight:bold; }
-    
     .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
 
     /* 플로팅 화살표 */
@@ -311,8 +309,9 @@
         </div>
 
         <div class="menu-section">
-            <div class="menu-title">선물</div>
-            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
+            <div class="menu-title">계정 관리</div>
+            <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
+            <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
         </div>
 
         <div class="menu-section">
@@ -322,9 +321,8 @@
         </div>
 
         <div class="menu-section">
-            <div class="menu-title">계정 관리</div>
-            <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
-            <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
+            <div class="menu-title">선물</div>
+            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
         </div>
 
         <div class="menu-section">
@@ -340,7 +338,7 @@
         </div>
         
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요.
         </div>
     </div>
 </div>
@@ -351,7 +349,7 @@
             <span id="modal-title"></span>
             <span style="cursor:pointer;" onclick="closeEventModal()">✕</span>
         </div>
-        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 아이콘을 선택하세요</div>
+        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 이모티콘을 선택하세요</div>
         <div id="event-icon-container" class="icon-grid"></div>
         <input type="hidden" id="selected-event-icon">
         
@@ -451,31 +449,21 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-// 보상 이모티콘 (동물, 식물, 음식, 사물, 자연 등 대폭 추가 - 약 300종)
+    // 보상 이모티콘 (300종)
     const rewardIcons = [
-        // 동물 & 생물
         '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾',
-        // 식물 & 자연
         '🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬',
-        // 음식 & 달콤함
         '🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷',
-        // 사물 & 취미 & 귀여운 것
         '🎈','🎆','🎇','🧨','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁',
-        // 표정 & 사랑
         '😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝'
     ];
 
-    // 약물/운동 랜덤 아이콘 리스트 (따뜻함/치유/안정 vs 활동/에너지/스포츠)
-    const medsIcons = [
-        '💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'
-    ];
-
-    const exerIcons = [
-        '🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'
-    ];
+    // 약물/운동 랜덤 아이콘 리스트
+    const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
+    const exerIcons = ['🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'];
 
     const cheerMessages = [
-        "꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "이렇게 꾸준히 자기 기분을 살펴보면 점점 더 기분을 조절할 수 있을거에요!", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."
+        "꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "기록은 사라지지 않고 당신을 지탱해 줄 거예요.", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."
     ];
 
     const items = [
@@ -850,7 +838,7 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        // [NEW] 생활사건 표시 로직
+                        // 생활사건 표시 로직
                         const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
                         cell.innerText = isEmoji ? rec.value.split(' ')[0] : (rec.value ? 'O' : ''); // 아이콘 또는 O
                         if(rec.value) cell.setAttribute('title', rec.value); // 툴팁에 전체 내용
@@ -954,11 +942,10 @@
         modalTarget = { day, id }; 
         document.getElementById('modal-title').innerText = `${day}일 생활사건`; 
         
-        // 텍스트에서 아이콘 분리 (저장된 데이터: "🚗 여행감" 또는 "그냥쉼")
         let currentIcon = '';
         let currentText = txt || "";
         
-        // 아이콘이 있다면 텍스트 맨 앞에 붙어있고 공백으로 구분됨
+        // 아이콘 분리 로직
         if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
             currentIcon = txt.split(' ')[0];
             currentText = txt.substring(currentIcon.length + 1);
@@ -971,16 +958,22 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
 
-        const noneDiv = document.createElement('div');
-        noneDiv.className = 'icon-item'; noneDiv.innerText = '⭕'; noneDiv.style.fontSize='14px'; 
-        // 선택안함 텍스트 대신 기본 아이콘(O) 느낌
-        noneDiv.innerHTML = '<span style="font-size:12px; display:block;">선택안함<br>(기본 O)</span>';
-        noneDiv.onclick = () => { 
-            document.getElementById('selected-event-icon').value = ''; 
+        // [요청 반영] ⭐️ 별표는 항상 맨 앞에 기본으로 표시
+        const starDiv = document.createElement('div');
+        starDiv.className = 'icon-item'; 
+        starDiv.innerText = '⭐️';
+        if(currentIcon === '⭐️') starDiv.classList.add('selected');
+        starDiv.onclick = () => {
+            const isSelected = starDiv.classList.contains('selected');
             document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
-            noneDiv.classList.add('selected');
+            if(!isSelected) {
+                starDiv.classList.add('selected');
+                document.getElementById('selected-event-icon').value = '⭐️';
+            } else {
+                document.getElementById('selected-event-icon').value = '';
+            }
         };
-        container.appendChild(noneDiv);
+        container.appendChild(starDiv);
 
         if(data) {
             data.forEach(item => {
@@ -989,9 +982,15 @@
                 div.innerText = item.icon;
                 if(item.icon === currentIcon) div.classList.add('selected');
                 div.onclick = () => {
-                    document.getElementById('selected-event-icon').value = item.icon;
+                    const isSelected = div.classList.contains('selected');
                     document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
-                    div.classList.add('selected');
+                    // 토글 기능 (이미 선택된 것 누르면 해제)
+                    if(!isSelected) {
+                        div.classList.add('selected');
+                        document.getElementById('selected-event-icon').value = item.icon;
+                    } else {
+                        document.getElementById('selected-event-icon').value = '';
+                    }
                 };
                 container.appendChild(div);
             });
@@ -1006,9 +1005,6 @@
         const txt = document.getElementById('modal-text').value.trim();
         const icon = document.getElementById('selected-event-icon').value;
         
-        // 아이콘이 있으면 "아이콘 텍스트", 없으면 "텍스트" 그대로 저장
-        // 텍스트가 없는데 아이콘만 선택할 수도 있음 -> "아이콘 " (뒤 공백 중요)
-        // 텍스트만 있으면 "텍스트"
         let fullVal = "";
         if(icon) {
             fullVal = icon + " " + txt;
@@ -1017,7 +1013,7 @@
         }
         fullVal = fullVal.trim();
 
-        if(!fullVal) { // 내용 없음
+        if(!fullVal) { 
             saveData(modalTarget.day, modalTarget.id, null);
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) { cell.innerText = ''; cell.removeAttribute('title'); }
@@ -1026,7 +1022,7 @@
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) {
                 if(icon) cell.innerText = icon;
-                else cell.innerText = 'O';
+                else cell.innerText = 'O'; // 아이콘 없이 텍스트만 있으면 O 표시
                 cell.setAttribute('title', fullVal);
             }
         }
