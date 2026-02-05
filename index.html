@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.1 | 분당서울대학교병원</title>
+<title>기분기록지 2.2 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -551,7 +551,8 @@
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         
-        if(error && error.message.includes('로그인')) return alert('로그인 실패.');
+        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.\n(DB가 리셋되었다면 회원가입을 다시 해주세요)');
+        if(error) return alert('오류: ' + error.message);
         
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
         target = id;
@@ -573,7 +574,6 @@
         target = q; alert(`${target} 님을 조회합니다.`); toggleSidebar(); renderTable(); 
     }
 
-    // 기념일 및 생일 체크 함수
     async function checkSpecialEvents() {
         if(user.role === 'doctor') return; 
         const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
@@ -607,15 +607,12 @@
         for(let d=1; d<=lastDay; d++) {
             const dt = new Date(year, month, d);
             const dayIdx = dt.getDay();
-            const kShort = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const kFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const hol = krHolidays[kFull] || krHolidays[kShort];
-            const isRed = dayIdx === 0 || hol;
+            const isRed = dayIdx === 0;
             const isToday = isCurMonth && d === todayDate;
 
             let th = document.createElement('th'); 
             if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
-            if(isRed) th.className = 'day-holiday'; if(hol) th.title = hol;
+            if(isRed) th.className = 'day-holiday';
             if(dayIdx===6 && !isRed) th.className = 'day-sat';
             if(isToday) th.classList.add('today-header'); 
             header.appendChild(th);
@@ -686,17 +683,10 @@
                     td.onclick = (e) => { 
                         originClick(e); 
                         if(user.role==='doctor') return;
-                        
                         let val = null;
-                        if(item.colorGroup === 'meds') {
-                            const hasVal = td.innerText !== '';
-                            if(!hasVal) val = getRandomIcon(medsIcons); 
-                        } else if(item.colorGroup === 'exer') {
-                            const hasVal = td.innerText !== '';
-                            if(!hasVal) val = getRandomIcon(exerIcons);
-                        } else {
-                            val = td.classList.toggle('checked') ? 'Y' : null; 
-                        }
+                        if(item.colorGroup === 'meds') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(medsIcons); } 
+                        else if(item.colorGroup === 'exer') { const hasVal = td.innerText !== ''; if(!hasVal) val = getRandomIcon(exerIcons); } 
+                        else { val = td.classList.toggle('checked') ? 'Y' : null; }
                         updateCheckVisual(td, item, val);
                         saveData(d, item.id, val);
                     };
@@ -706,10 +696,7 @@
                     td.appendChild(sel);
                 } else if(item.type === 'sleep') {
                     let sel = createSelect(0, 24); 
-                    sel.onchange = (e) => { 
-                        saveData(d, item.id, e.target.value); 
-                        updateSleepColor(td, e.target.value);
-                    }; 
+                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateSleepColor(td, e.target.value); }; 
                     td.appendChild(sel);
                 } else if(item.type === 'weight') {
                     let inp = document.createElement('input'); 
@@ -741,34 +728,18 @@
     function getRandomIcon(list) { return list[Math.floor(Math.random() * list.length)]; }
 
     function updateCheckVisual(cell, item, val) {
-        cell.style.backgroundColor = '';
-        cell.innerText = '';
-        cell.classList.remove('checked');
-
+        cell.style.backgroundColor = ''; cell.innerText = ''; cell.classList.remove('checked');
         if(!val) return; 
-
-        if(item.colorGroup === 'meds' || item.colorGroup === 'exer') {
-            cell.innerText = val; 
-        } else {
-            cell.classList.add('checked'); 
-            if(item.colorGroup === 'symptom') {
-                cell.style.backgroundColor = 'rgba(187, 222, 251, 0.5)';
-            }
-        }
+        if(item.colorGroup === 'meds' || item.colorGroup === 'exer') { cell.innerText = val; } 
+        else { cell.classList.add('checked'); if(item.colorGroup === 'symptom') cell.style.backgroundColor = 'rgba(187, 222, 251, 0.5)'; }
     }
 
     function updateSleepColor(cell, value) {
         if (value === '' || value === null) { cell.style.backgroundColor = ''; return; }
         const v = parseInt(value);
-        if (v < 7) {
-            const opacity = 0.6 * ((7 - v) / 7);
-            cell.style.backgroundColor = `rgba(255, 82, 82, ${opacity})`;
-        } else if (v > 8) {
-            const opacity = 0.6 * ((v - 8) / 16);
-            cell.style.backgroundColor = `rgba(33, 150, 243, ${opacity})`;
-        } else {
-            cell.style.backgroundColor = '';
-        }
+        if (v < 7) { const opacity = 0.6 * ((7 - v) / 7); cell.style.backgroundColor = `rgba(255, 82, 82, ${opacity})`; } 
+        else if (v > 8) { const opacity = 0.6 * ((v - 8) / 16); cell.style.backgroundColor = `rgba(33, 150, 243, ${opacity})`; } 
+        else { cell.style.backgroundColor = ''; }
     }
 
     function updateScaleColor(cell, value) {
@@ -838,10 +809,9 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        // 생활사건 표시 로직
                         const isEmoji = /\p{Emoji}/u.test(rec.value.charAt(0)) && rec.value.includes(' ');
-                        cell.innerText = isEmoji ? rec.value.split(' ')[0] : (rec.value ? 'O' : ''); // 아이콘 또는 O
-                        if(rec.value) cell.setAttribute('title', rec.value); // 툴팁에 전체 내용
+                        cell.innerText = isEmoji ? rec.value.split(' ')[0] : (rec.value ? 'O' : ''); 
+                        if(rec.value) cell.setAttribute('title', rec.value);
                     } else if(item.type === 'scale') {
                         const sel = cell.querySelector('select');
                         if(sel) { sel.value = rec.value; updateScaleColor(cell, rec.value); }
@@ -860,8 +830,6 @@
             checkSpecialEvents();
         }
     }
-
-    // --- 선물/이벤트 관련 로직 ---
 
     async function openGiftModal() {
         document.getElementById('gift-modal').style.display = 'flex';
@@ -914,10 +882,7 @@
         const { data, error } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
         
         if(error) return alert("오류: " + error.message);
-        
-        if(data === 'keep_going') {
-            return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
-        }
+        if(data === 'keep_going') return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
         
         const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
         alert(`🎉 축하합니다! [${randIcon}] 아이콘을 획득했습니다!\n\n"${msg}"`);
@@ -928,24 +893,20 @@
     async function sendGiftToRandom() {
         if(!selectedInventoryId) return;
         if(!confirm("정말 이 아이콘을 랜덤한 누군가에게 선물하시겠습니까?\n(보낸 후에는 사라집니다)")) return;
-        
         const { data, error } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
         if(error) return alert("오류: " + error.message);
         if(data === 'no_users') return alert("선물할 다른 유저가 없습니다.");
-        
         alert("🎁 선물이 익명의 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
         switchGiftTab(currentGiftTab);
     }
 
-    // 생활사건 모달 (인벤토리 연동)
+    // [수정] 생활사건 모달 - 별표 항상 표시
     async function openEventModal(day, id, txt) { 
         modalTarget = { day, id }; 
         document.getElementById('modal-title').innerText = `${day}일 생활사건`; 
         
         let currentIcon = '';
         let currentText = txt || "";
-        
-        // 아이콘 분리 로직
         if (txt && txt.includes(' ') && /\p{Emoji}/u.test(txt.charAt(0))) {
             currentIcon = txt.split(' ')[0];
             currentText = txt.substring(currentIcon.length + 1);
@@ -958,7 +919,7 @@
         const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
 
-        // [요청 반영] ⭐️ 별표는 항상 맨 앞에 기본으로 표시
+        // [NEW] 기본 아이콘(별) 항상 맨 앞에 추가
         const starDiv = document.createElement('div');
         starDiv.className = 'icon-item'; 
         starDiv.innerText = '⭐️';
@@ -984,7 +945,6 @@
                 div.onclick = () => {
                     const isSelected = div.classList.contains('selected');
                     document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected'));
-                    // 토글 기능 (이미 선택된 것 누르면 해제)
                     if(!isSelected) {
                         div.classList.add('selected');
                         document.getElementById('selected-event-icon').value = item.icon;
@@ -995,7 +955,6 @@
                 container.appendChild(div);
             });
         }
-
         document.getElementById('event-modal').style.display = 'flex'; 
     }
     
@@ -1004,13 +963,7 @@
     function saveEventFromModal() { 
         const txt = document.getElementById('modal-text').value.trim();
         const icon = document.getElementById('selected-event-icon').value;
-        
-        let fullVal = "";
-        if(icon) {
-            fullVal = icon + " " + txt;
-        } else {
-            fullVal = txt;
-        }
+        let fullVal = icon ? (icon + " " + txt) : txt;
         fullVal = fullVal.trim();
 
         if(!fullVal) { 
@@ -1021,8 +974,7 @@
             saveData(modalTarget.day, modalTarget.id, fullVal);
             const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`);
             if(cell) {
-                if(icon) cell.innerText = icon;
-                else cell.innerText = 'O'; // 아이콘 없이 텍스트만 있으면 O 표시
+                if(icon) cell.innerText = icon; else cell.innerText = 'O'; 
                 cell.setAttribute('title', fullVal);
             }
         }
