@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.2 | 분당서울대학교병원</title>
+<title>기분기록지 2.2 (Fix) | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -13,27 +13,12 @@
 <style>
     /* --- 디자인 시스템 --- */
     :root { 
-        --primary: #005eb8; 
-        --primary-dark: #004a94;
-        --today-bg: #fffde7; 
-        --today-border: #d50000;
-        --text: #2c3e50;
-        --bg-main: #f0f2f5;
-        --bg-white: #ffffff;
-        --border: #ccc;
-        
-        --bg-block-mood: #fff5f5;   
-        --bg-block-scale: #fffdeb;  
-        --bg-block-body: #e8f5e9;   
-        --bg-block-event: #ffffff;  
-        
-        --header-h: 46px;      
-        --top-bar-h: 42px; 
-        --cell-h: 30px;        
-        --col-w: 160px; 
-        --date-w: 42px;
+        --primary: #005eb8; --primary-dark: #004a94;
+        --today-bg: #fffde7; --today-border: #d50000;
+        --text: #2c3e50; --bg-main: #f0f2f5; --bg-white: #ffffff; --border: #ccc;
+        --bg-block-mood: #fff5f5; --bg-block-scale: #fffdeb; --bg-block-body: #e8f5e9; --bg-block-event: #ffffff;
+        --header-h: 46px; --top-bar-h: 42px; --cell-h: 30px; --col-w: 160px; --date-w: 42px;
     }
-
     /* 테마 */
     [data-theme="pink"] { --primary: #d81b60; --bg-main: #fce4ec; --bg-block-mood: #ffcdd2; --bg-block-scale: #e1bee7; --bg-block-body: #f8bbd0; }
     [data-theme="green"] { --primary: #2e7d32; --bg-main: #e8f5e9; --bg-block-mood: #c8e6c9; --bg-block-scale: #dcedc8; --bg-block-body: #b9f6ca; }
@@ -46,12 +31,7 @@
     * { box-sizing: border-box; }
 
     /* 로그인 화면 */
-    #auth-screen { 
-        height: 100dvh; display: flex; justify-content: center; align-items: center; 
-        position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
-        background: url('https://github.com/snumood/moodchart/blob/main/bg.jpg?raw=true') no-repeat center center fixed;
-        background-size: cover;
-    }
+    #auth-screen { height: 100dvh; display: flex; justify-content: center; align-items: center; position: fixed; width: 100%; z-index: 9999; top: 0; left: 0; background: url('https://github.com/snumood/moodchart/blob/main/bg.jpg?raw=true') no-repeat center center fixed; background-size: cover; }
     #auth-screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: -1; }
     .auth-box { width: 420px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
@@ -61,41 +41,24 @@
     .toggle-auth { margin-top: 20px; font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; display: inline-block; }
     .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f1f3f5; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
 
-    /* 메인 컨테이너 */
+    /* 메인 UI */
     .container { height: 100dvh; display: flex; flex-direction: column; background: var(--bg-white); position: relative; }
-    
-    /* 헤더 */
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: var(--bg-white); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .month-nav { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text); }
     .btn-nav { background: var(--bg-white); border: 1px solid var(--border); color: var(--text); padding: 0 8px; cursor: pointer; border-radius: 4px; font-size: 12px; height: 28px; display: flex; align-items: center; justify-content: center; }
     #date-picker { border: 1px solid var(--border); background: var(--bg-white); color: var(--text); padding: 0 5px; border-radius: 4px; height: 28px; font-size: 13px; cursor: pointer; width: 115px; }
     .btn-menu { font-size: 24px; background: none; border: none; cursor: pointer; color: var(--text); padding: 0 5px; }
 
-    /* 월간 평가 바 & 배지 영역 */
-    .top-assessment-bar { 
-        height: var(--top-bar-h); background: var(--bg-main); border-bottom: 1px solid var(--border); 
-        display: flex; align-items: center; justify-content: flex-start; gap: 8px; 
-        font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90;
-    }
+    .top-assessment-bar { height: var(--top-bar-h); background: var(--bg-main); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: flex-start; gap: 8px; font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90; }
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
     .top-assessment-bar input { width: 50px; height: 24px; text-align: center; border: 1px solid var(--border); background: var(--bg-white); color: var(--text); border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold; }
-    
-    .stat-badge {
-        background: #e3f2fd; color: var(--primary); padding: 3px 8px; 
-        border-radius: 12px; font-weight: bold; font-size: 11px; 
-        border: 1px solid #90caf9; margin-left: 5px; display: flex; align-items: center; gap: 4px;
-    }
+    .stat-badge { background: #e3f2fd; color: var(--primary); padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; border: 1px solid #90caf9; margin-left: 5px; display: flex; align-items: center; gap: 4px; }
     .streak-badge { background: #fff3e0; color: #ef6c00; border: 1px solid #ffcc80; }
     .badge-icon { font-size: 14px; margin-right: 2px; }
 
-    /* 그리드 */
     .grid-wrapper { flex: 1; overflow: auto; background: var(--bg-white); position: relative; scroll-behavior: smooth; }
-    
     #sticker-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; overflow: hidden; }
-    .sticker-placed { 
-        position: absolute; font-size: 28px; cursor: grab; pointer-events: auto; 
-        text-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.1s; user-select: none;
-    }
+    .sticker-placed { position: absolute; font-size: 28px; cursor: grab; pointer-events: auto; text-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.1s; user-select: none; }
     .sticker-placed:active { transform: scale(1.2); cursor: grabbing; z-index: 100; }
 
     table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 50px; }
@@ -104,14 +67,11 @@
     .col-label { position: sticky; left: 0; z-index: 20; width: var(--col-w) !important; min-width: var(--col-w) !important; max-width: var(--col-w) !important; border-right: 2px solid #999; text-align: left; padding-left: 10px; font-weight: 700; font-size: 11px; color: var(--text); background: var(--bg-white); }
     .block-divider td, .block-divider th { border-top: 3px solid #888; } 
 
-    /* 배경 및 색상 */
-    .bg-scale { background-color: var(--bg-block-scale); }
-    .bg-body { background-color: var(--bg-block-body); }
-    .bg-event { background-color: var(--bg-block-event); }
+    .bg-scale { background-color: var(--bg-block-scale); } .bg-body { background-color: var(--bg-block-body); } .bg-event { background-color: var(--bg-block-event); }
     .today-header { background-color: var(--today-bg) !important; color: #d50000; border: 2px solid var(--today-border) !important; border-bottom: none !important; position: sticky; top: 0; z-index: 15; }
     .today-dow { background-color: var(--today-bg) !important; border-left: 2px solid var(--today-border) !important; border-right: 2px solid var(--today-border) !important; border-bottom: 2px solid var(--today-border) !important; color: #d50000; font-weight: bold; }
-    .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } 
-    .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
+    .active-row td { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); } .active-col { box-shadow: inset 0 0 0 1000px rgba(0, 94, 184, 0.05); }
+
     .day-sun { color: #e53935; background-color: #fff5f5 !important; border-right: 2px solid #888 !important; }
     .day-sat { color: #1e88e5; background-color: #f0f8ff !important; }
     .day-holiday { color: #e53935 !important; background-color: #ffebee !important; font-weight: bold; }
@@ -131,7 +91,6 @@
     .disabled-cell { background-color: #eee !important; pointer-events: none; }
     .cell-icon { cursor: pointer; font-size: 18px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-    /* 플로팅 화살표 */
     .scroll-arrow { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 94, 184, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; pointer-events: none; z-index: 900; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: floatArrow 1.5s infinite ease-in-out; }
     .scroll-arrow.visible { opacity: 1; }
     .arrow-down { bottom: 80px; left: 50%; transform: translateX(-50%); } 
@@ -139,21 +98,9 @@
     @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
     @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
-    /* 스티커 가방 FAB */
-    #sticker-btn { 
-        position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; 
-        background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; font-size: 28px; 
-        display: flex; align-items: center; justify-content: center; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: 2px solid #fff;
-        transition: transform 0.2s;
-    }
+    #sticker-btn { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: 2px solid #fff; transition: transform 0.2s; }
     #sticker-btn:active { transform: scale(0.9); }
-    #sticker-inventory {
-        position: fixed; bottom: 90px; right: 20px; width: 300px; 
-        background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
-        padding: 15px; display: none; z-index: 1000;
-        max-height: 350px; overflow-y: auto;
-    }
+    #sticker-inventory { position: fixed; bottom: 90px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); padding: 15px; display: none; z-index: 1000; max-height: 350px; overflow-y: auto; }
     #sticker-inventory.show { display: block; }
     .sticker-list { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
     .inv-item { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; border-radius: 4px; transition: 0.2s; }
@@ -202,17 +149,14 @@
 
     .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
     .tooltip-target[data-tip=""]:hover::after { display: none; }
-
-    @media (max-width: 768px) {
-        :root { --col-w: 130px; }
-    }
+    @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.1</h2>
+        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지 2.2</h2>
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
@@ -316,7 +260,7 @@
         <div class="menu-section"><div class="menu-title">계정 관리</div><div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div><div class="menu-item" onclick="doLogout()">🚪 로그아웃</div></div>
         <div class="menu-section"><div class="menu-title">데이터 관리</div><div class="menu-item" onclick="exportData()">💾 모든 기록을 파일로 다운로드</div><input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)"><div class="menu-item" onclick="document.getElementById('import-file').click()">📂 파일을 기록으로 업로드 (이전기록삭제)</div></div>
         <div class="menu-section"><div class="menu-title">안내</div><a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="menu-item">📖 기분기록지 작성방법 보기</a></div>
-        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">본 프로그램은 의료용이 아니며 사용 책임은 작성자에게 있습니다.</div>
+        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.</div>
     </div>
 </div>
 
@@ -368,7 +312,6 @@
         '2040-02-11':'설날', '2040-02-12':'설날', '2040-02-13':'설날', '2040-02-14':'대체공휴일', '2040-04-11':'국회의원선거', '2040-05-18':'석가탄신일', '2040-09-20':'추석', '2040-09-21':'추석', '2040-09-22':'추석'
     };
 
-    // [보상 스티커 데이터베이스]
     const stickerDB = {
         1: ['⭐️','❤️','☀️','☁️','❄️','🔥','💧','🍀','🎵','📷','📚','✏️','🧸','🎈','🔑','🧩','🪁','🚲','🚗','🏠'], 
         2: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌'], 
@@ -376,7 +319,6 @@
         4: ['💎','💍','👑','🏆','🥇','🥈','🥉','🏅','🎖️','🚀','🛸','🌍','🌕','🌈','⚡','🔮','🧿','🪬','🧞‍♂️','🧜‍♀️'] 
     };
     
-    // [시즌 한정 스티커]
     const seasonalStickers = {
         'newyear': ['🌅','🧧','🐉','🪁','🙇','💰','🎍','🎊','🎉'],
         'chuseok': ['🌕','🍁','🌰','🎎','🍱','🦗','🌾','🍡'],
@@ -385,9 +327,7 @@
         'korea': ['🇰🇷','🐅','🐻','🍜','🥋']
     };
 
-    const eventIcons = [
-        '☀️','🌤️','☁️','🌧️','⛈️','🌩️','🌨️','❄️','🌪️','🌫️','🌈','☔','😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😶‍🌫️','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','😵‍💫','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','🏠','🏫','🏢','🏥','🏦','🏪','🏩','🏨','💒','⛪','🕌','🛕','🕍','🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛'
-    ];
+    const eventIcons = ['☀️','🌤️','☁️','🌧️','⛈️','🌩️','🌨️','❄️','🌪️','🌫️','🌈','☔','😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😶‍🌫️','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','😵‍💫','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','🏠','🏫','🏢','🏥','🏦','🏪','🏩','🏨','💒','⛪','🕌','🛕','🕍','🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛'];
     const medsIcons = ['🍀', '🌿', '🌱', '🍃', '🌾', '🌷', '✨', '⭐', '🌟', '💫', '🧡', '💙', '💜', '🤍', '🛡️', '✅', '➕', '💧', '🥣', '🍵', '🍎', '🍋', '🍓', '🐝', '🍯', '💊', '💊', '💊', '🩺', '🌡️'];
     const exerIcons = ['🏃', '🏃‍♀️', '🏃‍♂️', '👟', '🧗', '🧗‍♀️', '🧗‍♂️', '🚴', '🚴‍♀️', '🚴‍♂️', '🏋️', '🏋️‍♀️', '🏋️‍♂️', '🧘', '🧘‍♀️', '🧘‍♂️', '🤺', '🏇', '⛷️', '🏂', '🏄', '🏄‍♀️', '🏄‍♂️', '🏊', '🏊‍♀️', '🏊‍♂️', '🚣', '🚣‍♀️', '🚣‍♂️', '🧗', '💦', '💪', '🔥'];
 
@@ -434,12 +374,149 @@
     let currentTheme = localStorage.getItem('mood_theme') || 'default';
     let selectedIcon = '';
     
+    // 안전한 위치에 renderTable 선언
+    function renderTable() {
+        const year = curDate.getFullYear(), month = curDate.getMonth();
+        document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
+        const today = new Date();
+        const isCurMonth = today.getFullYear()===year && today.getMonth()===month;
+        const todayDate = today.getDate();
+        const lastDay = new Date(year, month+1, 0).getDate();
+        
+        const header = document.getElementById('header-row');
+        const dowRow = document.getElementById('dow-row');
+        const body = document.getElementById('table-body');
+        
+        while(header.children.length > 1) header.removeChild(header.lastChild);
+        while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
+        body.innerHTML = '';
+
+        const days = ['일','월','화','수','목','금','토'];
+        for(let d=1; d<=lastDay; d++) {
+            const dt = new Date(year, month, d);
+            const dayIdx = dt.getDay();
+            const kShort = `${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const kFull = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const hol = krHolidays[kFull] || krHolidays[kShort];
+            const isRed = dayIdx === 0 || hol;
+            const isToday = isCurMonth && d === todayDate;
+
+            let th = document.createElement('th'); 
+            if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
+            if(isRed) th.className = 'day-holiday'; if(hol) th.title = hol;
+            if(dayIdx===6 && !isRed) th.className = 'day-sat';
+            if(isToday) th.classList.add('today-header'); 
+            header.appendChild(th);
+
+            let td = document.createElement('th'); td.innerText = days[dayIdx];
+            if(isRed) td.className = 'day-holiday'; if(dayIdx===6 && !isRed) td.className = 'day-sat';
+            if(isToday) td.classList.add('today-dow'); 
+            dowRow.appendChild(td);
+        }
+
+        let lastSection = null;
+        items.forEach(item => {
+            let tr = document.createElement('tr');
+            if(lastSection && lastSection !== item.section) tr.classList.add('block-divider');
+            lastSection = item.section;
+            if (item.section === 'mood' && item.color) tr.style.backgroundColor = item.color;
+            else tr.classList.add('bg-' + item.section);
+
+            let th = document.createElement('th');
+            th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
+            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
+            tr.appendChild(th);
+
+            for(let d=1; d<=lastDay; d++) {
+                const dt = new Date(year, month, d);
+                const kDate = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let td = document.createElement('td');
+                if(dt.getDay() === 0) td.style.borderRight = "2px solid #bbb"; 
+                td.dataset.d = d; td.dataset.c = item.id; td.dataset.s = item.section;
+
+                td.onclick = function(e) {
+                    if(item.type !== 'event') {
+                        document.querySelectorAll('.active-row, .active-col').forEach(el => { el.classList.remove('active-row'); el.classList.remove('active-col'); });
+                        tr.classList.add('active-row');
+                        document.querySelectorAll(`td:nth-child(${d+1})`).forEach(cell => cell.classList.add('active-col'));
+                    }
+                };
+
+                if(item.id === 'meds' || item.id === 'exer') {
+                    td.className = 'cell-check cell-icon'; 
+                    const originClick = td.onclick;
+                    td.onclick = (e) => {
+                        originClick(e); if(user.role === 'doctor') return;
+                        const hasVal = td.innerText !== '' || td.classList.contains('checked');
+                        if(hasVal) {
+                            td.innerText = ''; td.classList.remove('checked'); saveData(d, item.id, null); updateVisuals(td, item, null);
+                        } else {
+                            const icon = getFixedRandomIcon(kDate, item.id);
+                            td.innerText = icon; saveData(d, item.id, icon); updateVisuals(td, item, 'Y');
+                        }
+                    };
+                } 
+                else if(item.type === 'check' && item.section === 'mood') {
+                    td.className = 'cell-check';
+                    const originClick = td.onclick;
+                    td.onclick = (e) => {
+                        originClick(e); if(user.role === 'doctor') return;
+                        const isChecked = td.classList.contains('checked');
+                        if(item.id !== 'mixed') {
+                            let cnt = 0;
+                            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+                            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${d}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
+                            if(!isChecked && cnt >= 2) return alert("기분은 하루 최대 2개입니다.");
+                        }
+                        if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
+                        else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                        if(item.id !== 'mixed') updateMixedState(d);
+                    };
+                } else if(item.type === 'mixed') { td.className = 'cell-mixed'; }
+                else if(item.type === 'check') {
+                    td.className = 'cell-check'; 
+                    const originClick = td.onclick;
+                    td.onclick = (e) => { 
+                        originClick(e); if(user.role!=='doctor') { 
+                            let val = td.classList.toggle('checked') ? 'Y' : null; 
+                            saveData(d, item.id, val); updateVisuals(td, item, val); 
+                        }
+                    };
+                } else if(item.type === 'scale') {
+                    let sel = createSelect(-4, 4); 
+                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
+                    td.appendChild(sel);
+                } else if(item.type === 'sleep') {
+                    let sel = createSelect(0, 24); 
+                    sel.onchange = (e) => { saveData(d, item.id, e.target.value); updateVisuals(td, item, e.target.value); }; 
+                    td.appendChild(sel);
+                } else if(item.type === 'weight') {
+                    let inp = document.createElement('input'); 
+                    inp.type='text'; inp.inputMode='decimal'; inp.className='cell-input';
+                    if(dt.getDay() !== 0) { td.className = 'disabled-cell'; inp.disabled = true; } 
+                    else inp.onblur = (e) => saveData(d, item.id, e.target.value);
+                    td.appendChild(inp);
+                } else if(item.type === 'event') {
+                    td.className = 'cell-event'; 
+                    td.onclick = () => { if(user.role!=='doctor') openEventModal(d, item.id, td.innerText); };
+                }
+                tr.appendChild(td);
+            }
+            body.appendChild(tr);
+        });
+        
+        document.getElementById('score-ls').value = '';
+        document.getElementById('score-mssi').value = '';
+        if(isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
+        setTimeout(checkScroll, 500);
+        if(target) loadData();
+    }
+
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
     const aRight = document.getElementById('arrow-right');
-    if (gridWrapper) {
-        gridWrapper.addEventListener('scroll', checkScroll);
-    }
+    if(gridWrapper) gridWrapper.addEventListener('scroll', checkScroll);
+    
     function checkScroll() {
         if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
         else aDown.classList.remove('visible');
@@ -486,46 +563,38 @@
             document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); 
             ['pink','green','dark'].forEach(t => unlockTheme(t, false));
         } else { 
-            // 7일 이내 데이터로만 보상 체크
             checkUnlockStatus(id, hashedPw, user.role);
-            checkSeasonalEvent(); // [NEW] 시즌 이벤트
+            checkSeasonalEvent();
             loadUserStickers(); 
             loadPlacedStickers(); 
             renderTable(); 
         }
     }
 
-    // Helper to check timeliness (7일 이내 작성 여부)
     function isTimely(record) {
-        if (!record.updated_at) return true; // DB 마이그레이션 전 데이터는 인정
+        if (!record.updated_at) return true;
         const targetDate = new Date(record.record_date);
         const writeDate = new Date(record.updated_at);
-        // 날짜 차이 계산 (밀리초 -> 일)
         const diffTime = writeDate - targetDate;
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
-        // 7일 이내 (+1일 여유)
         return diffDays <= 8 && diffDays >= -1; 
     }
 
     async function checkUnlockStatus(id, pw, role) {
         if(role === 'doctor') return;
         const { data } = await sb.rpc('get_records_secure', { p_user: id, p_pw: pw, p_target: id, p_start: '2000-01-01', p_end: '2099-12-31' });
-        
         if (data && data.length > 0) {
-            // 유효한 데이터만 필터링 (7일 이내 작성)
             const validData = data.filter(r => isTimely(r));
             const uniqueDates = Array.from(new Set(validData.map(r => r.record_date))).sort();
             const activeDays = uniqueDates.length;
             document.getElementById('total-days-display').innerText = `관찰 ${activeDays}일`;
             
-            // 스트릭 계산
             const streak = calculateStreak(uniqueDates);
             updateBadgeDisplay(streak);
 
             if (activeDays >= 30) unlockTheme('pink', true);
             if (activeDays >= 180) unlockTheme('green', true);
             if (activeDays >= 365) unlockTheme('dark', true);
-
             checkWeeklyReward(validData);
         }
     }
@@ -534,22 +603,15 @@
         if (sortedDates.length === 0) return 0;
         let streak = 0;
         const today = new Date(); today.setHours(0,0,0,0);
-        
         const lastRecord = new Date(sortedDates[sortedDates.length-1]);
         const diff = (today - lastRecord) / (1000 * 60 * 60 * 24);
         if (diff > 1) return 0;
-
         let current = new Date(lastRecord);
         for (let i = sortedDates.length - 1; i >= 0; i--) {
             const d = new Date(sortedDates[i]);
-            // 날짜 비교 (시간제외)
             if (current.getFullYear() === d.getFullYear() && current.getMonth() === d.getMonth() && current.getDate() === d.getDate()) {
-                streak++;
-                current.setDate(current.getDate() - 1); 
-            } else if (current.getTime() > d.getTime()) {
-                // 건너뛴 날짜가 있다면 루프 종료 (정렬되어 있으므로)
-                break; 
-            }
+                streak++; current.setDate(current.getDate() - 1); 
+            } else if (current.getTime() > d.getTime()) { break; }
         }
         return streak;
     }
@@ -557,14 +619,8 @@
     function updateBadgeDisplay(streak) {
         const streakEl = document.getElementById('streak-display');
         const badgeContainer = document.getElementById('badge-container');
-        
-        if (streak > 1) {
-            streakEl.innerText = `연속 ${streak}일🔥`;
-            streakEl.classList.remove('hidden');
-        } else {
-            streakEl.classList.add('hidden');
-        }
-
+        if (streak > 1) { streakEl.innerText = `연속 ${streak}일🔥`; streakEl.classList.remove('hidden'); } 
+        else { streakEl.classList.add('hidden'); }
         let badges = '';
         if (streak >= 3) badges += '<span title="3일 연속" class="badge-icon">🥉</span>';
         if (streak >= 7) badges += '<span title="7일 연속" class="badge-icon">🥈</span>';
@@ -578,7 +634,6 @@
         const month = today.getMonth() + 1;
         const date = today.getDate();
         const md = `${String(month).padStart(2,'0')}-${String(date).padStart(2,'0')}`;
-        
         let eventKey = null;
         if (md === '01-01') eventKey = 'newyear';
         else if (md === '12-25') eventKey = 'christmas';
@@ -586,17 +641,13 @@
         else if (krHolidays[`${today.getFullYear()}-${md}`] === '추석') eventKey = 'chuseok';
         else if (krHolidays[md]) eventKey = 'korea';
 
-        // 생일 체크 (숫자로 끝나는 ID만)
         const idMatch = user.username.match(/(\d{2})(\d{2})$/); 
         if (idMatch) {
             const m = parseInt(idMatch[1]);
             const d = parseInt(idMatch[2]);
             if (month === m && date === d) eventKey = 'birthday';
         }
-
-        if (eventKey) {
-            giveSpecialReward(eventKey);
-        }
+        if (eventKey) giveSpecialReward(eventKey);
     }
 
     function giveSpecialReward(eventKey) {
@@ -606,12 +657,7 @@
             const myKey = `my_stickers_${user.username}`;
             let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
             let newCount = 0;
-            stickers.forEach(s => {
-                if (!myStickers.includes(s)) {
-                    myStickers.push(s);
-                    newCount++;
-                }
-            });
+            stickers.forEach(s => { if (!myStickers.includes(s)) { myStickers.push(s); newCount++; } });
             if (newCount > 0) {
                 localStorage.setItem(myKey, JSON.stringify(myStickers));
                 let msg = "특별한 날이네요!";
@@ -619,7 +665,6 @@
                 else if(eventKey==='christmas') msg = "메리 크리스마스! 🎄";
                 else if(eventKey==='newyear') msg = "새해 복 많이 받으세요! 🙇";
                 else if(eventKey==='chuseok') msg = "풍성한 한가위 되세요! 🌕";
-                
                 alert(`${msg}\n[시즌 한정 스티커] 꾸러미가 도착했습니다!\n가방을 확인해보세요.`);
                 loadUserStickers();
             }
@@ -632,14 +677,9 @@
         const lastRewardStr = localStorage.getItem(lastRewardKey);
         const lastRewardDate = lastRewardStr ? new Date(lastRewardStr) : new Date(0);
         const now = new Date();
-        
         const diffDays = (now - lastRewardDate) / (1000 * 60 * 60 * 24);
         if (diffDays >= 7) {
-            const recentLogs = records.filter(r => {
-                const d = new Date(r.record_date);
-                return (now - d) / (1000 * 60 * 60 * 24) <= 7;
-            }).length;
-
+            const recentLogs = records.filter(r => { const d = new Date(r.record_date); return (now - d) / (1000 * 60 * 60 * 24) <= 7; }).length;
             if (recentLogs >= 3) {
                 const hasScore = records.some(r => (r.category === 'score_ls' || r.category === 'score_mssi') && r.value > 0);
                 giveReward(hasScore);
@@ -651,28 +691,20 @@
     function giveReward(hasBonus) {
         let tier = 1;
         const rand = Math.random();
-        if (hasBonus) {
-            if (rand < 0.5) tier = 2; else if (rand < 0.8) tier = 3; else tier = 4;
-        } else {
-            if (rand < 0.8) tier = 1; else tier = 2;
-        }
-
+        if (hasBonus) { if (rand < 0.5) tier = 2; else if (rand < 0.8) tier = 3; else tier = 4; } 
+        else { if (rand < 0.8) tier = 1; else tier = 2; }
         const tierIcons = stickerDB[tier];
         const newIcon = tierIcons[Math.floor(Math.random() * tierIcons.length)];
-        
         const myKey = `my_stickers_${user.username}`;
         let myStickers = JSON.parse(localStorage.getItem(myKey) || "[]");
-        
         if (!myStickers.includes(newIcon)) {
             myStickers.push(newIcon);
             localStorage.setItem(myKey, JSON.stringify(myStickers));
-            
             let itemName = "반짝이는 아이템";
             let msg = "꾸준히 기분을 관찰하신 당신에게";
             if(tier===2) { itemName = "귀여운 친구"; msg = "스스로를 잘 돌보시는군요!"; }
             if(tier===3) { itemName = "특별한 오브젝트"; msg = "정말 대단해요! 훌륭합니다."; }
             if(tier===4) { itemName = "전설의 아이콘"; msg = "당신의 기록은 전설이 될 거예요!"; }
-
             alert(`${msg}\n[${newIcon} ${itemName}] 스티커가 생겼어요!\n기분기록지 어디든 붙여보세요!`);
             loadUserStickers(); 
         }
@@ -683,12 +715,10 @@
         let earned = JSON.parse(localStorage.getItem(myKey) || "[]");
         let allStickers = [...stickerDB[1]]; 
         earned.forEach(s => { if(!allStickers.includes(s)) allStickers.push(s); });
-
         const container = document.getElementById('sticker-list-container');
         container.innerHTML = '';
         const listDiv = document.createElement('div');
         listDiv.className = 'sticker-list';
-        
         allStickers.forEach(icon => {
             const div = document.createElement('div');
             div.className = 'inv-item';
@@ -714,10 +744,8 @@
         el.style.left = x + 'px';
         el.style.top = y + 'px';
         if (dbId) el.dataset.dbId = dbId; 
-
         let isDragging = false;
         let startX, startY, initLeft, initTop;
-
         const startDrag = (cx, cy) => { isDragging = true; startX = cx; startY = cy; initLeft = parseFloat(el.style.left); initTop = parseFloat(el.style.top); el.style.zIndex = 1000; };
         const moveDrag = (cx, cy) => { if (!isDragging) return; el.style.left = (initLeft + cx - startX) + 'px'; el.style.top = (initTop + cy - startY) + 'px'; };
         const endDrag = async () => {
@@ -730,14 +758,12 @@
                 const { error } = await sb.rpc('save_sticker_secure', { p_user: user.username, p_pw: user.password, p_icon: icon, p_x: finalX, p_y: finalY });
             }
         };
-
         el.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); });
         window.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); });
         el.addEventListener('mouseup', endDrag);
         el.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
         window.addEventListener('touchmove', e => { moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
         el.addEventListener('touchend', endDrag);
-
         el.ondblclick = async () => {
             if(confirm('이 스티커를 삭제할까요?')) {
                 if(el.dataset.dbId && user.role !== 'doctor') {
@@ -753,26 +779,26 @@
         const layer = document.getElementById('sticker-layer');
         layer.innerHTML = '';
         const { data } = await sb.rpc('get_stickers_secure', { p_user: user.username, p_pw: user.password, p_target: target });
-        if (data) {
-            data.forEach(s => spawnSticker(s.icon, s.pos_x, s.pos_y, s.id));
-        }
+        if (data) { data.forEach(s => spawnSticker(s.icon, s.pos_x, s.pos_y, s.id)); }
     }
 
-    const gridEl = document.getElementById('grid-container');
-    gridEl.ondragover = (e) => e.preventDefault();
-    gridEl.ondrop = (e) => {
-        e.preventDefault();
-        const icon = e.dataTransfer.getData("text/plain");
-        if (icon) {
-            const rect = gridEl.getBoundingClientRect();
-            const x = e.clientX - rect.left + gridEl.scrollLeft;
-            const y = e.clientY - rect.top + gridEl.scrollTop;
-            spawnSticker(icon, x, y);
-            if (user.role !== 'doctor') {
-                sb.rpc('save_sticker_secure', { p_user: user.username, p_pw: user.password, p_icon: icon, p_x: x, p_y: y });
+    const gridEl2 = document.getElementById('grid-container');
+    if(gridEl2) {
+        gridEl2.ondragover = (e) => e.preventDefault();
+        gridEl2.ondrop = (e) => {
+            e.preventDefault();
+            const icon = e.dataTransfer.getData("text/plain");
+            if (icon) {
+                const rect = gridEl2.getBoundingClientRect();
+                const x = e.clientX - rect.left + gridEl2.scrollLeft;
+                const y = e.clientY - rect.top + gridEl2.scrollTop;
+                spawnSticker(icon, x, y);
+                if (user.role !== 'doctor') {
+                    sb.rpc('save_sticker_secure', { p_user: user.username, p_pw: user.password, p_icon: icon, p_x: x, p_y: y });
+                }
             }
-        }
-    };
+        };
+    }
 
     function unlockTheme(themeName, alertMsg) {
         const btn = document.getElementById(`theme-${themeName}`);
@@ -844,169 +870,6 @@
         closeEventModal(); 
     }
     
-    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
-    function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
-    function doLogout() { location.reload(); }
-    async function changePassword() {
-        const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
-        if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
-        const ho = await hashPassword(o), hn = await hashPassword(n);
-        const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success') { alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
-    }
-    function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
-    function jumpToDate(val) { curDate = new Date(val); renderTable(); }
-    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${user.username}.csv`; link.click(); }
-    async function importData(input) { const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(d && c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
-
-    function createSelect(min, max) {
-        let s = document.createElement('select'); s.className = 'cell-select'; s.add(new Option('', ''));
-        for(let i=min; i<=max; i++) s.add(new Option(i, i));
-        return s;
-    }
-
-    function updateVisuals(cell, item, value) {
-        cell.style.backgroundColor = ''; 
-        if (value === '' || value === null) return;
-        if (item.section === 'scale') {
-            const val = parseInt(value);
-            if (val > 0) { const alpha = 0.05 + (val * 0.06); cell.style.backgroundColor = `rgba(255, 82, 82, ${alpha})`; } 
-            else if (val < 0) { const alpha = 0.05 + (Math.abs(val) * 0.06); cell.style.backgroundColor = `rgba(33, 150, 243, ${alpha})`; } 
-            else { cell.style.backgroundColor = '#ffffff'; }
-        } else if (item.type === 'sleep') {
-            const val = parseFloat(value);
-            if (val < 7) { let intensity = (7 - val) / 7; cell.style.backgroundColor = `rgba(255, 82, 82, ${intensity * 0.5})`; } 
-            else if (val > 7) { let intensity = (val - 7) / 17; cell.style.backgroundColor = `rgba(33, 150, 243, ${intensity * 0.5})`; }
-        } else if (item.type === 'check' || (item.id === 'meds' || item.id === 'exer')) {
-            if (value && value !== '') {
-                if (item.colorGroup === 'period') cell.style.backgroundColor = 'rgba(244, 143, 177, 0.4)';
-                else if (item.colorGroup === 'neg') cell.style.backgroundColor = 'rgba(100, 181, 246, 0.3)';
-                else if (item.colorGroup === 'pos') cell.style.backgroundColor = 'rgba(129, 199, 132, 0.4)';
-            }
-        } else if (item.type === 'event') {
-            if (value && value.trim() !== '') cell.style.backgroundColor = 'rgba(255, 245, 157, 0.5)';
-        }
-    }
-
-    function checkMin(el) { if(el.value < 0) el.value = 0; }
-
-    async function updateMixedState(day) {
-        setTimeout(() => {
-            let cnt = 0;
-            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
-            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${day}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
-            const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
-            if(cnt >= 2) { if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } } 
-            else { if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); } }
-        }, 50);
-    }
-
-    async function saveData(day, cat, val) {
-        if(user.role==='doctor') return;
-        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
-        const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
-    }
-
-    async function saveMonthlyScore(type, val) {
-        if(user.role==='doctor') return;
-        const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
-        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
-    }
-
-    async function loadData() {
-        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
-        document.querySelectorAll('input, select').forEach(e => { 
-            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) {
-                e.value=''; if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
-            }
-        });
-        document.querySelectorAll('.cell-event').forEach(e => { e.innerText = ''; e.style.backgroundColor = ''; });
-
-        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
-        const lastDay = new Date(y, m, 0).getDate();
-        const start = `${y}-${String(m).padStart(2,'0')}-01`;
-        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
-
-        const { data, error } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
-        if(error) { if(error.message.includes('찾을 수')) return alert("환자를 찾을 수 없습니다."); else return alert("조회 오류: " + error.message); }
-        if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
-
-        data?.forEach(rec => {
-            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
-            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
-            else {
-                const day = new Date(rec.record_date).getDate();
-                const item = items.find(i => i.id === rec.category);
-                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
-                if(cell) {
-                    if(item && (item.id === 'meds' || item.id === 'exer')) {
-                        cell.innerText = rec.value;
-                        updateVisuals(cell, item, 'Y');
-                    }
-                    else if(rec.category === 'mixed' || cell.classList.contains('cell-check') || cell.classList.contains('cell-mixed')) {
-                        if(rec.value === 'Y') { cell.classList.add('checked'); if(item) updateVisuals(cell, item, 'Y'); }
-                    } else if(cell.classList.contains('cell-event')) {
-                        cell.innerText = rec.value;
-                        if(item) updateVisuals(cell, item, rec.value);
-                    } else if(cell.querySelector('select')) {
-                        cell.querySelector('select').value = rec.value;
-                        if(item || cell.dataset.s === 'scale') { const targetItem = item || items.find(i => i.section === 'scale'); updateVisuals(cell, targetItem, rec.value); }
-                    } else if(cell.querySelector('input')) {
-                        cell.querySelector('input').value = rec.value;
-                        if(item) updateVisuals(cell, item, rec.value);
-                    }
-                }
-            }
-        });
-
-        if(user.role !== 'doctor') {
-            const today = new Date();
-            if(today.getFullYear() === y && today.getMonth() + 1 === m) {
-                const lastDayOfCurrentMonth = new Date(y, m, 0).getDate();
-                if(today.getDate() >= lastDayOfCurrentMonth - 7) {
-                    const lsVal = document.getElementById('score-ls').value;
-                    const mssiVal = document.getElementById('score-mssi').value;
-                    if(!lsVal || !mssiVal) setTimeout(() => alert("📢 [알림] 이번 달 평가를 진행해주세요!\n(상단바 [월간] 항목 입력)"), 500);
-                }
-            }
-        }
-    }
-
-    async function openChartModal(type) {
-        toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
-        const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
-        document.getElementById('chart-title').innerText = title;
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
-        if(!data || data.length === 0) return alert("데이터가 없습니다.");
-        const targetCat = `score_${type}`;
-        const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
-        drawDashboardChart(points, title, type === 'ls' ? '#10B981' : '#6366F1');
-    }
-    function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
-    function drawDashboardChart(points, label, color) {
-        const ctx = document.getElementById('scoreChart').getContext('2d');
-        if(myChart) myChart.destroy();
-        if(points.length === 0) return;
-        const dates = points.map(p => new Date(p.x).getTime());
-        const minTime = Math.min(...dates), maxTime = Math.max(...dates);
-        const buffer = 28 * 24 * 3600 * 1000;
-        const minYear = new Date(minTime - buffer).getFullYear(), maxYear = new Date(maxTime + buffer).getFullYear();
-        const annotations = {};
-        const bgColors = ['rgba(248, 250, 252, 0.6)', 'rgba(240, 253, 244, 0.6)', 'rgba(239, 246, 255, 0.6)', 'rgba(254, 252, 232, 0.6)'];
-        for (let y = minYear; y <= maxYear; y++) {
-            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:12, weight:'bold'}, color: '#475569' } };
-        }
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '10', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
-        });
-    }
-
-    function openEventModal(day, id, txt) { modalTarget = { day, id }; document.getElementById('modal-title').innerText = `${day}일 생활사건`; document.getElementById('modal-text').value = txt || ""; document.getElementById('event-modal').style.display = 'flex'; document.getElementById('modal-text').focus(); }
-    function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
-    function saveEventFromModal() { const txt = document.getElementById('modal-text').value; const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`); if(cell) { cell.innerText = txt; updateVisuals(cell, {type:'event'}, txt); } saveData(modalTarget.day, modalTarget.id, txt); closeEventModal(); }
     function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     function doLogout() { location.reload(); }
