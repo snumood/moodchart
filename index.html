@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 3.4 | 분당서울대학교병원</title>
+<title>기분기록지 3.5 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -19,10 +19,12 @@
         --today-border: #d50000;
         --text: #2c3e50;
         --border: #ccc;
+        
         --bg-block-mood: #fff5f5;   
         --bg-block-scale: #fffdeb;  
         --bg-block-body: #e8f5e9;   
         --bg-block-event: #ffffff;  
+        
         --header-h: 46px;      
         --top-bar-h: 38px; 
         --cell-h: 34px;        
@@ -64,6 +66,7 @@
     .top-assessment-bar { height: var(--top-bar-h); background: #f8f9fa; border-bottom: 1px solid #bbb; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; flex-shrink: 0; padding: 0 10px; overflow-x: auto; white-space: nowrap; z-index: 90; }
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
     .top-assessment-bar input { width: 50px; height: 24px; text-align: center; border: 1px solid #999; border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold; }
+    .points-badge { display: none; }
 
     .grid-wrapper { flex: 1; overflow: auto; background: #fff; position: relative; -webkit-overflow-scrolling: touch; height: calc(100dvh - var(--header-h) - var(--top-bar-h)); }
     table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; margin-bottom: 80px; }
@@ -100,6 +103,14 @@
     .cell-select { width: 100%; height: 100%; border: none; background: transparent; text-align-last: center; -webkit-appearance: none; cursor: pointer; font-weight: 600; font-size: 11px; padding: 0; margin: 0; }
     .cell-input { width: 100%; height: 100%; border: none; background: transparent; text-align: center; font-size: 11px; padding: 0; margin: 0; min-width: 0; }
     .cell-event { cursor: pointer; text-align: center; padding: 0; color: #222; font-size: 22px; line-height: 1; }
+    .disabled-cell { background-color: #eee !important; pointer-events: none; color: #aaa; }
+
+    .scroll-arrow { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 94, 184, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; pointer-events: none; z-index: 900; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: floatArrow 1.5s infinite ease-in-out; }
+    .scroll-arrow.visible { opacity: 1; }
+    .arrow-down { bottom: 20px; left: 50%; transform: translateX(-50%); } 
+    .arrow-right { top: 50%; right: 15px; transform: translateY(-50%); animation-name: floatArrowH; }
+    @keyframes floatArrow { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
+    @keyframes floatArrowH { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(5px, -50%); } }
 
     #sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.3s ease; display: flex; flex-direction: column; }
     #sidebar.open { right: 0; }
@@ -113,6 +124,11 @@
     .menu-item:hover { color: var(--primary); font-weight: bold; }
     .user-badge { background: #e3f2fd; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 10px; }
 
+    #doc-panel { display: none; margin-bottom: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; }
+    #doc-panel.active { display: block; }
+    #doc-panel input { width: 70%; padding: 8px; border: 1px solid #fff; border-radius: 4px; }
+    #doc-panel button { width: 25%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; }
+
     .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     .icon-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-height: 180px; overflow-y: auto; overflow-x: hidden; margin-bottom: 15px; padding: 5px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
@@ -124,23 +140,11 @@
     .gift-tab-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 12px; color: #888; border-bottom: 2px solid transparent; }
     .gift-tab-item.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
 
-    /* [업데이트] 더 세련된 황금/컬러 빛남 효과 */
-    .gold-tier-1 { /* 10회 달성: 부드러운 노랑 */
-        background: linear-gradient(135deg, #fffde7, #fff9c4) !important; 
-        border: 1px solid #fbc02d !important; 
-    }
-    .gold-tier-2 { /* 50회 달성: 오로라 빛 */
-        background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; 
-        border: 2px solid #fbc02d !important;
-        box-shadow: 0 0 8px rgba(251, 192, 45, 0.4);
-    }
-    .gold-tier-3 { /* 100회 이상 달성: 진한 금빛 + 은은한 광채 */
-        background: linear-gradient(135deg, #fff9c4, #fbc02d, #f9a825) !important; 
-        border: 2px solid #e65100 !important;
-        box-shadow: 0 0 15px rgba(230, 81, 0, 0.5);
-        animation: glowPulse 3s infinite;
-    }
-    @keyframes glowPulse { 0% { opacity: 0.8; } 50% { opacity: 1; transform: scale(1.02); } 100% { opacity: 0.8; } }
+    /* [업데이트] 황금빛 이모지 스타일 */
+    .gold-tier-1 { /* 10회 */ background: linear-gradient(135deg, #fffde7, #fff9c4) !important; border: 1px solid #fbc02d !important; }
+    .gold-tier-2 { /* 50회 */ background: linear-gradient(135deg, #e0f2f1, #fff9c4, #fce4ec) !important; border: 2px solid #fbc02d !important; box-shadow: 0 0 8px rgba(251, 192, 45, 0.4); }
+    .gold-tier-3 { /* 100회 */ background: linear-gradient(135deg, #fffde7, #fbc02d, #f9a825, #fffde7) !important; background-size: 200% 200% !important; border: 2px solid #e65100 !important; box-shadow: 0 0 15px rgba(251, 192, 45, 0.7); animation: shimmer 3s infinite linear; }
+    @keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; transform: scale(1.03); } 100% { background-position: 0% 50%; } }
 
     .chart-modal-content { background: white; padding: 20px; border-radius: 20px; width: 95%; height: 80%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
     .chart-container { flex: 1; position: relative; width: 100%; min-height: 0; }
@@ -151,6 +155,9 @@
     .btn-modal { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-save { background: var(--primary); color: white; }
     .btn-cancel { background: #eee; color: #333; margin-right: 5px; }
+
+    .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
+    .tooltip-target[data-tip=""]:hover::after { display: none; }
 
     @media (max-width: 768px) { :root { --col-w: 130px; } }
 </style>
@@ -174,7 +181,10 @@
             <input id="j-id" class="auth-inp" placeholder="희망 아이디">
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
             <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜+생년월일 (필수)">
-            <div class="legal-text">본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.</div>
+            <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305</div>
+            <div class="legal-text">
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
+            </div>
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;"><input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.</label>
             <button class="btn-auth" style="background:#28a745;" onclick="join()">가입완료</button>
             <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
@@ -216,7 +226,9 @@
         <div id="doc-panel" class="hidden"><div style="font-weight:bold; margin-bottom:5px;">환자 조회</div><div style="display:flex; gap:5px;"><input id="search-id" placeholder="ID/번호" style="flex:1; padding:5px;"><button onclick="searchPatient()">검색</button></div></div>
         <div class="menu-section"><div class="menu-title">계정 관리</div><div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div><div class="menu-item" onclick="doLogout()">🚪 로그아웃</div></div>
         <div class="menu-section"><div class="menu-title">선물함</div><div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div></div>
-        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.</div>
+        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
+        </div>
     </div>
 </div>
 
@@ -236,7 +248,7 @@
 <div id="event-modal" class="modal-wrap">
     <div class="modal-content">
         <div class="modal-header"><span id="modal-title"></span><span style="cursor:pointer;" onclick="closeEventModal()">✕</span></div>
-        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 아이콘을 선택하세요</div>
+        <div style="font-size:11px; color:#666; margin-bottom:5px;">보유한 이모티콘을 선택하세요</div>
         <div id="event-icon-container" class="icon-grid"></div>
         <input type="hidden" id="selected-event-icon">
         <textarea id="modal-text" class="modal-textarea" placeholder="내용을 입력하세요."></textarea>
@@ -252,6 +264,13 @@
     </div>
 </div>
 
+<div id="chart-modal" class="modal-wrap">
+    <div class="chart-modal-content">
+        <div class="modal-header"><span id="chart-title">추세 그래프</span><span style="cursor:pointer; font-size:20px;" onclick="closeChartModal()">✕</span></div>
+        <div class="chart-container"><canvas id="scoreChart"></canvas></div>
+    </div>
+</div>
+
 <script>
     const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
@@ -259,7 +278,9 @@
 
     async function hashPassword(str) { const msgBuffer = new TextEncoder().encode(str); const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
 
-    const rewardIcons = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦫','🦥','🐁','🐀','🐿','🦔','🐾','🌵','🎄','🌲','🌳','🌴','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','⭐️','🌟','✨','⚡️','🔥','🌈','🌊','❄️','⛄️','🌬','🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🌶','🥒','🥦','🍄','🥜','🌰','🍞','🥐','🥖','🥯','🥞','🧇','🧀','🍖','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🍲','🥣','🥗','🍿','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','☕️','🫖','🍵','🍹','🍺','🥂','🍷','🎈','🎆','🎇','🧨','🎉','🎊','🎎','🎏','🎐','🎑','🎀','🎁','🎗','🎟','🎫','🎖','🏆','🏅','🥇','🥈','🥉','⚽️','🏀','🏈','⚾️','🥎','🎾','🏐','🏉','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳️','⛸','🎣','🤿','🎽','🎿','🛷','🥌','🎯','🪀','🪁','🎱','🔮','🧿','🎮','🕹','🎰','🎲','🧩','🧸','🪅','🪆','♠️','♥️','♦️','♣️','♟','🃏','🀄️','🎴','🎭','🖼','🎨','🧵','🧶','🎼','🎤','🎧','🎷','🎸','🎹','🎺','🎻','🪕','🥁','😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝','💊','🩺','🩹','🛌','🥛','🥪','🛁','🧘','🧘‍♀️','🎶','🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘‍♂️','🏹','🛶'];
+    const rewardIcons = ['💎','💍','💖','🏰','🦄','🍬','🍭','🎀','🦋','🧚','⛲','🎡','🎠','🔮','🎆','🎇','🌌','🪐','🌙','🌕','🌞','🏵️','🌺','🌹','🌷','🎈','🧸','🧁','🎂','🥞','🍓','🍒','🍑','🍇','🥂','🍹','🎻','🎹','🎼','🎨','🧵','👑','👜','🧥','👠','🕶️','🗝️','⚜️','✨','🎐','🏆','🥇','🏅','👑','🏵️','🎗️','🎁','💌','💎','✨','⚡','🔥','🌈','🌊','🐚','🪸','🧜','🧚','🧞','🐉','🦄','🦌','🕊️','🦢','🦚','💮','🪷','🌻','🍀','🍁','🍂','🍄','🌰','🍓','🍊','🍎','🍐','🍯','🥂','🍾','🍷','🍰','🎂','🍡','🍧','🍦','🧁','🥨','🍮','🍫','🍪'];
+    const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
+    const exerIcons = ['🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'];
     const cheerMessages = ["꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!", "오늘도 자신을 돌보는 당신이 멋집니다!", "작은 기록들이 모여 더 나은 내일을 만듭니다.", "당신의 꾸준함이 빛을 발하고 있어요.", "기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.", "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.", "당신의 하루하루가 소중하게 기록되고 있습니다.", "스스로를 이해하려는 노력에 박수를 보냅니다!", "조금씩 더 단단해지는 마음을 느껴보세요.", "오늘 받은 선물처럼, 당신의 하루도 선물 같기를.", "기록은 사라지지 않고 당신을 지탱해 줄 거예요.", "잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.", "당신의 성실함이 멋진 선물을 가져왔네요!", "나를 알아가는 여정에 함께해주셔서 감사합니다.", "어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.", "마음의 날씨를 살피는 당신은 지혜로운 사람입니다.", "오늘도 한 걸음 더 나아갔군요, 축하해요!", "선물 상자 속에 담긴 응원의 마음을 받아주세요.", "당신의 모든 감정을 존중하고 응원합니다.", "기록을 통해 더 행복해질 당신을 기대합니다."];
 
     const items = [
@@ -295,59 +316,31 @@
 
     let user = null, target = null, curDate = new Date();
     let modalTarget = { day: null, id: null };
-    let currentGiftTab = 'my';
-    let selectedInventoryId = null;
-    let replyTargetItemId = null;
+    let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
 
     async function login() {
-        const id = document.getElementById('l-id').value;
-        const pw = document.getElementById('l-pw').value;
+        const id = document.getElementById('l-id').value, pw = document.getElementById('l-pw').value;
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         if(error) return alert('로그인 실패: 정보를 확인하세요.');
-        user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
-        target = id;
+        user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = id;
         renderTable();
     }
 
-    async function loadData() {
-        // 기존 로드 로직 동일...
-        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
-        const lastDay = new Date(y, m, 0).getDate();
-        const start = `${y}-${String(m).padStart(2,'0')}-01`;
-        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
-        
-        data?.forEach(rec => {
-            const day = new Date(rec.record_date).getDate();
-            const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
-            if(cell) {
-                const item = items.find(i => i.id === rec.category);
-                if(item?.type === 'event') {
-                    const chars = Array.from(rec.value);
-                    cell.innerText = /\p{Emoji}/u.test(chars[0]) ? chars[0] : '⭐️';
-                    cell.setAttribute('title', rec.value);
-                } else if(item?.type === 'check') {
-                    if(rec.category === 'mixed' && rec.value === 'Y') cell.classList.add('checked');
-                    else if(item.colorGroup) updateCheckVisual(cell, item, rec.value);
-                    else if(rec.value === 'Y') cell.classList.add('checked');
-                } else if(cell.querySelector('select')) {
-                    cell.querySelector('select').value = rec.value;
-                    if(item.type==='sleep') updateSleepColor(cell, rec.value); else updateScaleColor(cell, rec.value);
-                } else if(cell.querySelector('input')) cell.querySelector('input').value = rec.value;
-            }
-        });
-        if(user.role !== 'doctor') { checkGiftReception(); }
-    }
-
     async function checkGiftReception() {
+        if(user.role === 'doctor') return;
         const { data } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
-        if(data && data.status === 'milestone') {
+        
+        // [수정] 오류 방지 로직 (객체가 아니거나 none 상태면 종료)
+        if(!data || data.status === 'none') return;
+
+        if(data.status === 'milestone') {
             alert(`🎉 축하합니다! ${data.msg}\n\n[${data.icon}] 아이콘이 선물함에 도착했습니다.`);
-        } else if (data && data.count > 0) {
+        } else if (data.status === 'normal' && data.count > 0) {
+            // [수정] data.count를 사용하여 메시지 출력
             alert(`🎁 누군가로부터 ${data.count}개의 새로운 선물이 도착했습니다! [받은 선물함]을 확인해보세요.`);
         }
     }
@@ -370,11 +363,15 @@
             return ['gift','gift_reply'].includes(item.source) || item.source.startsWith('milestone_recv');
         }) : [];
 
+        if(filtered.length === 0) {
+            container.innerHTML = '<div class="icon-empty">보유한 아이콘이 없습니다.</div>';
+            return;
+        }
+
         filtered.forEach(item => {
             const div = document.createElement('div');
             div.className = 'icon-item';
             div.innerText = item.icon;
-            // [업데이트] 마일스톤 등급별 배경 강화
             if(item.source.startsWith('milestone_')) {
                 const count = parseInt(item.source.split('_')[2]);
                 if(count >= 100) div.classList.add('gold-tier-3');
@@ -388,8 +385,7 @@
 
     function selectGiftItem(el, id, icon, source) {
         document.querySelectorAll('.icon-item.selected').forEach(e => e.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedInventoryId = id;
+        el.classList.add('selected'); selectedInventoryId = id;
         document.getElementById('preview-icon').innerText = icon;
         document.getElementById('selected-gift-action').classList.remove('hidden');
         const btn = document.getElementById('btn-gift-action');
@@ -400,17 +396,12 @@
                 btn.onclick = () => { replyTargetItemId = id; switchGiftTab('my'); alert("보답으로 보낼 아이콘을 선택하세요."); };
                 btn.disabled = false; btn.style.background = '#ff9800';
             } else {
-                btn.innerText = "💌 답례로 받은 선물입니다";
+                btn.innerText = "💌 답례 또는 특별 선물입니다";
                 btn.disabled = true; btn.style.background = '#ccc';
             }
         } else {
-            if (replyTargetItemId) {
-                btn.innerText = "📨 이 아이콘으로 보답 선물 보내기";
-                btn.onclick = sendReplyGift;
-            } else {
-                btn.innerText = "누군가에게 선물하기";
-                btn.onclick = sendGiftToRandom;
-            }
+            btn.innerText = replyTargetItemId ? "📨 보답 선물 보내기" : "누군가에게 선물하기";
+            btn.onclick = replyTargetItemId ? sendReplyGift : sendGiftToRandom;
             btn.disabled = false; btn.style.background = '#ff9800';
         }
     }
@@ -418,17 +409,27 @@
     async function sendGiftToRandom() {
         if(!confirm("정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)")) return;
         const { data } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
+        
         if(data?.status === 'milestone') {
             alert(`🎁 선물이 누군가에게 배달되었습니다!\n\n🎉 [특별 보상] 따뜻한 마음을 가진 당신에게 특별한 선물 [${data.icon}]을 드려요!`);
-        } else alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
+        } else if(data?.status === 'no_users') { 
+            // 활동 유저 없으면 admin에게 감 (내부 로직상 성공)
+            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
+        } else {
+            alert("🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.");
+        }
         switchGiftTab('my');
     }
 
     async function sendReplyGift() {
         const { data, error } = await sb.rpc('send_reply_gift_secure', { p_user: user.username, p_pw: user.password, p_my_item_id: selectedInventoryId, p_received_item_id: replyTargetItemId });
         if(error) return alert("오류 발생");
-        alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
-        replyTargetItemId = null; switchGiftTab('received');
+        if(data && data.status === 'success') {
+            alert("💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!");
+            replyTargetItemId = null; switchGiftTab('received');
+        } else {
+            alert("보낼 수 없는 상태입니다.");
+        }
     }
 
     async function tryUnlockGift() {
@@ -440,14 +441,10 @@
         } else alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
     }
 
-    // 나머지 렌더링 및 유틸리티 함수들 (기존과 동일)
     function renderTable() {
-        const year = curDate.getFullYear(), month = curDate.getMonth();
-        const lastDay = new Date(year, month+1, 0).getDate();
+        const year = curDate.getFullYear(), month = curDate.getMonth(), lastDay = new Date(year, month+1, 0).getDate();
         const header = document.getElementById('header-row'), dowRow = document.getElementById('dow-row'), body = document.getElementById('table-body');
-        while(header.children.length > 1) header.removeChild(header.lastChild);
-        while(dowRow.children.length > 1) dowRow.removeChild(dowRow.lastChild);
-        body.innerHTML = '';
+        header.innerHTML = '<th class="col-label">항목 / 날짜</th>'; dowRow.innerHTML = '<th class="col-label" style="background:#fff;">요일</th>'; body.innerHTML = '';
         const days = ['일','월','화','수','목','금','토'];
         for(let d=1; d<=lastDay; d++) {
             const dt = new Date(year, month, d), isToday = new Date().toDateString() === dt.toDateString();
@@ -475,7 +472,7 @@
         });
         loadData();
     }
-    async function saveData(day, cat, val) { const y = curDate.getFullYear(), m = curDate.getMonth()+1; const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`; await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val }); }
+    async function saveData(d, c, v) { const y = curDate.getFullYear(), m = curDate.getMonth()+1; const date = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: c, p_val: v }); }
     async function saveMonthlyScore(type, val) { const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`; const { data } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val }); if(data?.reward_icon) alert(`🎉 보상 획득! [${data.reward_icon}]`); }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
     function closeGiftModal() { document.getElementById('gift-modal').style.display='none'; }
@@ -485,9 +482,71 @@
     function updateCheckVisual(c, i, v) { c.classList.toggle('checked', v==='Y'); }
     function updateSleepColor(c, v) { if(!v) {c.style.background=''; return;} const n=parseInt(v); c.style.background = n<7 ? '#ffcdd2' : (n>8 ? '#bbdefb' : ''); }
     function updateScaleColor(c, v) { if(!v) {c.style.background=''; return;} const n=parseInt(v); c.style.background = n>0 ? `rgba(255,0,0,${n*0.1})` : (n<0 ? `rgba(0,0,255,${Math.abs(n)*0.1})` : ''); }
-    function openEventModal(d,id,t) { modalTarget={d,id}; document.getElementById('modal-title').innerText=`${d}일 생활사건`; document.getElementById('event-modal').style.display='flex'; }
+    function openEventModal(d,id,t) { modalTarget={d,id}; document.getElementById('modal-title').innerText=`${d}일 생활사건`; document.getElementById('event-modal').style.display='flex'; 
+        let icon='', text=t||''; if(t){const chars=Array.from(t); if(/\p{Emoji}/u.test(chars[0])){icon=chars[0]; text=chars.slice(1).join('').trim();} else {text=t;}}
+        document.getElementById('modal-text').value=text; document.getElementById('selected-event-icon').value=icon;
+        const container = document.getElementById('event-icon-container'); container.innerHTML='로딩중...';
+        sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password }).then(({ data }) => {
+            container.innerHTML='';
+            const starDiv = document.createElement('div'); starDiv.className='icon-item'; starDiv.innerText='⭐️';
+            if(icon==='⭐️' || !icon) starDiv.classList.add('selected');
+            starDiv.onclick=()=>{ document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected')); starDiv.classList.add('selected'); document.getElementById('selected-event-icon').value='⭐️'; };
+            container.appendChild(starDiv);
+            data?.filter(i=>['earn','default','gift','gift_reply'].includes(i.source) || i.source.startsWith('milestone') || i.source.startsWith('event') || i.source.startsWith('monthly')).forEach(item=>{
+                const div=document.createElement('div'); div.className='icon-item'; div.innerText=item.icon;
+                if(item.icon===icon){div.classList.add('selected'); starDiv.classList.remove('selected');}
+                div.onclick=()=>{ document.querySelectorAll('#event-modal .icon-item').forEach(e=>e.classList.remove('selected')); div.classList.add('selected'); document.getElementById('selected-event-icon').value=item.icon; };
+                container.appendChild(div);
+            });
+        });
+    }
     function closeEventModal() { document.getElementById('event-modal').style.display='none'; }
+    function saveEventFromModal() { 
+        const t=document.getElementById('modal-text').value.trim(), i=document.getElementById('selected-event-icon').value||'⭐️';
+        if(!t){ saveData(modalTarget.d, modalTarget.id, null); const c=document.querySelector(`td[data-d="${modalTarget.d}"][data-c="${modalTarget.id}"]`); if(c){c.innerText=''; c.removeAttribute('title');} }
+        else { const v=`${i} ${t}`; saveData(modalTarget.d, modalTarget.id, v); const c=document.querySelector(`td[data-d="${modalTarget.d}"][data-c="${modalTarget.id}"]`); if(c){c.innerText=i; c.setAttribute('title',v);} }
+        closeEventModal();
+    }
     function doLogout() { location.reload(); }
+    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display='flex'; }
+    function closePwModal() { document.getElementById('pw-modal').style.display='none'; }
+    async function changePassword() {
+        const o=document.getElementById('pw-old').value, n=document.getElementById('pw-new').value, c=document.getElementById('pw-cfm').value;
+        if(!o||!n) return alert("입력 필요"); if(n!==c) return alert("불일치");
+        const ho=await hashPassword(o), hn=await hashPassword(n);
+        const {data}=await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
+        if(data==='success'){alert("완료. 재로그인하세요."); location.reload();} else alert("실패");
+    }
+    async function exportData() { 
+        if(user.role==='doctor') return alert("불가");
+        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' });
+        if(!data?.length) return alert("데이터 없음");
+        let csv = "Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`);
+        const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8,"+csv); link.download = `mood_${user.username}.csv`; link.click();
+    }
+    async function importData(input) { 
+        const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다.")) return;
+        const r = new FileReader(); r.onload = async (e) => { 
+            const rows = e.target.result.split("\n").slice(1); 
+            for(let row of rows) { 
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+                if(cols.length>=3) { const d=cols[0].trim(), c=cols[1].trim(), v=cols[2].replace(/^"|"$/g,'').trim(); if(d&&c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } 
+            } 
+            alert("업로드 완료"); loadData(); 
+        }; r.readAsText(f); 
+    }
+    function openChartModal(type) { 
+        toggleSidebar(); document.getElementById('chart-modal').style.display='flex';
+        sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' }).then(({ data }) => {
+            if(!data?.length) return alert("데이터 없음");
+            const points = data.filter(r => r.category === `score_${type}`).map(r => ({ x: r.record_date, y: parseFloat(r.value) })).sort((a,b)=>new Date(a.x)-new Date(b.x));
+            const ctx = document.getElementById('scoreChart').getContext('2d'); if(myChart) myChart.destroy();
+            const dates=points.map(p=>new Date(p.x).getTime()), minT=Math.min(...dates)-2e9, maxT=Math.max(...dates)+2e9;
+            const ann={}; for(let y=new Date(minT).getFullYear(); y<=new Date(maxT).getFullYear(); y++) ann['y'+y]={type:'box', xMin:luxon.DateTime.fromObject({year:y,month:1,day:1}).toMillis(), xMax:luxon.DateTime.fromObject({year:y,month:12,day:31}).toMillis(), backgroundColor:['rgba(248,250,252,0.6)','rgba(240,253,244,0.6)','rgba(239,246,255,0.6)','rgba(254,252,232,0.6)'][(y-2000)%4], borderWidth:0, label:{display:true, content:y+'년', position:'start', yAdjust:20, font:{size:12, weight:'bold'}, color:'#475569'}};
+            myChart = new Chart(ctx, { type: 'line', data: { datasets: [{ label: type==='ls'?'생활습관':'기분안정성', data: points, borderColor: type==='ls'?'#10B981':'#6366F1', backgroundColor: type==='ls'?'#10B98110':'#6366F110', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minT, max: maxT }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: ann }, legend: { display: false } } } });
+        });
+    }
+    function closeChartModal() { document.getElementById('chart-modal').style.display='none'; }
 </script>
 </body>
 </html>
