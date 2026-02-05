@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>기분기록지 2.1 | 분당서울대학교병원</title>
+<title>기분기록지 2.2 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -28,7 +28,7 @@
         --bg-block-event: #ffffff;  
         
         --header-h: 46px;      
-        --top-bar-h: 42px; /* 배지 공간 확보를 위해 약간 늘림 */
+        --top-bar-h: 42px; 
         --cell-h: 30px;        
         --col-w: 160px; 
         --date-w: 42px;
@@ -80,15 +80,12 @@
     .top-assessment-bar a { font-weight: bold; color: var(--primary); text-decoration: underline; font-size: 11px; }
     .top-assessment-bar input { width: 50px; height: 24px; text-align: center; border: 1px solid var(--border); background: var(--bg-white); color: var(--text); border-radius: 4px; font-size: 12px; padding: 0; font-weight: bold; }
     
-    /* [NEW] 배지 및 통계 스타일 */
     .stat-badge {
         background: #e3f2fd; color: var(--primary); padding: 3px 8px; 
         border-radius: 12px; font-weight: bold; font-size: 11px; 
         border: 1px solid #90caf9; margin-left: 5px; display: flex; align-items: center; gap: 4px;
     }
-    .streak-badge {
-        background: #fff3e0; color: #ef6c00; border: 1px solid #ffcc80;
-    }
+    .streak-badge { background: #fff3e0; color: #ef6c00; border: 1px solid #ffcc80; }
     .badge-icon { font-size: 14px; margin-right: 2px; }
 
     /* 그리드 */
@@ -440,7 +437,9 @@
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
     const aRight = document.getElementById('arrow-right');
-    gridWrapper.addEventListener('scroll', checkScroll);
+    if (gridWrapper) {
+        gridWrapper.addEventListener('scroll', checkScroll);
+    }
     function checkScroll() {
         if (gridWrapper.scrollHeight - gridWrapper.scrollTop > gridWrapper.clientHeight + 20) aDown.classList.add('visible');
         else aDown.classList.remove('visible');
@@ -487,6 +486,7 @@
             document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); 
             ['pink','green','dark'].forEach(t => unlockTheme(t, false));
         } else { 
+            // 7일 이내 데이터로만 보상 체크
             checkUnlockStatus(id, hashedPw, user.role);
             checkSeasonalEvent(); // [NEW] 시즌 이벤트
             loadUserStickers(); 
@@ -495,12 +495,26 @@
         }
     }
 
+    // Helper to check timeliness (7일 이내 작성 여부)
+    function isTimely(record) {
+        if (!record.updated_at) return true; // DB 마이그레이션 전 데이터는 인정
+        const targetDate = new Date(record.record_date);
+        const writeDate = new Date(record.updated_at);
+        // 날짜 차이 계산 (밀리초 -> 일)
+        const diffTime = writeDate - targetDate;
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        // 7일 이내 (+1일 여유)
+        return diffDays <= 8 && diffDays >= -1; 
+    }
+
     async function checkUnlockStatus(id, pw, role) {
         if(role === 'doctor') return;
         const { data } = await sb.rpc('get_records_secure', { p_user: id, p_pw: pw, p_target: id, p_start: '2000-01-01', p_end: '2099-12-31' });
         
         if (data && data.length > 0) {
-            const uniqueDates = Array.from(new Set(data.map(r => r.record_date))).sort();
+            // 유효한 데이터만 필터링 (7일 이내 작성)
+            const validData = data.filter(r => isTimely(r));
+            const uniqueDates = Array.from(new Set(validData.map(r => r.record_date))).sort();
             const activeDays = uniqueDates.length;
             document.getElementById('total-days-display').innerText = `관찰 ${activeDays}일`;
             
@@ -512,11 +526,10 @@
             if (activeDays >= 180) unlockTheme('green', true);
             if (activeDays >= 365) unlockTheme('dark', true);
 
-            checkWeeklyReward(data);
+            checkWeeklyReward(validData);
         }
     }
 
-    // 스트릭 계산
     function calculateStreak(sortedDates) {
         if (sortedDates.length === 0) return 0;
         let streak = 0;
@@ -529,10 +542,14 @@
         let current = new Date(lastRecord);
         for (let i = sortedDates.length - 1; i >= 0; i--) {
             const d = new Date(sortedDates[i]);
-            if (current.getTime() === d.getTime()) {
+            // 날짜 비교 (시간제외)
+            if (current.getFullYear() === d.getFullYear() && current.getMonth() === d.getMonth() && current.getDate() === d.getDate()) {
                 streak++;
                 current.setDate(current.getDate() - 1); 
-            } else { break; }
+            } else if (current.getTime() > d.getTime()) {
+                // 건너뛴 날짜가 있다면 루프 종료 (정렬되어 있으므로)
+                break; 
+            }
         }
         return streak;
     }
@@ -549,14 +566,13 @@
         }
 
         let badges = '';
-        if (streak >= 3) badges += '<span title="3일 연속">🥉</span>';
-        if (streak >= 7) badges += '<span title="7일 연속">🥈</span>';
-        if (streak >= 30) badges += '<span title="30일 연속">🥇</span>';
-        if (streak >= 100) badges += '<span title="100일 연속">🏆</span>';
+        if (streak >= 3) badges += '<span title="3일 연속" class="badge-icon">🥉</span>';
+        if (streak >= 7) badges += '<span title="7일 연속" class="badge-icon">🥈</span>';
+        if (streak >= 30) badges += '<span title="30일 연속" class="badge-icon">🥇</span>';
+        if (streak >= 100) badges += '<span title="100일 연속" class="badge-icon">🏆</span>';
         badgeContainer.innerHTML = badges;
     }
 
-    // 시즌 한정 아이템
     function checkSeasonalEvent() {
         const today = new Date();
         const month = today.getMonth() + 1;
@@ -828,6 +844,169 @@
         closeEventModal(); 
     }
     
+    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
+    function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
+    function doLogout() { location.reload(); }
+    async function changePassword() {
+        const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
+        if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
+        const ho = await hashPassword(o), hn = await hashPassword(n);
+        const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
+        if(data==='success') { alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+    }
+    function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
+    function jumpToDate(val) { curDate = new Date(val); renderTable(); }
+    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${user.username}.csv`; link.click(); }
+    async function importData(input) { const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(d && c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+
+    function createSelect(min, max) {
+        let s = document.createElement('select'); s.className = 'cell-select'; s.add(new Option('', ''));
+        for(let i=min; i<=max; i++) s.add(new Option(i, i));
+        return s;
+    }
+
+    function updateVisuals(cell, item, value) {
+        cell.style.backgroundColor = ''; 
+        if (value === '' || value === null) return;
+        if (item.section === 'scale') {
+            const val = parseInt(value);
+            if (val > 0) { const alpha = 0.05 + (val * 0.06); cell.style.backgroundColor = `rgba(255, 82, 82, ${alpha})`; } 
+            else if (val < 0) { const alpha = 0.05 + (Math.abs(val) * 0.06); cell.style.backgroundColor = `rgba(33, 150, 243, ${alpha})`; } 
+            else { cell.style.backgroundColor = '#ffffff'; }
+        } else if (item.type === 'sleep') {
+            const val = parseFloat(value);
+            if (val < 7) { let intensity = (7 - val) / 7; cell.style.backgroundColor = `rgba(255, 82, 82, ${intensity * 0.5})`; } 
+            else if (val > 7) { let intensity = (val - 7) / 17; cell.style.backgroundColor = `rgba(33, 150, 243, ${intensity * 0.5})`; }
+        } else if (item.type === 'check' || (item.id === 'meds' || item.id === 'exer')) {
+            if (value && value !== '') {
+                if (item.colorGroup === 'period') cell.style.backgroundColor = 'rgba(244, 143, 177, 0.4)';
+                else if (item.colorGroup === 'neg') cell.style.backgroundColor = 'rgba(100, 181, 246, 0.3)';
+                else if (item.colorGroup === 'pos') cell.style.backgroundColor = 'rgba(129, 199, 132, 0.4)';
+            }
+        } else if (item.type === 'event') {
+            if (value && value.trim() !== '') cell.style.backgroundColor = 'rgba(255, 245, 157, 0.5)';
+        }
+    }
+
+    function checkMin(el) { if(el.value < 0) el.value = 0; }
+
+    async function updateMixedState(day) {
+        setTimeout(() => {
+            let cnt = 0;
+            const moodItems = items.filter(i => i.section === 'mood' && i.id !== 'mixed');
+            moodItems.forEach(i => { const t = document.querySelector(`td[data-d="${day}"][data-c="${i.id}"]`); if(t && t.classList.contains('checked')) cnt++; });
+            const mixedCell = document.querySelector(`td[data-d="${day}"][data-c="mixed"]`);
+            if(cnt >= 2) { if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } } 
+            else { if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); } }
+        }, 50);
+    }
+
+    async function saveData(day, cat, val) {
+        if(user.role==='doctor') return;
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
+    }
+
+    async function saveMonthlyScore(type, val) {
+        if(user.role==='doctor') return;
+        const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
+        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+    }
+
+    async function loadData() {
+        document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
+        document.querySelectorAll('input, select').forEach(e => { 
+            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal')) {
+                e.value=''; if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
+            }
+        });
+        document.querySelectorAll('.cell-event').forEach(e => { e.innerText = ''; e.style.backgroundColor = ''; });
+
+        const y = curDate.getFullYear(), m = curDate.getMonth()+1;
+        const lastDay = new Date(y, m, 0).getDate();
+        const start = `${y}-${String(m).padStart(2,'0')}-01`;
+        const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
+
+        const { data, error } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+        if(error) { if(error.message.includes('찾을 수')) return alert("환자를 찾을 수 없습니다."); else return alert("조회 오류: " + error.message); }
+        if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
+
+        data?.forEach(rec => {
+            if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
+            else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
+            else {
+                const day = new Date(rec.record_date).getDate();
+                const item = items.find(i => i.id === rec.category);
+                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
+                if(cell) {
+                    if(item && (item.id === 'meds' || item.id === 'exer')) {
+                        cell.innerText = rec.value;
+                        updateVisuals(cell, item, 'Y');
+                    }
+                    else if(rec.category === 'mixed' || cell.classList.contains('cell-check') || cell.classList.contains('cell-mixed')) {
+                        if(rec.value === 'Y') { cell.classList.add('checked'); if(item) updateVisuals(cell, item, 'Y'); }
+                    } else if(cell.classList.contains('cell-event')) {
+                        cell.innerText = rec.value;
+                        if(item) updateVisuals(cell, item, rec.value);
+                    } else if(cell.querySelector('select')) {
+                        cell.querySelector('select').value = rec.value;
+                        if(item || cell.dataset.s === 'scale') { const targetItem = item || items.find(i => i.section === 'scale'); updateVisuals(cell, targetItem, rec.value); }
+                    } else if(cell.querySelector('input')) {
+                        cell.querySelector('input').value = rec.value;
+                        if(item) updateVisuals(cell, item, rec.value);
+                    }
+                }
+            }
+        });
+
+        if(user.role !== 'doctor') {
+            const today = new Date();
+            if(today.getFullYear() === y && today.getMonth() + 1 === m) {
+                const lastDayOfCurrentMonth = new Date(y, m, 0).getDate();
+                if(today.getDate() >= lastDayOfCurrentMonth - 7) {
+                    const lsVal = document.getElementById('score-ls').value;
+                    const mssiVal = document.getElementById('score-mssi').value;
+                    if(!lsVal || !mssiVal) setTimeout(() => alert("📢 [알림] 이번 달 평가를 진행해주세요!\n(상단바 [월간] 항목 입력)"), 500);
+                }
+            }
+        }
+    }
+
+    async function openChartModal(type) {
+        toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
+        const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
+        document.getElementById('chart-title').innerText = title;
+        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+        if(!data || data.length === 0) return alert("데이터가 없습니다.");
+        const targetCat = `score_${type}`;
+        const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
+        drawDashboardChart(points, title, type === 'ls' ? '#10B981' : '#6366F1');
+    }
+    function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
+    function drawDashboardChart(points, label, color) {
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        if(points.length === 0) return;
+        const dates = points.map(p => new Date(p.x).getTime());
+        const minTime = Math.min(...dates), maxTime = Math.max(...dates);
+        const buffer = 28 * 24 * 3600 * 1000;
+        const minYear = new Date(minTime - buffer).getFullYear(), maxYear = new Date(maxTime + buffer).getFullYear();
+        const annotations = {};
+        const bgColors = ['rgba(248, 250, 252, 0.6)', 'rgba(240, 253, 244, 0.6)', 'rgba(239, 246, 255, 0.6)', 'rgba(254, 252, 232, 0.6)'];
+        for (let y = minYear; y <= maxYear; y++) {
+            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:12, weight:'bold'}, color: '#475569' } };
+        }
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '10', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
+        });
+    }
+
+    function openEventModal(day, id, txt) { modalTarget = { day, id }; document.getElementById('modal-title').innerText = `${day}일 생활사건`; document.getElementById('modal-text').value = txt || ""; document.getElementById('event-modal').style.display = 'flex'; document.getElementById('modal-text').focus(); }
+    function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
+    function saveEventFromModal() { const txt = document.getElementById('modal-text').value; const cell = document.querySelector(`td[data-d="${modalTarget.day}"][data-c="${modalTarget.id}"]`); if(cell) { cell.innerText = txt; updateVisuals(cell, {type:'event'}, txt); } saveData(modalTarget.day, modalTarget.id, txt); closeEventModal(); }
     function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     function doLogout() { location.reload(); }
