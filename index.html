@@ -195,7 +195,7 @@
         <div id="join-form" class="hidden">
             <input id="j-id" class="auth-inp" placeholder="희망 아이디">
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
-            <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜+생년월일 (필수)">
+            <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜+생년월일">
             <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305</div>
             <div class="legal-text">
                 본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다.
@@ -403,7 +403,23 @@
     let user = null, target = null, curDate = new Date();
     let modalTarget = { day: null, id: null };
     let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
-    let myChart = null; // [수정됨] 차트 변수 초기화 추가
+    let myChart = null; 
+    let logoutTimer; // [추가] 자동로그아웃 타이머
+
+    // [추가] 활동 감지 시 타이머 리셋
+    function resetLogoutTimer() {
+        if(!user) return; // 로그인 전이면 무시
+        clearTimeout(logoutTimer);
+        logoutTimer = setTimeout(() => {
+            alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
+            location.reload();
+        }, 600000); // 10분 = 600000ms
+    }
+    
+    // [추가] 활동 이벤트 등록
+    ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+        document.addEventListener(evt, resetLogoutTimer);
+    });
 
     const gridWrapper = document.getElementById('grid-container');
     const aDown = document.getElementById('arrow-down');
@@ -433,9 +449,14 @@
     async function join() {
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
         const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
-        if(!id || !pw || !h) return alert('필수 입력 누락');
+        
+        // [수정] 필수값 체크에서 h 제거 (환자번호 옵셔널)
+        if(!id || !pw) return alert('필수 입력 누락');
+        
         const hashedPw = await hashPassword(pw);
-        const { error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h });
+        // [수정] h가 없으면 빈 문자열 전달
+        const { error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h ? h : '' });
+        
         if(error) alert('오류: ' + error.message);
         else if(error && error.message.includes('duplicate')) alert('이미 존재하는 아이디입니다.'); 
         else { alert('가입 완료.'); toggleAuth('login'); }
@@ -451,6 +472,10 @@
         if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
         if(error) return alert('오류: ' + error.message);
         user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
+        
+        // [추가] 로그인 성공 시 타이머 시작
+        resetLogoutTimer();
+
         target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
