@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 1.03 | 분당서울대학교병원</title>
+<title>기분기록지 1.04 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -403,7 +403,7 @@
         { id: 'sleep', label: '수면시간 (시간)', desc: '0~24시간', section: 'body', type: 'sleep' },
         { id: 'weight',label: '체중 (kg) *일요일만', desc: '일요일 권장', section: 'body', type: 'weight' },
         { id: 'period',label: '생리기간', desc: '', section: 'body', type: 'check', colorGroup: 'symptom' },
-        { id: 'alcoh', label: '음주', desc: '( )잔, 주종', section: 'body', type: 'text', colorGroup: 'symptom' },
+        { id: 'alcoh', label: '음주 (음주량[잔],주종)', desc: '', section: 'body', type: 'text', colorGroup: 'symptom' },
         { id: 'binge', label: '폭식', desc: '', section: 'body', type: 'check', colorGroup: 'symptom' },
         { id: 'pain',  label: '통증 및 신체증상', desc: '', section: 'body', type: 'check', colorGroup: 'symptom' },
         { id: 'cry',   label: '울음', desc: '', section: 'body', type: 'check', colorGroup: 'symptom' },
@@ -476,7 +476,7 @@
         }
         
         if (data === 'duplicate_id') return alert('이미 존재하는 아이디입니다.');
-        if (data === 'duplicate_hosp') return alert('이미 가입된 환자번호 또는 구분 가능한 문자열입니다. 중복 가입은 불가합니다.');
+        if (data === 'duplicate_hosp') return alert('이미 가입된 환자번호나 문자열입니다. 다른 환자번호나 문자열을 사용하세요');
         if (data === 'duplicate') return alert('중복된 데이터가 존재하여 가입할 수 없습니다.');
         
         alert('가입 완료.'); 
@@ -506,7 +506,15 @@
     async function searchPatient() {
         const q = document.getElementById('search-id').value.trim();
         if(!q) return alert("ID 또는 환자번호를 입력하세요.");
-        target = q; alert(`${target} 님을 조회합니다.`); toggleSidebar(); renderTable(); 
+        
+        const { data, error } = await sb.rpc('resolve_patient_id_secure', { p_admin: user.username, p_admin_pw: user.password, p_query: q });
+        if(error) return alert("조회 권한 오류: " + error.message);
+        if(!data) return alert("해당 정보로 가입된 환자를 찾을 수 없습니다.");
+        
+        target = data; 
+        alert(`조회 대상: ${target} 님`); 
+        toggleSidebar(); 
+        renderTable(); 
     }
 
     async function adminDownloadByHosp() {
