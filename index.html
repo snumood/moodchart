@@ -13,7 +13,7 @@
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>기분기록지 1.05 | 분당서울대학교병원</title>
+<title>기분기록지 1.06 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
@@ -178,13 +178,13 @@
     <div class="auth-box">
         <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지</h2>
         <div id="login-form">
-            <input id="l-id" class="auth-inp" placeholder="아이디">
-            <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            <input id="l-id" class="auth-inp" placeholder="아이디" autocomplete="username">
+            <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="current-password">
             <div class="save-login-wrap">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" id="remember-me"> 아이디/비밀번호 저장
+                    <input type="checkbox" id="remember-me"> 아이디 저장
                 </label>
-                <div class="warning-text">※공용기기에서 비밀번호유출주의</div>
+                <div class="warning-text">※비밀번호는 브라우저에 저장하지 않습니다</div>
             </div>
             <button class="btn-auth" onclick="login()">로그인</button>
             <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
@@ -362,6 +362,30 @@
     const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    function clearSavedLogin() {
+        localStorage.removeItem('mood_saved_id');
+        localStorage.removeItem('mood_saved_pw');
+    }
+
+    function saveRememberedLogin(id) {
+        if (document.getElementById('remember-me').checked) {
+            localStorage.setItem('mood_saved_id', id);
+            localStorage.removeItem('mood_saved_pw');
+        } else {
+            clearSavedLogin();
+        }
+    }
+
+    async function safeRpc(fn, args) {
+        const { data, error } = await sb.rpc(fn, args);
+        if (error && /Auth failed/i.test(error.message || '')) {
+            alert('인증이 만료되었거나 올바르지 않습니다. 다시 로그인해주세요.');
+            location.reload();
+            return { data: null, error };
+        }
+        return { data, error };
+    }
+
     async function hashPassword(str) {
         const msgBuffer = new TextEncoder().encode(str);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -436,7 +460,7 @@
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(() => {
             alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
-            location.reload();
+            doLogout();
         }, 600000); 
     }
     
@@ -458,10 +482,9 @@
 
     window.onload = () => {
         const savedId = localStorage.getItem('mood_saved_id');
-        const savedPw = localStorage.getItem('mood_saved_pw'); 
-        if(savedId && savedPw) {
+        localStorage.removeItem('mood_saved_pw');
+        if (savedId) {
             document.getElementById('l-id').value = savedId;
-            document.getElementById('l-pw').value = savedPw; 
             document.getElementById('remember-me').checked = true;
         }
     };
@@ -476,7 +499,7 @@
         if(!id || !pw) return alert('필수 입력 누락');
         
         const hashedPw = await hashPassword(pw);
-        const { data, error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h ? h : '' });
+        const { data, error } = await safeRpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h ? h : '' });
         
         if (error) {
             if (error.message.includes('duplicate')) {
@@ -494,30 +517,46 @@
     }
 
     async function login() {
-        const id = document.getElementById('l-id').value;
+        const id = document.getElementById('l-id').value.trim();
         const pw = document.getElementById('l-pw').value;
-        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_saved_pw', pw); } 
-        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
-        const hashedPw = await hashPassword(pw); 
-        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
-        if(error) return alert('오류: ' + error.message);
-        user = { username: id, password: hashedPw, role: (id==='admin'?'doctor':'patient') }; 
-        
+
+        if (!id || !pw) return alert('아이디와 비밀번호를 입력하세요.');
+
+        saveRememberedLogin(id);
+        const hashedPw = await hashPassword(pw);
+
+        const { data, error } = await safeRpc('login_secure', {
+            p_id: id,
+            p_pw: hashedPw
+        });
+
+        if (error && error.message.includes('Auth failed')) {
+            return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
+        }
+        if (error) return alert('오류: ' + error.message);
+        if (!data || !data.username) return alert('로그인 처리 중 오류가 발생했습니다.');
+
+        user = {
+            username: data.username,
+            password: hashedPw,
+            role: data.role || 'patient'
+        };
+
+        document.getElementById('l-pw').value = '';
         resetLogoutTimer();
 
-        target = id;
+        target = user.username;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = id + (user.role==='doctor'?'(의료진)':'');
-        if(user.role==='doctor') { document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); } else { renderTable(); }
+        document.getElementById('user-badge').innerText = user.username + (user.role === 'doctor' ? '(의료진)' : '');
+        if(user.role === 'doctor') { document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); } else { renderTable(); }
     }
 
     async function searchPatient() {
         const q = document.getElementById('search-id').value.trim();
         if(!q) return alert("ID 또는 환자번호를 입력하세요.");
         
-        const { data, error } = await sb.rpc('resolve_patient_id_secure', { p_admin: user.username, p_admin_pw: user.password, p_query: q });
+        const { data, error } = await safeRpc('resolve_patient_id_secure', { p_admin: user.username, p_admin_pw: user.password, p_query: q });
         if(error) return alert("조회 권한 오류: " + error.message);
         if(!data) return alert("해당 정보로 가입된 환자를 찾을 수 없습니다.");
         
@@ -530,12 +569,12 @@
     async function adminDownloadByHosp() {
         const h = document.getElementById('download-hosp-id').value.trim();
         if(!h) return alert("병원 등록번호를 입력하세요.");
-        const { data, error } = await sb.rpc('admin_download_by_hosp_secure', { p_admin: user.username, p_admin_pw: user.password, p_hosp_id: h });
+        const { data, error } = await safeRpc('admin_download_by_hosp_secure', { p_admin: user.username, p_admin_pw: user.password, p_hosp_id: h });
         if(error) return alert("오류: " + error.message);
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         
         let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
-        data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`);
+        data.forEach(r => csv += `${r.record_date},${r.category},"${String(r.value || '').replace(/"/g, '""')}"\n`);
         const link = document.createElement("a");
         link.href = encodeURI(csv);
         link.download = `mood_recovery_${h}.csv`;
@@ -544,7 +583,7 @@
 
     async function checkSpecialEvents() {
         if(user.role === 'doctor') return; 
-        const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await safeRpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
         if (data && data.status === 'success') {
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
@@ -553,7 +592,7 @@
 
     async function checkGiftReception() {
         if(user.role === 'doctor') return;
-        const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await safeRpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
         
         if (!data || data.status === 'none') return; 
 
@@ -861,14 +900,15 @@
         if(user.role==='doctor') return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
+        await safeRpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
     async function saveMonthlyScore(type, val) {
         if(user.role==='doctor') return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
-        const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        const { data, error } = await safeRpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
         
+        if (error) return alert('오류: ' + error.message);
         if (data && data.reward_icon) {
             const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
             alert(`🎉 점수 입력 보상!\n\n[${data.reward_icon}] 아이콘을 획득했습니다!\n"${msg}"\n(선물함에서 확인하세요)`);
@@ -890,7 +930,7 @@
         const start = `${y}-${String(m).padStart(2,'0')}-01`;
         const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
 
-        const { data, error } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+        const { data, error } = await safeRpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
         
         if(error) return alert("조회 오류: " + error.message);
         if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
@@ -964,7 +1004,7 @@
         const container = document.getElementById('gift-list-container');
         container.innerHTML = '<div style="grid-column:span 6; text-align:center;">로딩중...</div>';
         
-        const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await safeRpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
         
         const filtered = data ? data.filter(item => {
@@ -1048,7 +1088,7 @@
         if(!replyTargetItemId || !selectedInventoryId) return;
         if(!confirm("선택한 아이콘을 보답으로 보내시겠습니까?")) return;
 
-        const { data, error } = await sb.rpc('send_reply_gift_secure', { 
+        const { data, error } = await safeRpc('send_reply_gift_secure', { 
             p_user: user.username, 
             p_pw: user.password, 
             p_my_item_id: selectedInventoryId, 
@@ -1067,7 +1107,7 @@
 
     async function tryUnlockGift() {
         const randIcon = rewardIcons[Math.floor(Math.random() * rewardIcons.length)];
-        const { data, error } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
+        const { data, error } = await safeRpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
         
         if(error) return alert("오류: " + error.message);
         if(data === 'keep_going') return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
@@ -1081,7 +1121,7 @@
     async function sendGiftToRandom() {
         if(!selectedInventoryId) return;
         if(!confirm("정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)")) return;
-        const { data, error } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
+        const { data, error } = await safeRpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
         if(error) return alert("오류: " + error.message);
         
         if(data?.status === 'milestone') {
@@ -1115,7 +1155,7 @@
 
         const container = document.getElementById('event-icon-container');
         container.innerHTML = '로딩중...';
-        const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await safeRpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
         container.innerHTML = '';
 
         const starDiv = document.createElement('div');
@@ -1186,7 +1226,7 @@
         toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+        const { data } = await safeRpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         const targetCat = `score_${type}`;
         const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
@@ -1213,18 +1253,55 @@
     }
     function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
-    function doLogout() { location.reload(); }
+    function doLogout() {
+        clearTimeout(logoutTimer);
+        user = null;
+        target = null;
+        document.getElementById('l-pw').value = '';
+        location.reload();
+    }
     async function changePassword() {
         const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
         if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
         const ho = await hashPassword(o), hn = await hashPassword(n);
-        const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success') { alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+        const { data, error } = await safeRpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
+        if(error) return alert('오류: ' + error.message);
+        if(data==='success') { clearSavedLogin(); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
     }
     function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
     function jumpToDate(val) { curDate = new Date(val); renderTable(); }
-    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${user.username}.csv`; link.click(); }
-    async function importData(input) { const f = input.files[0]; if(!f) return; if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(d && c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+    async function exportData() {
+        if(user.role === 'doctor') return alert("불가");
+        alert("데이터 다운로드 중...");
+        const { data, error } = await safeRpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' });
+        if(error) return alert('오류: ' + error.message);
+        if(!data || !data.length) return alert("데이터 없음");
+        let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
+        data.forEach(r => csv += `${r.record_date},${r.category},"${String(r.value || '').replace(/"/g, '""')}"\n`);
+        const link = document.createElement("a");
+        link.href = encodeURI(csv);
+        link.download = `mood_${user.username}.csv`;
+        link.click();
+    }
+    async function importData(input) {
+        const f = input.files[0];
+        if(!f) return;
+        if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return;
+        const r = new FileReader();
+        r.onload = async (e) => {
+            const rows = e.target.result.split("\n").slice(1);
+            for(let row of rows) {
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if(cols.length>=3) {
+                    const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim();
+                    if(d && c) await safeRpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v });
+                }
+            }
+            alert("업로드 완료");
+            loadData();
+        };
+        r.readAsText(f);
+    }
 </script>
 </body>
 </html>
