@@ -194,10 +194,10 @@
         <div id="join-form" class="hidden">
             <input id="j-id" class="auth-inp" placeholder="희망 아이디">
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
-            <input id="j-hosp" class="auth-inp" placeholder="등록번호 또는 이니셜생년월일 등 구분 가능한 문자열">
+            <input id="j-hosp" class="auth-inp" placeholder="명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열">
             <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305 (중복 가입 불가)</div>
             <div class="legal-text">
-                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 분당서울대학교병원 등록번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.
             </div>
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
@@ -295,7 +295,7 @@
         </div>
         
         <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 분당서울대학교병원 등록번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.
         </div>
     </div>
 </div>
@@ -488,7 +488,7 @@
         }
         
         if (data === 'duplicate_id') return alert('이미 존재하는 아이디입니다.');
-        if (data === 'duplicate_hosp') return alert('이미 가입된 환자번호나 문자열입니다. 다른 환자번호나 문자열을 사용하세요');
+        if (data === 'duplicate_hosp') return alert('이미 가입된 번호나 문자열입니다. 다른 번호나 문자열을 사용하세요');
         if (data === 'duplicate') return alert('중복된 데이터가 존재하여 가입할 수 없습니다.');
         
         alert('가입 완료.'); 
@@ -517,7 +517,7 @@
 
     async function searchPatient() {
         const q = document.getElementById('search-id').value.trim();
-        if(!q) return alert("ID 또는 환자번호를 입력하세요.");
+        if(!q) return alert("ID 또는 번호를 입력하세요.");
         
         const { data, error } = await sb.rpc('resolve_patient_id_secure', { p_admin: user.username, p_admin_pw: user.password, p_query: q });
         if(error) return alert("조회 권한 오류: " + error.message);
@@ -531,7 +531,7 @@
 
     async function adminDownloadByHosp() {
         const h = document.getElementById('download-hosp-id').value.trim();
-        if(!h) return alert("병원 등록번호를 입력하세요.");
+        if(!h) return alert("번호를 입력하세요.");
         const { data, error } = await sb.rpc('admin_download_by_hosp_secure', { p_admin: user.username, p_admin_pw: user.password, p_hosp_id: h });
         if(error) return alert("오류: " + error.message);
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
