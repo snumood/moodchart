@@ -180,20 +180,20 @@
     <div class="auth-box">
         <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지</h2>
         <div id="login-form">
-            <input id="l-id" class="auth-inp" placeholder="아이디">
-            <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            <input id="l-id" class="auth-inp" placeholder="아이디" autocomplete="username">
+            <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="current-password">
             <div class="save-login-wrap">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" id="remember-me"> 아이디/비밀번호 저장
+                    <input type="checkbox" id="remember-me"> 이 기기에서 30일간 로그인 유지
                 </label>
-                <div class="warning-text">※공용기기에서 비밀번호유출주의</div>
+                <div class="warning-text">※공용기기에서는 사용하지 마세요. 비밀번호는 저장하지 않습니다.</div>
             </div>
             <button class="btn-auth" onclick="login()">로그인</button>
             <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
         </div>
         <div id="join-form" class="hidden">
-            <input id="j-id" class="auth-inp" placeholder="희망 아이디">
-            <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호">
+            <input id="j-id" class="auth-inp" placeholder="희망 아이디" autocomplete="username">
+            <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="new-password">
             <input id="j-hosp" class="auth-inp" placeholder="명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열">
             <div style="font-size:11px; color:#d32f2f; text-align:left; margin-bottom:3px;">⚠️ 이 번호는 담당 의료진이 작성 내용을 확인할 수 있도록 연결하는 용도입니다.</div>
             <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305 (중복 가입 불가)</div>
@@ -398,6 +398,38 @@
         return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ''));
     }
 
+    function randomToken(bytes = 32) {
+        const arr = new Uint8Array(bytes);
+        crypto.getRandomValues(arr);
+        return btoa(String.fromCharCode(...arr)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    async function deviceTokenHash(token) {
+        return hashPassword(`moodchart-device-token-v1:${token}`);
+    }
+
+    function clearDeviceLogin() {
+        localStorage.removeItem('mood_device_user');
+        localStorage.removeItem('mood_device_token');
+        localStorage.removeItem('mood_saved_pw');
+    }
+
+    async function revokeStoredDeviceLogin() {
+        const token = localStorage.getItem('mood_device_token');
+        clearDeviceLogin();
+        if (!token) return;
+        try {
+            await sb.rpc('revoke_mood_persistent_login', { p_token_hash: await deviceTokenHash(token) });
+        } catch (e) {
+            console.warn('기기 로그인 해제 실패(무시됨):', e);
+        }
+    }
+
+    async function detectRole(id, hashedPw) {
+        const { error: doctorErr } = await sb.rpc('resolve_patient_id_secure', { p_admin: id, p_admin_pw: hashedPw, p_query: '' });
+        return doctorErr ? 'patient' : 'doctor';
+    }
+
     const rewardIcons = ['💎','💍','💖','🏰','🦄','🍬','🍭','🎀','🦋','🧚','⛲','🎡','🎠','🔮','🎆','🎇','🌌','🪐','🌙','🌕','🌞','🏵️','🌺','🌹','🌷','🎈','🧸','🧁','🎂','🥞','🍓','🍒','🍑','🍇','🥂','🍹','🎻','🎹','🎼','🎨','🧵','👑','👜','🧥','👠','🕶️','🗝️','⚜️','✨','🎐','🏆','🥇','🏅','👑','🏵️','🎗️','🎁','💌','💎','✨','⚡','🔥','🌈','🌊','🐚','🪸','🧜','🧚','🧞','🐉','🦄','🦌','🕊️','🦢','🦚','💮','🪷','🌻','🍀','🍁','🍂','🍄','🌰','🍓','🍊','🍎','🍐','🍯','🥂','🍾','🍷','🍰','🎂','🍡','🍧','🍦','🧁','🥨','🍮','🍫','🍪'];
     const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
     const exerIcons = ['🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'];
@@ -465,6 +497,7 @@
         if(!user) return; 
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(() => {
+            sessionStorage.setItem('mood_skip_auto_login_once', '1');
             alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
             location.reload();
         }, 600000); 
@@ -486,13 +519,14 @@
         else aRight.classList.remove('visible');
     }
 
-    window.onload = () => {
+    window.onload = async () => {
         const savedId = localStorage.getItem('mood_saved_id');
         localStorage.removeItem('mood_saved_pw');
         if(savedId) {
             document.getElementById('l-id').value = savedId;
             document.getElementById('remember-me').checked = true;
         }
+        await tryDeviceLogin();
     };
 
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
@@ -522,29 +556,83 @@
         toggleAuth('login');
     }
 
-    async function login() {
-        const id = document.getElementById('l-id').value;
-        const pw = document.getElementById('l-pw').value;
-        localStorage.removeItem('mood_saved_pw');
-        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
-        else { localStorage.removeItem('mood_saved_id'); }
-        const hashedPw = await hashPassword(pw); 
-        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
-        if(error) return alert('오류: ' + error.message);
-        let role = 'patient';
-        const { data: _, error: doctorErr } = await sb.rpc('resolve_patient_id_secure', { p_admin: id, p_admin_pw: hashedPw, p_query: '' });
-        if (!doctorErr) role = 'doctor';
+    async function completeLogin(id, hashedPw, role) {
         user = { username: id, password: hashedPw, role };
         document.getElementById('l-pw').value = '';
-        
         resetLogoutTimer();
 
         target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = id + (user.role==='doctor'?'(의료진)':'');
-        if(user.role==='doctor') { document.getElementById('doc-panel').classList.add('active'); target = null; toggleSidebar(); } else { renderTable(); }
+        document.getElementById('user-badge').innerText = id + (role === 'doctor' ? '(의료진)' : '');
+        if(role === 'doctor') {
+            document.getElementById('doc-panel').classList.add('active');
+            target = null;
+            toggleSidebar();
+        } else {
+            renderTable();
+        }
+    }
+
+    async function saveDeviceLogin(id, hashedPw, role) {
+        const token = randomToken();
+        const { error } = await sb.rpc('create_mood_persistent_login', {
+            p_user: id,
+            p_pw: hashedPw,
+            p_role: role,
+            p_token_hash: await deviceTokenHash(token),
+            p_user_agent: navigator.userAgent || '',
+            p_days: 30
+        });
+        if (error) {
+            console.warn('기기 로그인 저장 실패:', error.message);
+            clearDeviceLogin();
+            return;
+        }
+        localStorage.setItem('mood_saved_id', id);
+        localStorage.setItem('mood_device_user', id);
+        localStorage.setItem('mood_device_token', token);
+    }
+
+    async function tryDeviceLogin() {
+        if (sessionStorage.getItem('mood_skip_auto_login_once') === '1') {
+            sessionStorage.removeItem('mood_skip_auto_login_once');
+            return false;
+        }
+        const id = localStorage.getItem('mood_device_user');
+        const token = localStorage.getItem('mood_device_token');
+        if (!id || !token) return false;
+        try {
+            const { data, error } = await sb.rpc('consume_mood_persistent_login', {
+                p_token_hash: await deviceTokenHash(token),
+                p_user_agent: navigator.userAgent || ''
+            });
+            if (error || !data?.password_hash || data.username !== id) throw error || new Error('invalid device token');
+            const hashedPw = data.password_hash;
+            const { error: authError } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
+            if (authError) throw authError;
+            await completeLogin(id, hashedPw, data.role || await detectRole(id, hashedPw));
+            return true;
+        } catch (e) {
+            console.warn('자동 로그인 실패:', e?.message || e);
+            await revokeStoredDeviceLogin();
+            return false;
+        }
+    }
+
+    async function login() {
+        const id = document.getElementById('l-id').value;
+        const pw = document.getElementById('l-pw').value;
+        localStorage.removeItem('mood_saved_pw');
+        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
+        else { localStorage.removeItem('mood_saved_id'); await revokeStoredDeviceLogin(); }
+        const hashedPw = await hashPassword(pw); 
+        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
+        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
+        if(error) return alert('오류: ' + error.message);
+        const role = await detectRole(id, hashedPw);
+        if(document.getElementById('remember-me').checked) await saveDeviceLogin(id, hashedPw, role);
+        await completeLogin(id, hashedPw, role);
     }
 
     async function searchPatient() {
@@ -1257,13 +1345,17 @@
     }
     function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
-    function doLogout() { location.reload(); }
+    async function doLogout() {
+        await revokeStoredDeviceLogin();
+        sessionStorage.setItem('mood_skip_auto_login_once', '1');
+        location.reload();
+    }
     async function changePassword() {
         const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
         if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
         const ho = await hashPassword(o), hn = await hashPassword(n);
         const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success') { localStorage.removeItem('mood_saved_pw'); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+        if(data==='success') { await revokeStoredDeviceLogin(); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
     }
     function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
     function jumpToDate(val) { curDate = new Date(val); renderTable(); }
