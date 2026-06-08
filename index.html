@@ -13,7 +13,7 @@
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co https://cdn.jsdelivr.net; font-src 'self' data: https:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co https://cdn.jsdelivr.net; font-src 'self' data: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>기분기록지 1.07 | 분당서울대학교병원</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
@@ -372,6 +372,32 @@
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    function safeText(value, maxLen = 500) {
+        return String(value ?? '').replace(/[\u0000-\u001F\u007F]/g, '').slice(0, maxLen);
+    }
+
+    function safeFilePart(value) {
+        return safeText(value, 80).replace(/[^a-zA-Z0-9가-힣._-]/g, '_') || 'data';
+    }
+
+    function csvCell(value) {
+        return `"${safeText(value, 2000).replace(/"/g, '""')}"`;
+    }
+
+    function cssIdent(value) {
+        const text = String(value ?? '');
+        if (window.CSS?.escape) return CSS.escape(text);
+        return text.replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+    }
+
+    function isAllowedCategory(cat) {
+        return cat === 'dummy' || cat === 'score_ls' || cat === 'score_mssi' || items.some(item => item.id === cat);
+    }
+
+    function isIsoDate(value) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ''));
+    }
+
     const rewardIcons = ['💎','💍','💖','🏰','🦄','🍬','🍭','🎀','🦋','🧚','⛲','🎡','🎠','🔮','🎆','🎇','🌌','🪐','🌙','🌕','🌞','🏵️','🌺','🌹','🌷','🎈','🧸','🧁','🎂','🥞','🍓','🍒','🍑','🍇','🥂','🍹','🎻','🎹','🎼','🎨','🧵','👑','👜','🧥','👠','🕶️','🗝️','⚜️','✨','🎐','🏆','🥇','🏅','👑','🏵️','🎗️','🎁','💌','💎','✨','⚡','🔥','🌈','🌊','🐚','🪸','🧜','🧚','🧞','🐉','🦄','🦌','🕊️','🦢','🦚','💮','🪷','🌻','🍀','🍁','🍂','🍄','🌰','🍓','🍊','🍎','🍐','🍯','🥂','🍾','🍷','🍰','🎂','🍡','🍧','🍦','🧁','🥨','🍮','🍫','🍪'];
     const medsIcons = ['💊','🩺','🩹','🛌','🧸','🍵','☕','🥛','🍯','🍎','🍊','🍋','🍌','🥣','🥗','🥪','🌿','🌱','🍃','🍀','☘️','🌵','🌻','🌼','🌷','🌸','🌹','🌺','💐','🌞','🌝','✨','🌟','⭐️','💫','🧡','💛','💚','💙','💜','🤎','🤍','❤️‍🩹','💖','💗','💓','💞','💕','💌','🛡️','✅','🕯️','📖','🛁','🧘','🧘‍♀️','🎼','🎶'];
     const exerIcons = ['🏃','🏃‍♀️','🏃‍♂️','🚶','🚶‍♀️','🚶‍♂️','💃','🕺','👯','🧖','🧗','🧗‍♀️','🧗‍♂️','🤺','🏇','⛷️','🏂','🏄','🏄‍♀️','🏄‍♂️','🚣','🚣‍♀️','🚣‍♂️','🏊','🏊‍♀️','🏊‍♂️','⛹️','⛹️‍♀️','⛹️‍♂️','🏋️','🏋️‍♀️','🏋️‍♂️','🚴','🚴‍♀️','🚴‍♂️','🚵','🚵‍♀️','🚵‍♂️','🤸','🤸‍♀️','🤸‍♂️','🤼','🤼‍♀️','🤼‍♂️','🤽','🤽‍♀️','🤽‍♂️','🤾','🤾‍♀️','🤾‍♂️','🤹','🤹‍♀️','🤹‍♂️','🧘','🧘‍♀️','🧘‍♂️','🏹','🎣','🤿','🛶','🥅','🏒','🥍','🏏','🏑','🎳','🥎','⚾','🏈','🏉','🏐','🎾','🏸','🏓','🥊','🥋','🥅','⛳','⛸','🎣','🎽','🎿','🛷','🥌'];
@@ -462,10 +488,9 @@
 
     window.onload = () => {
         const savedId = localStorage.getItem('mood_saved_id');
-        const savedPw = localStorage.getItem('mood_saved_pw'); 
-        if(savedId && savedPw) {
+        localStorage.removeItem('mood_saved_pw');
+        if(savedId) {
             document.getElementById('l-id').value = savedId;
-            document.getElementById('l-pw').value = savedPw; 
             document.getElementById('remember-me').checked = true;
         }
     };
@@ -500,8 +525,9 @@
     async function login() {
         const id = document.getElementById('l-id').value;
         const pw = document.getElementById('l-pw').value;
-        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_saved_pw', pw); } 
-        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_saved_pw'); }
+        localStorage.removeItem('mood_saved_pw');
+        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
+        else { localStorage.removeItem('mood_saved_id'); }
         const hashedPw = await hashPassword(pw); 
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
@@ -510,6 +536,7 @@
         const { data: _, error: doctorErr } = await sb.rpc('resolve_patient_id_secure', { p_admin: id, p_admin_pw: hashedPw, p_query: '' });
         if (!doctorErr) role = 'doctor';
         user = { username: id, password: hashedPw, role };
+        document.getElementById('l-pw').value = '';
         
         resetLogoutTimer();
 
@@ -542,10 +569,14 @@
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         
         let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
-        data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`);
+        data.forEach(r => {
+            if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) {
+                csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`;
+            }
+        });
         const link = document.createElement("a");
         link.href = encodeURI(csv);
-        link.download = `mood_recovery_${h}.csv`;
+        link.download = `mood_recovery_${safeFilePart(h)}.csv`;
         link.click();
     }
 
@@ -906,9 +937,11 @@
             if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
             else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
             else {
-                const day = new Date(rec.record_date).getDate();
                 const item = items.find(i => i.id === rec.category);
-                const cell = document.querySelector(`td[data-d="${day}"][data-c="${rec.category}"]`);
+                if (!item || !isIsoDate(rec.record_date)) return;
+                const day = new Date(rec.record_date).getDate();
+                if (!Number.isInteger(day) || day < 1 || day > 31) return;
+                const cell = document.querySelector(`td[data-d="${day}"][data-c="${cssIdent(rec.category)}"]`);
                 
                 if(cell && item) {
                     if(item.type === 'check') {
@@ -916,24 +949,25 @@
                     } else if(rec.category === 'mixed' && rec.value === 'Y') {
                         cell.classList.add('checked');
                     } else if(item.type === 'event') {
-                        const chars = Array.from(rec.value);
+                        const value = safeText(rec.value, 500);
+                        const chars = Array.from(value);
                         const firstChar = chars[0]; 
                         if (/\p{Emoji}/u.test(firstChar)) {
                             cell.innerText = firstChar;
                         } else {
                             cell.innerText = '⭐️'; 
                         }
-                        if(rec.value) cell.setAttribute('title', rec.value);
+                        if(value) cell.setAttribute('title', value);
                     } else if(item.type === 'scale') {
                         const sel = cell.querySelector('select');
-                        if(sel) { sel.value = rec.value; sel.dataset.oldval = rec.value; updateScaleColor(cell, rec.value); }
+                        if(sel) { sel.value = safeText(rec.value, 10); sel.dataset.oldval = sel.value; updateScaleColor(cell, sel.value); }
                     } else if(item.type === 'sleep') {
                         const sel = cell.querySelector('select');
-                        if(sel) { sel.value = rec.value; sel.dataset.oldval = rec.value; updateSleepColor(cell, rec.value); }
+                        if(sel) { sel.value = safeText(rec.value, 10); sel.dataset.oldval = sel.value; updateSleepColor(cell, sel.value); }
                     } else if(cell.querySelector('input')) {
                         const inp = cell.querySelector('input');
-                        inp.value = rec.value;
-                        inp.dataset.oldval = rec.value;
+                        inp.value = safeText(rec.value, 500);
+                        inp.dataset.oldval = inp.value;
                     }
                 }
             }
@@ -976,9 +1010,11 @@
         
         const filtered = data ? data.filter(item => {
             if (tab === 'my') {
-                return item.source === 'earn' || item.source === 'default' || item.source.startsWith('monthly') || item.source.startsWith('event') || item.source === 'admin_init' || item.source === 'admin_full_set' || item.source.startsWith('milestone_sent');
+                const source = safeText(item.source, 80);
+                return source === 'earn' || source === 'default' || source.startsWith('monthly') || source.startsWith('event') || source === 'admin_init' || source === 'admin_full_set' || source.startsWith('milestone_sent');
             } else {
-                return item.source === 'gift' || item.source === 'gift_reply' || item.source.startsWith('milestone_recv');
+                const source = safeText(item.source, 80);
+                return source === 'gift' || source === 'gift_reply' || source.startsWith('milestone_recv');
             }
         }) : [];
         
@@ -990,15 +1026,16 @@
         filtered.forEach(item => {
             const div = document.createElement('div');
             div.className = 'icon-item';
-            div.innerText = item.icon;
+            div.innerText = safeText(item.icon, 20);
             
-            if(item.source.includes('milestone')) {
-                if (item.source.includes('100')) div.classList.add('gold-tier-3');
-                else if (item.source.includes('50')) div.classList.add('gold-tier-2');
+            const source = safeText(item.source, 80);
+            if(source.includes('milestone')) {
+                if (source.includes('100')) div.classList.add('gold-tier-3');
+                else if (source.includes('50')) div.classList.add('gold-tier-2');
                 else div.classList.add('gold-tier-1');
             }
 
-            div.onclick = () => selectGiftItem(div, item.id, item.icon, item.source);
+            div.onclick = () => selectGiftItem(div, item.id, item.icon, source);
             container.appendChild(div);
         });
 
@@ -1226,12 +1263,12 @@
         if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
         const ho = await hashPassword(o), hn = await hashPassword(n);
         const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success') { alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+        if(data==='success') { localStorage.removeItem('mood_saved_pw'); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
     }
     function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
     function jumpToDate(val) { curDate = new Date(val); renderTable(); }
-    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => csv += `${r.record_date},${r.category},"${r.value.replace(/"/g, '""')}"\n`); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${user.username}.csv`; link.click(); }
-    async function importData(input) { const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(d && c) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: v }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
+    async function importData(input) { const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
 </script>
 </body>
 </html>
