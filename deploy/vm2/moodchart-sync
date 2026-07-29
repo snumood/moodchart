@@ -16,25 +16,25 @@ git -C "${repo_dir}" fetch --quiet --prune origin main
 commit="$(git -C "${repo_dir}" rev-parse origin/main)"
 release_dir="${releases_dir}/${commit}"
 
-if [[ ! -d "${release_dir}" ]]; then
-    install -d -m 0755 "${release_dir}"
-    for asset in \
-        index.html \
-        admin-login.html \
-        bg.jpg \
-        bg2.jpg \
-        favicon-16x16.png \
-        favicon-32x32.png \
-        favicon.ico \
-        apple-touch-icon.png \
-        android-chrome-192x192.png \
-        android-chrome-512x512.png \
-        site.webmanifest
-    do
+install -d -m 0755 "${release_dir}"
+for asset in \
+    index.html \
+    admin-login.html \
+    bg.jpg \
+    bg2.jpg \
+    favicon-16x16.png \
+    favicon-32x32.png \
+    favicon.ico \
+    apple-touch-icon.png \
+    android-chrome-192x192.png \
+    android-chrome-512x512.png \
+    site.webmanifest
+do
+    if [[ ! -f "${release_dir}/${asset}" ]]; then
         git -C "${repo_dir}" show "${commit}:${asset}" > "${release_dir}/${asset}"
         chmod 0644 "${release_dir}/${asset}"
-    done
-fi
+    fi
+done
 
 grep -q '<title>기분기록지' "${release_dir}/index.html"
 grep -q 'SUPABASE_URL' "${release_dir}/index.html"
