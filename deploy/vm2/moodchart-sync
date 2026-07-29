@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_url="https://github.com/snumood/moodchart.git"
+base_dir="/srv/moodchart"
+repo_dir="${base_dir}/repo"
+releases_dir="${base_dir}/releases"
+
+install -d -m 0755 "${base_dir}" "${releases_dir}"
+
+if [[ ! -d "${repo_dir}/.git" ]]; then
+    git clone --filter=blob:none --no-checkout "${repo_url}" "${repo_dir}"
+fi
+
+git -C "${repo_dir}" fetch --quiet --prune origin main
+commit="$(git -C "${repo_dir}" rev-parse origin/main)"
+release_dir="${releases_dir}/${commit}"
+
+if [[ ! -d "${release_dir}" ]]; then
+    install -d -m 0755 "${release_dir}"
+    for asset in \
+        index.html \
+        bg.jpg \
+        bg2.jpg \
+        favicon-16x16.png \
+        favicon-32x32.png \
+        favicon.ico \
+        apple-touch-icon.png \
+        android-chrome-192x192.png \
+        android-chrome-512x512.png \
+        site.webmanifest
+    do
+        git -C "${repo_dir}" show "${commit}:${asset}" > "${release_dir}/${asset}"
+        chmod 0644 "${release_dir}/${asset}"
+    done
+fi
+
+grep -q '<title>기분기록지' "${release_dir}/index.html"
+grep -q 'SUPABASE_URL' "${release_dir}/index.html"
+
+ln -sfn "${release_dir}" "${base_dir}/current.new"
+mv -Tf "${base_dir}/current.new" "${base_dir}/current"

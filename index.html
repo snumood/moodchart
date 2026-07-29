@@ -53,7 +53,7 @@
     #auth-screen { 
         height: 100dvh; display: flex; justify-content: center; align-items: center; 
         position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
-        background: url('https://github.com/snumood/moodchart/blob/main/bg2.jpg?raw=true') no-repeat center center fixed;
+        background: url('./bg2.jpg') no-repeat center center fixed;
         background-size: cover;
     }
     #auth-screen::before {
@@ -63,6 +63,11 @@
     .auth-box { width: 90%; max-width: 400px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
     .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
     .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
+    .auth-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0 10px; color: #777; font-size: 11px; }
+    .auth-divider::before, .auth-divider::after { content: ""; height: 1px; background: #ddd; flex: 1; }
+    .btn-google { width: 100%; padding: 11px; background: white; color: #333; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; }
+    .btn-google:hover { background: #f8f9fa; border-color: #aaa; }
+    .admin-login-note { color: #666; font-size: 10px; line-height: 1.4; margin-top: 7px; }
     .save-login-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 12px; color: #666; margin: 10px 0; }
     .warning-text { color: #d32f2f; font-weight: bold; font-size: 11px; line-height: 1.35; }
     .toggle-auth { margin-top: 20px; font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; display: inline-block; }
@@ -190,6 +195,9 @@
             </div>
             <button class="btn-auth" onclick="login()">로그인</button>
             <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
+            <div class="auth-divider">관리자 전용</div>
+            <button class="btn-google" onclick="adminGoogleLogin()">Google 계정으로 관리자 로그인</button>
+            <div class="admin-login-note">승인된 관리자 Google 계정만 접근할 수 있습니다.</div>
         </div>
         <div id="join-form" class="hidden">
             <input id="j-id" class="auth-inp" placeholder="희망 아이디" autocomplete="username">
@@ -266,17 +274,17 @@
 
         <div class="menu-section">
             <div class="menu-title">계정 관리</div>
-            <div class="menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
+            <div class="menu-item" id="password-menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
             <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
         </div>
 
-        <div class="menu-section">
+        <div class="menu-section" id="gift-menu-section">
             <div class="menu-title">분석 리포트</div>
             <div class="menu-item" onclick="openChartModal('ls')">📊 월간생활습관점수 추세보기</div>
             <div class="menu-item" onclick="openChartModal('mssi')">📈 기분안정성평가점수 추세보기</div>
         </div>
 
-        <div class="menu-section">
+        <div class="menu-section" id="data-menu-section">
             <div class="menu-title">선물</div>
             <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
         </div>
@@ -425,9 +433,45 @@
         }
     }
 
-    async function detectRole(id, hashedPw) {
-        const { error: doctorErr } = await sb.rpc('resolve_patient_id_secure', { p_admin: id, p_admin_pw: hashedPw, p_query: '' });
-        return doctorErr ? 'patient' : 'doctor';
+    async function adminGoogleLogin() {
+        const redirectTo = `${window.location.origin}${window.location.pathname}`;
+        const { error } = await sb.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo }
+        });
+        if (error) {
+            alert("관리자 Google 로그인을 시작할 수 없습니다.");
+        }
+    }
+
+    async function completeAdminLogin(session) {
+        const { data: authorized, error } = await sb.rpc('moodchart_admin_session');
+        if (error || authorized !== true) {
+            await sb.auth.signOut();
+            alert("승인된 관리자 Google 계정이 아닙니다.");
+            return false;
+        }
+
+        user = {
+            username: session.user.email || 'Google 관리자',
+            password: null,
+            role: 'admin',
+            authUserId: session.user.id
+        };
+        target = null;
+        resetLogoutTimer();
+
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('user-badge').innerText = 'Google 관리자';
+        document.getElementById('doc-panel').classList.add('active');
+        document.getElementById('password-menu-item').classList.add('hidden');
+        document.getElementById('gift-menu-section').classList.add('hidden');
+        document.getElementById('data-menu-section').classList.add('hidden');
+        document.getElementById('score-ls').disabled = true;
+        document.getElementById('score-mssi').disabled = true;
+        toggleSidebar();
+        return true;
     }
 
     const rewardIcons = ['💎','💍','💖','🏰','🦄','🍬','🍭','🎀','🦋','🧚','⛲','🎡','🎠','🔮','🎆','🎇','🌌','🪐','🌙','🌕','🌞','🏵️','🌺','🌹','🌷','🎈','🧸','🧁','🎂','🥞','🍓','🍒','🍑','🍇','🥂','🍹','🎻','🎹','🎼','🎨','🧵','👑','👜','🧥','👠','🕶️','🗝️','⚜️','✨','🎐','🏆','🥇','🏅','👑','🏵️','🎗️','🎁','💌','💎','✨','⚡','🔥','🌈','🌊','🐚','🪸','🧜','🧚','🧞','🐉','🦄','🦌','🕊️','🦢','🦚','💮','🪷','🌻','🍀','🍁','🍂','🍄','🌰','🍓','🍊','🍎','🍐','🍯','🥂','🍾','🍷','🍰','🎂','🍡','🍧','🍦','🧁','🥨','🍮','🍫','🍪'];
@@ -493,11 +537,18 @@
     let logoutTimer; 
     let lastWarningTime = 0;
 
+    function isAdminUser() {
+        return user?.role === 'admin';
+    }
+
     function resetLogoutTimer() {
         if(!user) return; 
         clearTimeout(logoutTimer);
-        logoutTimer = setTimeout(() => {
+        logoutTimer = setTimeout(async () => {
             sessionStorage.setItem('mood_skip_auto_login_once', '1');
+            if (isAdminUser()) {
+                await sb.auth.signOut();
+            }
             alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
             location.reload();
         }, 600000); 
@@ -520,6 +571,11 @@
     }
 
     window.onload = async () => {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session && await completeAdminLogin(session)) {
+            return;
+        }
+
         const savedId = localStorage.getItem('mood_saved_id');
         localStorage.removeItem('mood_saved_pw');
         if(savedId) {
@@ -556,22 +612,17 @@
         toggleAuth('login');
     }
 
-    async function completeLogin(id, hashedPw, role) {
-        user = { username: id, password: hashedPw, role };
+    async function completeLogin(id, hashedPw) {
+        user = { username: id, password: hashedPw, role: 'patient' };
         document.getElementById('l-pw').value = '';
         resetLogoutTimer();
 
         target = id;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = id + (role === 'doctor' ? '(의료진)' : '');
-        if(role === 'doctor') {
-            document.getElementById('doc-panel').classList.add('active');
-            target = null;
-            toggleSidebar();
-        } else {
-            renderTable();
-        }
+        document.getElementById('user-badge').innerText = id;
+        document.getElementById('doc-panel').classList.remove('active');
+        renderTable();
     }
 
     async function saveDeviceLogin(id, hashedPw, role) {
@@ -611,7 +662,7 @@
             const hashedPw = data.password_hash;
             const { error: authError } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
             if (authError) throw authError;
-            await completeLogin(id, hashedPw, data.role || await detectRole(id, hashedPw));
+            await completeLogin(id, hashedPw);
             return true;
         } catch (e) {
             console.warn('자동 로그인 실패:', e?.message || e);
@@ -623,6 +674,9 @@
     async function login() {
         const id = document.getElementById('l-id').value;
         const pw = document.getElementById('l-pw').value;
+        if (id.trim().toLowerCase() === 'admin') {
+            return alert('관리자는 Google 계정으로 로그인하세요.');
+        }
         localStorage.removeItem('mood_saved_pw');
         if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
         else { localStorage.removeItem('mood_saved_id'); await revokeStoredDeviceLogin(); }
@@ -630,16 +684,16 @@
         const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
         if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
         if(error) return alert('오류: ' + error.message);
-        const role = await detectRole(id, hashedPw);
-        if(document.getElementById('remember-me').checked) await saveDeviceLogin(id, hashedPw, role);
-        await completeLogin(id, hashedPw, role);
+        if(document.getElementById('remember-me').checked) await saveDeviceLogin(id, hashedPw, 'patient');
+        await completeLogin(id, hashedPw);
     }
 
     async function searchPatient() {
         const q = document.getElementById('search-id').value.trim();
         if(!q) return alert("ID 또는 번호를 입력하세요.");
         
-        const { data, error } = await sb.rpc('resolve_patient_id_secure', { p_admin: user.username, p_admin_pw: user.password, p_query: q });
+        if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
+        const { data, error } = await sb.rpc('moodchart_admin_resolve_patient', { p_query: q });
         if(error) return alert("조회 권한 오류: " + error.message);
         if(!data) return alert("해당 정보로 가입된 환자를 찾을 수 없습니다.");
         
@@ -652,7 +706,8 @@
     async function adminDownloadByHosp() {
         const h = document.getElementById('download-hosp-id').value.trim();
         if(!h) return alert("번호를 입력하세요.");
-        const { data, error } = await sb.rpc('admin_download_by_hosp_secure', { p_admin: user.username, p_admin_pw: user.password, p_hosp_id: h });
+        if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
+        const { data, error } = await sb.rpc('moodchart_admin_download_by_hosp', { p_hosp_id: h });
         if(error) return alert("오류: " + error.message);
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         
@@ -669,7 +724,7 @@
     }
 
     async function checkSpecialEvents() {
-        if(user.role === 'doctor') return; 
+        if(isAdminUser()) return;
         const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
         if (data && data.status === 'success') {
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
@@ -678,7 +733,7 @@
     }
 
     async function checkGiftReception() {
-        if(user.role === 'doctor') return;
+        if(isAdminUser()) return;
         const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
         
         if (!data || data.status === 'none') return; 
@@ -691,7 +746,7 @@
     }
 
     function checkPastEdit(day, revertCallback, proceedCallback) {
-        if(user.role === 'doctor') {
+        if(isAdminUser()) {
             proceedCallback();
             return;
         }
@@ -809,7 +864,7 @@
                     td.className = 'cell-check';
                     const originClick = td.onclick;
                     td.onclick = (e) => {
-                        originClick(e); if(user.role === 'doctor') return;
+                        originClick(e); if(isAdminUser()) return;
                         const isChecked = td.classList.contains('checked');
                         if(item.id !== 'mixed') {
                             let cnt = 0;
@@ -832,7 +887,7 @@
                     td.className = 'cell-check cell-icon'; 
                     const originClick = td.onclick;
                     td.onclick = (e) => { 
-                        originClick(e); if(user.role==='doctor') return;
+                        originClick(e); if(isAdminUser()) return;
                         let val = null;
                         const hasVal = td.innerText !== '';
                         const isChecked = td.classList.contains('checked');
@@ -904,7 +959,7 @@
                 } else if(item.type === 'event') {
                     td.className = 'cell-event'; 
                     td.onclick = () => {
-                        if (user.role === 'doctor') {
+                        if (isAdminUser()) {
                             const txt = td.getAttribute('title');
                             if(txt) alert(`[생활사건]\n${txt}`);
                             else alert("기록된 생활사건이 없습니다.");
@@ -923,6 +978,11 @@
         
         document.getElementById('score-ls').value = '';
         document.getElementById('score-mssi').value = '';
+        if (isAdminUser()) {
+            body.querySelectorAll('input, select').forEach(control => {
+                control.disabled = true;
+            });
+        }
         if(isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
         setTimeout(checkScroll, 500);
         if(target) loadData();
@@ -984,14 +1044,14 @@
     }
 
     async function saveData(day, cat, val) {
-        if(user.role==='doctor') return;
+        if(isAdminUser()) return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
     async function saveMonthlyScore(type, val) {
-        if(user.role==='doctor') return;
+        if(isAdminUser()) return;
         const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
         const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
         
@@ -1016,10 +1076,13 @@
         const start = `${y}-${String(m).padStart(2,'0')}-01`;
         const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
 
-        const { data, error } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+        const request = isAdminUser()
+            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: start, p_end: end })
+            : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+        const { data, error } = await request;
         
         if(error) return alert("조회 오류: " + error.message);
-        if(user.role === 'doctor' && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
+        if(isAdminUser() && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
 
         data?.forEach(rec => {
             if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
@@ -1061,7 +1124,7 @@
             }
         });
 
-        if(user.role !== 'doctor') {
+        if(!isAdminUser()) {
             const today = new Date();
             if(today.getFullYear() === y && today.getMonth() + 1 === m) {
                 if(today.getDate() >= lastDay - 7) {
@@ -1318,7 +1381,10 @@
         toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+        const request = isAdminUser()
+            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
+            : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+        const { data } = await request;
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         const targetCat = `score_${type}`;
         const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
@@ -1343,10 +1409,14 @@
             options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
         });
     }
-    function openPwModal() { document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
+    function openPwModal() { if(isAdminUser()) return; document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     async function doLogout() {
-        await revokeStoredDeviceLogin();
+        if (isAdminUser()) {
+            await sb.auth.signOut();
+        } else {
+            await revokeStoredDeviceLogin();
+        }
         sessionStorage.setItem('mood_skip_auto_login_once', '1');
         location.reload();
     }
@@ -1359,8 +1429,8 @@
     }
     function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
     function jumpToDate(val) { curDate = new Date(val); renderTable(); }
-    async function exportData() { if(user.role === 'doctor') return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
-    async function importData(input) { const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+    async function exportData() { if(isAdminUser()) return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
+    async function importData(input) { if(isAdminUser()) return alert("불가"); const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
 </script>
 </body>
 </html>

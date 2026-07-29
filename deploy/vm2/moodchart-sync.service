@@ -1,0 +1,18 @@
+[Unit]
+Description=Synchronize moodchart static site from GitHub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=moodchart-sync
+Group=moodchart-sync
+ExecStart=/usr/local/sbin/moodchart-sync
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/moodchart
+
+[Install]
+WantedBy=multi-user.target
