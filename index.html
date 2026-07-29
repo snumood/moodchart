@@ -161,6 +161,19 @@
 
     .chart-modal-content { background: white; padding: 20px; border-radius: 20px; width: 95%; height: 80%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
     .chart-container { flex: 1; position: relative; width: 100%; min-height: 0; }
+    .stats-modal-content { background: white; padding: 22px; border-radius: 16px; width: 94%; max-width: 720px; max-height: 88dvh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+    .stats-periods { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .stats-period-btn { padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 999px; background: white; color: #475569; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .stats-period-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .stats-period-btn:disabled { cursor: wait; opacity: 0.65; }
+    .stats-range { color: #64748b; font-size: 11px; margin-bottom: 16px; }
+    .stats-section-title { font-size: 13px; font-weight: bold; color: #334155; margin: 16px 0 8px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .stats-card { min-height: 82px; padding: 12px 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; text-align: center; }
+    .stats-card-label { color: #64748b; font-size: 11px; line-height: 1.35; }
+    .stats-card-value { color: var(--primary); font-size: 24px; font-weight: 800; line-height: 1.2; margin-top: 7px; }
+    .stats-note { color: #64748b; font-size: 10px; line-height: 1.5; margin-top: 12px; }
+    .stats-status { min-height: 18px; color: #d32f2f; font-size: 11px; margin-top: 10px; }
     .modal-header { font-weight: bold; margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between; color: var(--primary); }
     .modal-textarea { width: 100%; height: 80px; border: 1px solid #ccc; padding: 10px; resize: none; border-radius: 6px; font-size: 13px; margin-top: 10px; }
     .modal-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
@@ -172,7 +185,10 @@
     .tooltip-target:hover::after { content: attr(data-tip); position: fixed; left: 190px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.9); color: #fff; padding: 12px; border-radius: 8px; width: 250px; font-size: 12px; z-index: 9999; pointer-events: none; white-space: pre-wrap; text-align: left; }
     .tooltip-target[data-tip=""]:hover::after { display: none; }
 
-    @media (max-width: 768px) { :root { --col-w: 130px; } }
+    @media (max-width: 768px) {
+        :root { --col-w: 130px; }
+        .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
 </style>
 </head>
 <body>
@@ -265,6 +281,11 @@
             </div>
         </div>
 
+        <div class="menu-section hidden" id="admin-stats-menu-section">
+            <div class="menu-title">관리자</div>
+            <div class="menu-item" onclick="openAdminStatsModal()">📋 이용자 통계</div>
+        </div>
+
         <div class="menu-section">
             <div class="menu-title">계정 관리</div>
             <div class="menu-item" id="password-menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
@@ -339,6 +360,49 @@
                 <div style="font-size:10px; color:#d32f2f; margin-top:5px;">* 선물하면 선물함에서 사라집니다!</div>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="stats-modal" class="modal-wrap">
+    <div class="stats-modal-content">
+        <div class="modal-header">
+            <span>이용자 통계</span>
+            <span style="cursor:pointer; font-size:20px;" onclick="closeAdminStatsModal()">✕</span>
+        </div>
+        <div class="stats-periods" aria-label="통계 기간">
+            <button class="stats-period-btn" data-stats-period="1w" onclick="loadAdminStats('1w')">1주</button>
+            <button class="stats-period-btn" data-stats-period="2w" onclick="loadAdminStats('2w')">2주</button>
+            <button class="stats-period-btn active" data-stats-period="4w" onclick="loadAdminStats('4w')">4주</button>
+            <button class="stats-period-btn" data-stats-period="2m" onclick="loadAdminStats('2m')">2개월</button>
+            <button class="stats-period-btn" data-stats-period="3m" onclick="loadAdminStats('3m')">3개월</button>
+            <button class="stats-period-btn" data-stats-period="6m" onclick="loadAdminStats('6m')">6개월</button>
+            <button class="stats-period-btn" data-stats-period="1y" onclick="loadAdminStats('1y')">1년</button>
+        </div>
+        <div class="stats-range" id="stats-range">기간을 불러오는 중입니다.</div>
+
+        <div class="stats-section-title">선택 기간의 실제 기록 사용자</div>
+        <div class="stats-grid">
+            <div class="stats-card"><div class="stats-card-label">실제 사용자</div><div class="stats-card-value" id="stat-active-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">등록번호 등록 사용자</div><div class="stats-card-value" id="stat-linked-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">미등록 사용자</div><div class="stats-card-value" id="stat-unlinked-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">신규 기록 사용자</div><div class="stats-card-value" id="stat-new-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">전체 기록 일수</div><div class="stats-card-value" id="stat-record-days">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">사용자당 평균 기록 일수</div><div class="stats-card-value" id="stat-average-days">-</div></div>
+        </div>
+
+        <div class="stats-section-title">현재 아이템 및 선물</div>
+        <div class="stats-grid">
+            <div class="stats-card"><div class="stats-card-label">아이템 보유 사용자</div><div class="stats-card-value" id="stat-item-holders">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">전체 보유 아이템</div><div class="stats-card-value" id="stat-current-items">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">전체 선물·답례</div><div class="stats-card-value" id="stat-gift-transfers">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">선물을 보낸 사용자</div><div class="stats-card-value" id="stat-gift-senders">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">선물을 받은 사용자</div><div class="stats-card-value" id="stat-gift-receivers">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">선물 기능 사용자</div><div class="stats-card-value" id="stat-gift-participants">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">일반 선물</div><div class="stats-card-value" id="stat-normal-gifts">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">답례 선물</div><div class="stats-card-value" id="stat-reply-gifts">-</div></div>
+        </div>
+        <div class="stats-note">사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 아이템과 선물은 현재 DB에 남아 있는 사용자 보유 항목만 집계합니다. 사용자 아이디나 등록번호는 표시하지 않습니다.</div>
+        <div class="stats-status" id="stats-status" role="status" aria-live="polite"></div>
     </div>
 </div>
 
@@ -448,6 +512,7 @@
         document.getElementById('user-badge').innerText = 'Google 관리자';
         document.getElementById('doc-panel').classList.add('active');
         document.getElementById('password-menu-item').classList.add('hidden');
+        document.getElementById('admin-stats-menu-section').classList.remove('hidden');
         document.getElementById('gift-menu-section').classList.add('hidden');
         document.getElementById('data-menu-section').classList.add('hidden');
         document.getElementById('score-ls').disabled = true;
@@ -700,6 +765,71 @@
         link.href = encodeURI(csv);
         link.download = `mood_recovery_${safeFilePart(h)}.csv`;
         link.click();
+    }
+
+    const adminStatPeriods = new Set(['1w', '2w', '4w', '2m', '3m', '6m', '1y']);
+    const adminStatFields = {
+        active_users: 'stat-active-users',
+        linked_users: 'stat-linked-users',
+        unlinked_users: 'stat-unlinked-users',
+        new_record_users: 'stat-new-users',
+        record_days: 'stat-record-days',
+        average_record_days: 'stat-average-days',
+        item_holders: 'stat-item-holders',
+        current_items: 'stat-current-items',
+        gift_transfers: 'stat-gift-transfers',
+        gift_senders: 'stat-gift-senders',
+        gift_receivers: 'stat-gift-receivers',
+        gift_participants: 'stat-gift-participants',
+        normal_gifts: 'stat-normal-gifts',
+        reply_gifts: 'stat-reply-gifts'
+    };
+
+    function openAdminStatsModal() {
+        if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
+        if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        document.getElementById('stats-modal').style.display = 'flex';
+        loadAdminStats('4w');
+    }
+
+    function closeAdminStatsModal() {
+        document.getElementById('stats-modal').style.display = 'none';
+    }
+
+    function formatAdminStat(value, fractionDigits = 0) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return '0';
+        return number.toLocaleString('ko-KR', {
+            minimumFractionDigits: fractionDigits,
+            maximumFractionDigits: fractionDigits
+        });
+    }
+
+    async function loadAdminStats(period) {
+        if (!isAdminUser() || !adminStatPeriods.has(period)) return;
+
+        const status = document.getElementById('stats-status');
+        const buttons = document.querySelectorAll('[data-stats-period]');
+        status.textContent = '통계를 불러오는 중입니다.';
+        buttons.forEach(button => {
+            button.disabled = true;
+            button.classList.toggle('active', button.dataset.statsPeriod === period);
+        });
+
+        const { data, error } = await sb.rpc('moodchart_admin_usage_summary', { p_period: period });
+
+        buttons.forEach(button => { button.disabled = false; });
+        if (error || !data || typeof data !== 'object') {
+            status.textContent = '통계를 불러오지 못했습니다.';
+            return;
+        }
+
+        Object.entries(adminStatFields).forEach(([field, elementId]) => {
+            const digits = field === 'average_record_days' ? 1 : 0;
+            document.getElementById(elementId).textContent = formatAdminStat(data[field], digits);
+        });
+        document.getElementById('stats-range').textContent = `${safeText(data.period_label, 20)} · ${safeText(data.period_start, 20)} ~ ${safeText(data.period_end, 20)}`;
+        status.textContent = '';
     }
 
     async function checkSpecialEvents() {
