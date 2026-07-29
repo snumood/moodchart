@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co https://cdn.jsdelivr.net; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests;">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="shortcut icon" href="./favicon.ico">
+<title>관리자 로그인 | 기분기록지</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<style>
+    :root {
+        --primary: #005eb8;
+        --text: #2c3e50;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: url('./bg2.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: var(--text);
+        font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+    }
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: -1;
+    }
+    .auth-box {
+        width: 100%;
+        max-width: 400px;
+        padding: 30px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+    h1 {
+        margin: 0 0 8px;
+        color: var(--primary);
+        font-size: 22px;
+    }
+    p {
+        margin: 0 0 20px;
+        color: #666;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    button:hover { background: #f8f9fa; border-color: #aaa; }
+    button:disabled { cursor: wait; opacity: 0.65; }
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #666;
+        font-size: 12px;
+        text-decoration: underline;
+    }
+    .status {
+        min-height: 18px;
+        margin-top: 12px;
+        color: #d32f2f;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+</style>
+</head>
+<body>
+<main class="auth-box">
+    <h1>관리자 로그인</h1>
+    <p>승인된 관리자 Google 계정만 접근할 수 있습니다.</p>
+    <button id="google-login" type="button">Google 계정으로 로그인</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <a class="back-link" href="./">사용자 로그인으로 돌아가기</a>
+</main>
+
+<script>
+    const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const loginButton = document.getElementById('google-login');
+    const statusBox = document.getElementById('status');
+    const appUrl = new URL('./', window.location.href).href;
+
+    async function validateAdminSession(session) {
+        if (!session) return false;
+        const { data: authorized, error } = await sb.rpc('moodchart_admin_session');
+        if (!error && authorized === true) {
+            window.location.replace(appUrl);
+            return true;
+        }
+        await sb.auth.signOut();
+        statusBox.textContent = '승인된 관리자 Google 계정이 아닙니다.';
+        return false;
+    }
+
+    async function startGoogleLogin() {
+        loginButton.disabled = true;
+        statusBox.textContent = '';
+        const { error } = await sb.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: appUrl }
+        });
+        if (error) {
+            loginButton.disabled = false;
+            statusBox.textContent = '관리자 Google 로그인을 시작할 수 없습니다.';
+        }
+    }
+
+    loginButton.addEventListener('click', startGoogleLogin);
+
+    window.addEventListener('load', async () => {
+        const { data: { session } } = await sb.auth.getSession();
+        await validateAdminSession(session);
+    });
+</script>
+</body>
+</html>

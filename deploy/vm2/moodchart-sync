@@ -20,6 +20,7 @@ if [[ ! -d "${release_dir}" ]]; then
     install -d -m 0755 "${release_dir}"
     for asset in \
         index.html \
+        admin-login.html \
         bg.jpg \
         bg2.jpg \
         favicon-16x16.png \
