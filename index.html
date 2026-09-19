@@ -12,15 +12,16 @@
 <link rel="manifest" href="./site.webmanifest">
     
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co https://cdn.jsdelivr.net; font-src 'self' data: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests;">
-<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <title>기분기록지 1.07 | 분당서울대학교병원</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/luxon" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation" crossorigin="anonymous"></script>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/chart.js"></script>
+<script src="vendor/luxon.js"></script>
+<script src="vendor/chartjs-adapter-luxon.js"></script>
+<script src="vendor/chartjs-plugin-annotation.js"></script>
 
 <style>
     /* --- 디자인 시스템 --- */

@@ -1,0 +1,47 @@
+[
+  {
+    "repo": "moodchart",
+    "path": "vendor/supabase.js",
+    "source": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+    "version": "2.116.0",
+    "sha256": "fbde52aab1700a3b308087ae78b41fb5192e7a952d81d5d08238763ce3245dd8",
+    "bytes": 218610
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/chart.js",
+    "source": "https://cdn.jsdelivr.net/npm/chart.js",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/chart.js",
+    "version": "4.5.1",
+    "sha256": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a",
+    "bytes": 208522
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/luxon.js",
+    "source": "https://cdn.jsdelivr.net/npm/luxon",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/luxon",
+    "version": "3.7.2",
+    "sha256": "516c5fea5c82bdf1fb5c472b9aafdca9cda6dc806b2c12ce9d62c2e0fc348104",
+    "bytes": 81694
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/chartjs-adapter-luxon.js",
+    "source": "https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon",
+    "version": "1.3.1",
+    "sha256": "aa4f88f51685e7b22e9bd54b727d196168ee85b8ce5ce082c0197ec676976b5b",
+    "bytes": 1836
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/chartjs-plugin-annotation.js",
+    "source": "https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation",
+    "version": "3.1.0",
+    "sha256": "ff03786a60f6c93ccacfe0fbb6c2e3c671d7930856a3689f2f393113d8d655ec",
+    "bytes": 38359
+  }
+]
