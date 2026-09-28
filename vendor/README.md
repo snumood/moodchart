@@ -9,6 +9,8 @@ Before updating, run a dependency audit and verify login, Chart.js time axes,
 the Luxon adapter and annotations. Keep CSP restricted to local scripts.
 
 Fonts (SIL Open Font License 1.1) are served from `vendor/fonts/` because the
-CSP allows fonts from this site only: Nanum Pen Script for handwritten entries
-and Cormorant Garamond (latin) for printed numerals. Browsers download only the
-unicode-range subsets a page actually uses.
+CSP allows fonts from this site only: Pretendard (text), MaruBuri (Korean
+headings, subset to the glyphs the app uses; re-run the subset if new Korean
+heading text is added), Nanum Pen Script (handwritten entries) and Cormorant
+Garamond (printed numerals). Browsers download only the unicode-range subsets
+a page actually uses.

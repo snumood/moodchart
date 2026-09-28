@@ -46,6 +46,30 @@
   },
   {
     "repo": "moodchart",
+    "path": "vendor/fonts/pretendard.css",
+    "source": "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/",
+    "version": "1.3.9",
+    "weights": "Pretendard Variable, dynamic subset",
+    "license": "OFL-1.1 (vendor/fonts/pretendard/OFL.txt)",
+    "sha256": "1ca0ec223dcbc707e211e4b7733514589d4ab23330e7723997baa9b0126c293a",
+    "bytes": 54932,
+    "font_files": 92,
+    "font_files_sha256_of_sorted_hashes": "d9cdb1e8f63275729c8e3ab4c3977e8a5fe33b325fd4670b549b06c06a98e05f"
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/fonts/maruburi.css",
+    "source": "https://cdn.jsdelivr.net/npm/@kfonts/maruburi@0.1.0",
+    "version": "0.1.0 (NAVER MaruBuri)",
+    "weights": "300/400/600, glyph subset of the app's text",
+    "license": "OFL-1.1 (vendor/fonts/maruburi/OFL.txt)",
+    "sha256": "2f87db1ce0882fbf30dac0c0a4dc79eaff2f293ddfbaf9231bca4ae49905d126",
+    "bytes": 623,
+    "font_files": 3,
+    "font_files_sha256_of_sorted_hashes": "88e04b40e6f3381c923498664f983424d78e7ce3b2f9ec95cf7d52f4a3b48bfc"
+  },
+  {
+    "repo": "moodchart",
     "path": "vendor/fonts/nanum-pen-script.css",
     "source": "https://cdn.jsdelivr.net/npm/@fontsource/nanum-pen-script@5.3.0",
     "version": "5.3.0",

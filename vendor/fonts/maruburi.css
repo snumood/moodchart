@@ -1,0 +1,22 @@
+/* MaruBuri (© NAVER Corp., SIL Open Font License 1.1), subset to the glyphs this app uses. */
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(./maruburi/maruburi-light-subset.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./maruburi/maruburi-regular-subset.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./maruburi/maruburi-semibold-subset.woff2) format('woff2');
+}

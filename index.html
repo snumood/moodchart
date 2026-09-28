@@ -17,6 +17,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>기분기록지 1.07 | 분당서울대학교병원</title>
+<link rel="stylesheet" href="vendor/fonts/pretendard.css">
+<link rel="stylesheet" href="vendor/fonts/maruburi.css">
 <link rel="stylesheet" href="vendor/fonts/nanum-pen-script.css">
 <link rel="stylesheet" href="vendor/fonts/cormorant-garamond.css">
 <script src="vendor/supabase.js"></script>
@@ -193,102 +195,94 @@
         .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    /* --- 책상 위의 가죽 플래너 (가죽 표지 · 스티치 · 찢긴 종이 · 인쇄 활자 · 펜 글씨) --- */
+    /* --- 리넨 책상 위의 검은 양장 수첩 (크림 종이 · 인쇄 활자 · 펜 글씨) --- */
     :root {
-        --paper: #fdfaf2;
-        --grid-line: rgba(70, 80, 100, 0.12);
-        --grid-strong: rgba(70, 80, 100, 0.28);
-        --print-ink: #3b4152;
-        --print-soft: #8a8f9c;
-        --ink: #243049;
-        --pencil: rgba(72, 76, 96, 0.62);
+        --paper: #fbf8f1;
+        --grid-line: rgba(60, 58, 70, 0.085);
+        --grid-strong: rgba(60, 58, 70, 0.22);
+        --print-ink: #33353d;
+        --print-soft: #8d8f98;
+        --accent: #9b2f35;
+        --ink: #1f2a44;
+        --pencil: rgb(72, 76, 96);
         --hand: 'Nanum Pen Script', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-        --print: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+        --print: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        --serif-ko: 'MaruBuri', 'AppleMyungjo', 'Batang', serif;
         --serif: 'Cormorant Garamond', 'Times New Roman', serif;
-        --leather: #8a5a33;
-        --nb-top: 30px;
-        --nb-x: 14px;
-        --nb-right: 14px;
-        --nb-bottom: 84px;
-        --tape-mood: #e8a4a0;
-        --tape-scale: #e9c77a;
-        --tape-body: #9fc7a4;
-        --tape-event: #a9b6e0;
-        --check-v1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        --check-v2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        --check-v3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+        --nb-top: 26px;
+        --nb-x: 16px;
+        --nb-right: 16px;
+        --nb-bottom: 86px;
+        --tape-mood: #d9a4a2;
+        --tape-scale: #d9c28e;
+        --tape-body: #a8c3ab;
+        --tape-event: #aab4d6;
+        --check-v1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        /* 가죽 결: 잡음에 조명을 비춰 도드라진 질감 */
+        --leather-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='l' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting surfaceScale='1.6' lighting-color='%23ffffff'%3E%3CfeDistantLight azimuth='235' elevation='48'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 -0.72'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23l)'/%3E%3C/svg%3E");
+        /* 리넨 결 */
+        --linen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.10 0'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.012' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23a)'/%3E%3Crect width='300' height='300' filter='url(%23b)'/%3E%3C/svg%3E");
     }
     @media (min-width: 900px) {
-        :root { --nb-top: 40px; --nb-x: 40px; --nb-right: 68px; --nb-bottom: 96px; }
+        :root { --nb-top: 40px; --nb-x: 48px; --nb-right: 76px; --nb-bottom: 100px; }
     }
 
-    /* 책상 (호두나무 결) */
+    /* 리넨 책상 + 창가 빛 */
     body {
-        background-color: #6f4a2d;
+        font-family: var(--print);
+        background-color: #e6e1d9;
         background-image:
-            radial-gradient(120% 90% at 35% 15%, rgba(255, 210, 160, 0.22), transparent 60%),
-            repeating-linear-gradient(91deg, rgba(40, 20, 5, 0.10) 0 2px, transparent 2px 9px, rgba(255, 220, 180, 0.05) 9px 11px, transparent 11px 23px),
-            linear-gradient(180deg, #7a5233, #5e3d24);
+            radial-gradient(90% 70% at 18% 0%, rgba(255, 252, 245, 0.85), rgba(255, 252, 245, 0) 60%),
+            radial-gradient(140% 110% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(70, 58, 44, 0.22) 100%),
+            var(--linen);
     }
 
-    /* 가죽 표지 + 스티치 */
+    /* 검은 양장 표지 (펼친 상태에서 종이 둘레로 보이는 부분) */
     #nb-cover {
         position: fixed; z-index: 0; pointer-events: none;
-        top: calc(var(--nb-top) - 22px); left: calc(var(--nb-x) - 10px);
-        right: calc(var(--nb-right) - 18px); bottom: calc(var(--nb-bottom) - 18px);
-        border-radius: 12px;
-        background-color: var(--leather);
-        background-image: var(--grain), radial-gradient(130% 100% at 25% 0%, rgba(255, 230, 190, 0.22), transparent 55%), linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.18));
-        box-shadow: 0 20px 44px rgba(25, 12, 2, 0.55), inset 0 1px 0 rgba(255, 235, 200, 0.25), inset 0 -2px 3px rgba(0, 0, 0, 0.3);
-    }
-    #nb-cover::after {
-        content: ""; position: absolute; inset: 6px; border-radius: 8px;
-        border: 1.5px dashed rgba(255, 228, 185, 0.55);
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+        top: calc(var(--nb-top) - 12px); left: calc(var(--nb-x) - 10px);
+        right: calc(var(--nb-right) - 16px); bottom: calc(var(--nb-bottom) - 16px);
+        border-radius: 14px;
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.07), transparent 55%);
+        box-shadow:
+            0 30px 60px -12px rgba(40, 30, 20, 0.45),
+            0 12px 24px -8px rgba(40, 30, 20, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.10),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.03);
     }
     #main-screen { position: relative; }
 
-    /* 종이 (쌓인 페이지) */
+    /* 크림 종이 (쌓인 페이지) */
     #main-screen .container {
         position: fixed; z-index: 1;
         top: var(--nb-top); left: var(--nb-x); right: var(--nb-right); bottom: var(--nb-bottom);
         height: auto;
         background: var(--paper);
-        border-radius: 2px 2px 4px 4px;
+        border-radius: 3px 5px 5px 3px;
         box-shadow:
-            0 1px 0 #efe9da, 0 2px 0 #faf6ec, 0 3px 0 #e8e1d0, 0 4px 0 #f7f2e6, 0 5px 0 #e1d8c4,
-            1px 0 0 #ece5d4, 2px 0 0 #f8f3e8, 3px 0 0 #e4dcc9,
-            0 10px 18px rgba(25, 12, 2, 0.35);
+            1px 0 0 #efeae0, 2px 0 0 #fbf8f1, 3px 1px 0 #e9e3d7, 4px 1px 0 #f8f4ec, 5px 2px 0 #e3dccf,
+            0 1px 0 #efeae0, 0 2px 0 #f8f4ec, 1px 3px 0 #e6e0d4,
+            0 6px 14px rgba(0, 0, 0, 0.35);
+    }
+    /* 제본선 쪽 그늘 */
+    #main-screen .container::after {
+        content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 22px; z-index: 60; pointer-events: none;
+        background: linear-gradient(90deg, rgba(40, 30, 20, 0.16), rgba(40, 30, 20, 0.05) 40%, rgba(40, 30, 20, 0));
+        border-radius: 3px 0 0 3px;
     }
     #main-screen .grid-wrapper { height: auto; min-height: 0; flex: 1; }
 
-    /* 위쪽 가죽 제본 띠 + 찢겨 나간 종이 조각 */
-    #nb-rings {
-        position: fixed; z-index: 120; pointer-events: none;
-        top: calc(var(--nb-top) - 22px); left: calc(var(--nb-x) - 10px); right: calc(var(--nb-right) - 18px);
-        height: 30px; border-radius: 12px 12px 3px 3px;
-        background-color: #7a4c29;
-        background-image: var(--grain), linear-gradient(180deg, rgba(255, 225, 180, 0.25), rgba(0, 0, 0, 0.25));
-        box-shadow: 0 3px 5px rgba(25, 12, 2, 0.45);
-    }
-    #nb-rings::before {
-        content: ""; position: absolute; left: 10px; right: 10px; top: 7px; height: 0;
-        border-top: 1.5px dashed rgba(255, 228, 185, 0.6);
-    }
-    #nb-rings::after {
-        content: ""; position: absolute; left: 6px; right: 6px; top: 100%; height: 9px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='9' viewBox='0 0 120 9'%3E%3Cpath d='M0 0H120V2L116 3.5L113 1.8L109 5.5L105 2.4L101 3.2L98 1.6L94 6.2L90 2.2L86 4L83 1.9L79 3L75 7L71 2.6L67 3.6L64 1.7L60 4.8L56 2.1L52 3.4L49 1.5L45 6.6L41 2.3L37 3.9L34 1.8L30 2.9L26 5.8L22 2L18 3.3L15 1.6L11 4.4L7 2.5L3 3.1L0 1.9Z' fill='%23fbf7ee'/%3E%3C/svg%3E") repeat-x;
-        filter: drop-shadow(0 1px 0.5px rgba(60, 40, 10, 0.25));
-    }
-
-    /* 리본 책갈피 */
+    /* 새틴 책갈피 끈 */
     #nb-ribbon {
         position: fixed; z-index: 0; pointer-events: none;
-        right: calc(var(--nb-right) + 46px); bottom: calc(var(--nb-bottom) - 50px);
-        width: 12px; height: 62px;
-        background: linear-gradient(90deg, #6e1420, #a3283a 45%, #6e1420);
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
+        right: calc(var(--nb-right) + 54px); bottom: calc(var(--nb-bottom) - 58px);
+        width: 9px; height: 70px;
+        background: linear-gradient(90deg, #3c0d15, #7a1f2d 40%, #9c3445 52%, #6a1a26 70%, #3c0d15);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
+        transform-origin: 50% 0;
     }
 
     /* 월 인덱스 탭 (넓은 화면) */
@@ -297,86 +291,85 @@
         #nb-tabs {
             display: flex; flex-direction: column; gap: 2px;
             position: fixed; z-index: 0;
-            top: calc(var(--nb-top) + 70px); right: calc(var(--nb-right) - 40px);
-            width: 46px;
+            top: calc(var(--nb-top) + 70px); right: calc(var(--nb-right) - 42px);
+            width: 48px;
         }
         .nb-tab {
-            height: 34px; border: none; border-radius: 0 7px 7px 0; cursor: pointer;
-            padding-left: 13px; text-align: left;
-            font-family: var(--serif); font-size: 17px; font-weight: 600; color: #5b4a36;
-            background: linear-gradient(90deg, #e9dcc3, #f4ead6);
-            box-shadow: 2px 1px 2px rgba(25, 12, 2, 0.35), inset -1px 0 0 rgba(0, 0, 0, 0.06);
-            transform: translateX(-9px); transition: transform .2s;
+            height: 34px; border: none; border-radius: 0 6px 6px 0; cursor: pointer;
+            padding-left: 15px; text-align: left;
+            font-family: var(--serif); font-size: 17px; font-weight: 600; color: #6f6a62;
+            background: linear-gradient(90deg, #e9e3d7, #f3eee4);
+            box-shadow: 2px 1px 3px rgba(40, 30, 20, 0.25);
+            transform: translateX(-10px); transition: transform .25s cubic-bezier(.2, .8, .3, 1);
         }
         .nb-tab:hover { transform: translateX(-4px); }
-        .nb-tab.current { transform: translateX(0); background: linear-gradient(90deg, #fff8e8, #fffdf6); color: #2a2218; }
+        .nb-tab.current { transform: translateX(0); background: linear-gradient(90deg, #fbf8f1, #fffdf8); color: var(--accent); }
     }
 
     /* 머리말: 인쇄된 플래너 제목 */
     .header {
         background: transparent; border-bottom: 1px solid var(--grid-strong); box-shadow: none;
-        padding-top: 12px; height: calc(var(--header-h) + 22px);
+        padding: 12px 14px 0 20px; height: calc(var(--header-h) + 22px);
     }
-    .month-nav { gap: 10px; }
+    .month-nav { gap: 12px; }
     .btn-nav {
-        font-size: 11px; color: var(--print-soft); background: transparent;
-        border: 1px solid rgba(70, 80, 100, 0.25); border-radius: 50%; width: 30px; height: 30px; padding: 0;
+        font-size: 10px; color: var(--print-soft); background: transparent;
+        border: 1px solid rgba(60, 58, 70, 0.22); border-radius: 50%; width: 30px; height: 30px; padding: 0;
+        transition: background .2s, color .2s;
     }
-    .btn-nav:active { background: rgba(70, 80, 100, 0.08); }
+    .btn-nav:hover { color: var(--print-ink); }
+    .btn-nav:active { background: rgba(60, 58, 70, 0.07); }
     #date-picker { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-    #nb-title { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; line-height: 1; white-space: nowrap; }
-    #nb-title .t-num { font-family: var(--serif); font-weight: 300; font-size: 46px; color: #2a2f3d; letter-spacing: -1px; }
-    #nb-title .t-meta { display: flex; flex-direction: column; gap: 3px; }
-    #nb-title .t-en { font-family: var(--serif); font-weight: 600; font-size: 13px; letter-spacing: 3.5px; color: #b0413e; }
-    #nb-title .t-ko { font-family: var(--print); font-weight: 500; font-size: 11px; letter-spacing: 1px; color: var(--print-soft); }
+    #nb-title { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; line-height: 1; white-space: nowrap; }
+    #nb-title .t-num { font-family: var(--serif); font-weight: 300; font-size: 48px; color: #23252c; letter-spacing: -1px; }
+    #nb-title .t-meta { display: flex; flex-direction: column; gap: 5px; }
+    #nb-title .t-en { font-family: var(--serif); font-weight: 600; font-size: 12.5px; letter-spacing: 4px; color: var(--accent); }
+    #nb-title .t-ko { font-family: var(--serif-ko); font-weight: 400; font-size: 11.5px; letter-spacing: 0.5px; color: var(--print-soft); }
     .btn-menu { color: var(--print-soft); font-size: 22px; }
 
     /* 월간 평가: 인쇄된 칸 */
     .top-assessment-bar {
         background: transparent; border-bottom: 1px solid var(--grid-line);
-        font-family: var(--print); font-size: 11.5px; color: var(--print-ink); height: 40px; gap: 10px;
+        font-family: var(--print); font-size: 11.5px; color: var(--print-ink); height: 42px; gap: 12px;
     }
-    .top-assessment-bar a { font-size: 11.5px; font-weight: 600; color: var(--print-ink); text-decoration: none; border-bottom: 1px dotted rgba(59, 65, 82, 0.5); }
+    .top-assessment-bar a { font-size: 11.5px; font-weight: 600; color: var(--print-ink); text-decoration: none; border-bottom: 1px solid rgba(51, 53, 61, 0.25); }
     .top-assessment-bar input {
-        font-family: var(--hand); font-size: 24px; font-weight: 400; color: var(--ink); width: 54px; height: 30px;
-        background: transparent; border: none; border-bottom: 1px solid rgba(59, 65, 82, 0.45); border-radius: 0;
+        font-family: var(--hand); font-size: 25px; font-weight: 400; color: var(--ink); width: 56px; height: 32px;
+        background: transparent; border: none; border-bottom: 1px solid rgba(51, 53, 61, 0.35); border-radius: 0;
     }
-    .top-assessment-bar input::placeholder { font-family: var(--print); font-size: 10px; color: #b8bcc6; }
+    .top-assessment-bar input::placeholder { font-family: var(--print); font-size: 10px; color: #bdbfc6; }
 
-    /* 종이 결 */
-    .grid-wrapper {
-        background-color: var(--paper);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
+    /* 표 */
+    .grid-wrapper { background-color: var(--paper); }
     th, td { border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); }
     thead tr:nth-child(1) th, thead tr:nth-child(2) th { background: var(--paper); color: var(--print-ink); }
     thead tr:nth-child(1) th { border-bottom: 1px solid var(--grid-line); font-family: var(--serif); font-size: 18px; font-weight: 600; }
-    thead tr:nth-child(2) th { border-bottom: 1.5px solid var(--grid-strong); font-family: var(--print); font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--print-soft); }
+    thead tr:nth-child(2) th { border-bottom: 1px solid var(--grid-strong); font-family: var(--print); font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--print-soft); }
     thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { background: var(--paper); font-family: var(--print); font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--print-soft); }
     .col-label {
-        font-family: var(--print); font-size: 11px; font-weight: 600; color: var(--print-ink); letter-spacing: -0.2px;
-        border-right: 1px solid rgba(176, 65, 62, 0.45);
+        font-family: var(--print); font-size: 11px; font-weight: 550; color: var(--print-ink); letter-spacing: -0.2px;
+        border-right: 1px solid rgba(155, 47, 53, 0.35);
         background: linear-gradient(var(--row-tint, transparent), var(--row-tint, transparent)), var(--paper) !important;
-        box-shadow: inset 4px 0 0 var(--tape, transparent);
-        padding-left: 12px;
+        box-shadow: inset 3px 0 0 var(--tape, transparent);
+        padding-left: 14px;
     }
     tr.sec-mood { --tape: var(--tape-mood); }
     tr.sec-scale { --tape: var(--tape-scale); }
     tr.sec-body { --tape: var(--tape-body); }
     tr.sec-event { --tape: var(--tape-event); }
-    .block-divider td, .block-divider th { border-top: 1.5px solid var(--grid-strong) !important; }
-    .bg-scale { background-color: rgba(233, 199, 122, 0.08); }
-    .bg-body { background-color: rgba(159, 199, 164, 0.08); }
+    .block-divider td, .block-divider th { border-top: 1px solid var(--grid-strong) !important; }
+    .bg-scale { background-color: rgba(217, 194, 142, 0.07); }
+    .bg-body { background-color: rgba(168, 195, 171, 0.07); }
     .bg-event { background-color: transparent; }
-    .disabled-cell { background-color: rgba(120, 110, 90, 0.05) !important; color: #d0c8b6; }
+    .disabled-cell { background-color: rgba(120, 110, 90, 0.04) !important; color: #d6d0c4; }
 
-    /* 오늘: 인쇄된 동그라미 표시 */
-    .today-header, .today-dow { background: var(--paper) !important; border: none !important; color: #b0413e !important; }
-    .today-header { background: radial-gradient(circle at 50% 62%, rgba(176, 65, 62, 0.12) 0 13px, transparent 14px), var(--paper) !important; }
-    .today-badge { background: none; color: #b0413e; font-family: var(--print); font-size: 8.5px; font-weight: 700; letter-spacing: 1px; width: auto; margin-bottom: 0; }
-    td.today-col { background-image: linear-gradient(rgba(176, 65, 62, 0.045), rgba(176, 65, 62, 0.045)); }
-    .day-sun, .day-holiday { color: #b0413e !important; background-color: var(--paper) !important; }
-    .day-sat { color: #3d64a8 !important; background-color: var(--paper) !important; }
+    /* 오늘 */
+    .today-header, .today-dow { background: var(--paper) !important; border: none !important; color: var(--accent) !important; }
+    .today-header { background: radial-gradient(circle at 50% 62%, rgba(155, 47, 53, 0.10) 0 13px, transparent 14px), var(--paper) !important; }
+    .today-badge { background: none; color: var(--accent); font-family: var(--print); font-size: 8.5px; font-weight: 700; letter-spacing: 1px; width: auto; margin-bottom: 0; }
+    td.today-col { background-image: linear-gradient(rgba(155, 47, 53, 0.035), rgba(155, 47, 53, 0.035)); }
+    .day-sun, .day-holiday { color: var(--accent) !important; background-color: var(--paper) !important; }
+    .day-sat { color: #3d5a8f !important; background-color: var(--paper) !important; }
 
     /* 펜 체크 */
     .cell-check.checked::after, .cell-mixed.checked::after {
@@ -386,23 +379,23 @@
         mask: var(--check, var(--check-v1)) no-repeat center / contain;
         transform: rotate(var(--rot, 0deg));
     }
-    .cell-mixed.checked::after { background: #8e44ad; }
+    .cell-mixed.checked::after { background: #7d3c98; }
     td.v2 { --check: var(--check-v2); }
     td.v3 { --check: var(--check-v3); }
     td.ink-anim.checked::after { animation: penStroke .42s cubic-bezier(.3, .7, .4, 1) both; animation-delay: var(--ink-delay, 0s); }
 
     /* 펜 글씨 */
-    .cell-select, .cell-input { font-family: var(--hand); font-size: 23px; font-weight: 400; color: var(--ink-c, var(--ink)); }
-    .cell-input { font-size: 20px; }
-    .cell-input::placeholder { font-family: var(--print); font-size: 9px; color: rgba(90, 100, 130, 0.35); }
+    .cell-select, .cell-input { font-family: var(--hand); font-size: 24px; font-weight: 400; color: var(--ink-c, var(--ink)); }
+    .cell-input { font-size: 21px; }
+    .cell-input::placeholder { font-family: var(--print); font-size: 9px; color: rgba(90, 100, 130, 0.3); }
     td.ink-anim .cell-select, td.ink-anim .cell-input { animation: penStroke .5s ease-out both; animation-delay: var(--ink-delay, 0s); }
     @keyframes penStroke {
         from { clip-path: inset(-20% 100% -20% 0); }
         to { clip-path: inset(-20% -5% -20% 0); }
     }
 
-    /* 스티커 (약 · 운동 · 생활사건) */
-    .cell-icon, .cell-event { filter: drop-shadow(0 1.5px 0.5px rgba(80, 60, 30, 0.28)); }
+    /* 스티커 */
+    .cell-icon, .cell-event { filter: drop-shadow(0 1px 0.5px rgba(80, 60, 30, 0.25)); }
     .cell-icon:not(.checked), .cell-event { font-size: 20px; }
     td.sticker-pop { animation: stickerPop .45s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: var(--ink-delay, 0s); }
     @keyframes stickerPop {
@@ -413,56 +406,88 @@
 
     /* 기분 흐름선 (연필) — 두 기분을 체크한 날은 위·아래 선으로 갈라지고 사이를 칠함 */
     #mood-line { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 25; overflow: visible; }
-    #mood-line path.pencil { fill: none; stroke: var(--pencil); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    #mood-line path.pencil-2 { fill: none; stroke: rgba(72, 76, 96, 0.2); stroke-width: 1; stroke-linecap: round; }
-    #mood-line path.band { stroke: none; fill: rgba(72, 76, 96, 0.08); }
-    #mood-line path.band.mixed { fill: url(#mixed-hatch); }
-    #mood-line line.span { stroke: rgba(72, 76, 96, 0.5); stroke-width: 1.4; stroke-dasharray: 2 3; stroke-linecap: round; }
-    #mood-line line.span.mixed { stroke: rgba(142, 68, 173, 0.75); }
+    #mood-line path.pencil { fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    #mood-line path.pencil-2 { fill: none; stroke-width: 1; stroke-linecap: round; }
+    #mood-line path.band { stroke: none; fill: rgba(72, 76, 96, 0.07); }
+    #mood-line line.span { stroke: rgba(72, 76, 96, 0.5); stroke-width: 1.3; stroke-dasharray: 2 3; stroke-linecap: round; }
+    #mood-line line.span.mixed { stroke: rgba(125, 60, 152, 0.8); }
     #mood-line circle { fill: rgba(72, 76, 96, 0.6); }
-    #mood-line circle.mixed { fill: #8e44ad; }
+    #mood-line circle.mixed { fill: #7d3c98; }
     #mood-line.drawing path.pencil, #mood-line.drawing path.pencil-2 { animation: drawLine 1.4s ease-out both; }
     #mood-line.drawing path.band, #mood-line.drawing line { animation: fadeIn 1s .5s ease-out both; }
     @keyframes drawLine { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* 페이지 넘김 (CSS 대체용) */
-    .nb-cast { position: absolute; z-index: 94; pointer-events: none; }
-
     /* 책상 위의 펜 */
     #pen-tray {
-        position: fixed; z-index: 950; left: 50%; bottom: 6px; transform: translateX(-50%);
-        height: 72px; display: flex; align-items: flex-end; gap: 2px; padding: 0 6px;
+        position: fixed; z-index: 950; left: 50%; bottom: 8px; transform: translateX(-50%);
+        height: 74px; display: flex; align-items: flex-end; gap: 4px; padding: 0 6px;
     }
     .nb-pen {
-        width: 40px; height: 72px; border: none; background: none; padding: 0; cursor: pointer; position: relative;
-        transition: transform .25s cubic-bezier(.2, 1.3, .4, 1), filter .25s;
-        transform: rotate(-32deg) translateY(6px);
-        filter: drop-shadow(3px 4px 2px rgba(20, 10, 2, 0.55));
+        width: 38px; height: 74px; border: none; background: none; padding: 0; cursor: pointer; position: relative;
+        transition: transform .3s cubic-bezier(.2, 1.2, .4, 1), filter .3s, opacity .3s;
+        transform: rotate(-30deg) translateY(6px);
+        filter: drop-shadow(4px 5px 3px rgba(40, 30, 20, 0.35));
     }
-    .nb-pen svg { width: 18px; height: 72px; display: block; margin: 0 auto; }
-    .nb-pen:hover { transform: rotate(-32deg) translateY(1px); }
-    .nb-pen.active { transform: rotate(-24deg) translateY(-8px) scale(1.08); filter: drop-shadow(6px 10px 4px rgba(20, 10, 2, 0.45)); }
-    .nb-pen.pencil { margin-left: 10px; }
-    .nb-pen.pencil.off { transform: rotate(-60deg) translateY(12px); filter: drop-shadow(2px 3px 2px rgba(20, 10, 2, 0.45)) grayscale(0.35); }
-    .nb-pen.pencil:not(.off) { transform: rotate(-38deg) translateY(-2px); }
+    .nb-pen svg { width: 16px; height: 74px; display: block; margin: 0 auto; }
+    .nb-pen:hover { transform: rotate(-30deg) translateY(1px); }
+    /* 들고 있는 펜은 자리가 비어 흐릿하게 */
+    .nb-pen.active { transform: rotate(-30deg) translateY(10px); opacity: 0.22; filter: none; }
+    .nb-pen.pencil { margin-left: 12px; }
+    .nb-pen.pencil.off { transform: rotate(-58deg) translateY(12px); filter: drop-shadow(3px 4px 2px rgba(40, 30, 20, 0.3)) grayscale(0.5); opacity: 0.8; }
+    .nb-pen.pencil:not(.off) { transform: rotate(-36deg) translateY(-2px); }
     #nb-toast {
-        position: fixed; z-index: 960; left: 50%; bottom: 84px; transform: translateX(-50%);
-        background: rgba(35, 28, 20, 0.88); color: #f6efe2; font-family: var(--print); font-size: 12.5px; font-weight: 500; letter-spacing: 0.2px;
-        padding: 7px 14px; border-radius: 16px; box-shadow: 0 4px 10px rgba(20, 10, 2, 0.35);
-        opacity: 0; transition: opacity .25s; pointer-events: none;
+        position: fixed; z-index: 960; left: 50%; bottom: 90px; transform: translateX(-50%);
+        background: rgba(24, 24, 27, 0.9); color: #f3efe7; font-family: var(--print); font-size: 12.5px; font-weight: 500; letter-spacing: 0.2px;
+        padding: 8px 16px; border-radius: 18px; box-shadow: 0 6px 16px rgba(20, 15, 10, 0.3);
+        opacity: 0; transition: opacity .3s; pointer-events: none;
     }
     #nb-toast.show { opacity: 1; }
 
-    /* 칸에 쓰러 가는 펜 */
-    #nb-hand-pen { position: fixed; z-index: 1200; width: 22px; height: 92px; pointer-events: none; left: 0; top: 0; opacity: 0; transform-origin: 50% 100%; filter: drop-shadow(8px 10px 5px rgba(30, 20, 5, 0.35)); }
-    #nb-hand-pen svg { width: 100%; height: 100%; display: block; }
+    /* 펜을 쥔 손 */
+    #nb-hand { position: fixed; z-index: 1200; pointer-events: none; left: 0; top: 0; opacity: 0; filter: drop-shadow(14px 18px 12px rgba(40, 28, 16, 0.32)); }
+    #nb-hand svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+    /* 수첩 열고 닫기 */
+    #nb-book { position: fixed; inset: 0; z-index: 2500; perspective: 2200px; pointer-events: auto; }
+    #nb-book .board {
+        position: absolute; transform-origin: 0 50%; transform-style: preserve-3d;
+    }
+    #nb-book .face { position: absolute; inset: 0; border-radius: 4px 14px 14px 4px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    #nb-book .front {
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%), linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 6%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), inset -1px 0 0 rgba(255, 255, 255, 0.05);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    }
+    #nb-book .front .emboss-ko { font-family: var(--serif-ko); font-weight: 300; font-size: 30px; letter-spacing: 12px; padding-left: 12px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16), 0 -1px 0 rgba(0, 0, 0, 0.7); }
+    #nb-book .front .emboss-en { font-family: var(--serif); font-weight: 500; font-size: 12px; letter-spacing: 7px; padding-left: 7px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15); }
+    #nb-book .front .emboss-foot { position: absolute; bottom: 28px; font-family: var(--serif-ko); font-size: 10px; letter-spacing: 2px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.13); }
+    #nb-book .inside {
+        transform: rotateY(180deg);
+        border-radius: 14px 4px 4px 14px;
+        background: #18181b;
+        box-shadow: inset 0 0 0 7px #18181b;
+    }
+    #nb-book .inside::after {
+        content: ""; position: absolute; inset: 7px; border-radius: 4px;
+        background: linear-gradient(90deg, #f1ece2, #f7f3eb 70%, #e9e3d7);
+        box-shadow: inset -12px 0 18px -10px rgba(40, 30, 20, 0.25);
+    }
+    #nb-book .band {
+        position: absolute; top: -2px; bottom: -2px; width: 11px; border-radius: 2px;
+        background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e);
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.5), 2px 0 3px rgba(0, 0, 0, 0.4);
+    }
+    #nb-book .shade { position: absolute; pointer-events: none; background: linear-gradient(90deg, rgba(20, 15, 10, 0.45), rgba(20, 15, 10, 0) 80%); opacity: 0; }
 
     @media (max-width: 480px) {
-        .top-assessment-bar { gap: 6px; padding: 0 8px; justify-content: space-between; font-size: 10.5px; }
+        .top-assessment-bar { gap: 6px; padding: 0 8px 0 14px; justify-content: space-between; font-size: 10.5px; }
         .top-assessment-bar a { font-size: 10.5px; }
         .top-assessment-bar input { width: 44px; }
-        #nb-title .t-num { font-size: 40px; }
+        #nb-title .t-num { font-size: 42px; }
+        #nb-book .front .emboss-ko { font-size: 24px; letter-spacing: 9px; }
+        #nb-ribbon { right: calc(var(--nb-right) + 18px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1817,6 +1842,7 @@
             await revokeStoredDeviceLogin();
         }
         sessionStorage.setItem('mood_skip_auto_login_once', '1');
+        await Notebook.close();
         location.reload();
     }
     async function changePassword() {
@@ -1907,61 +1933,157 @@
             td.classList.add(cls);
         }
 
-        // ---------- 펜 SVG ----------
-        function penSvg(color, w = 18, h = 72) {
-            const light = 'rgba(255,255,255,0.55)';
-            return `<svg viewBox="0 0 18 72" width="${w}" height="${h}" aria-hidden="true">
-                <defs><linearGradient id="pb${color.slice(1)}" x1="0" x2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.85"/><stop offset="0.35" stop-color="${color}"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/></linearGradient></defs>
-                <rect x="4" y="2" width="10" height="16" rx="4" fill="${color}"/>
-                <rect x="12.4" y="3" width="2.2" height="20" rx="1" fill="#c9ced6"/>
-                <rect x="4" y="16" width="10" height="38" rx="1.5" fill="url(#pb${color.slice(1)})"/>
-                <rect x="5.4" y="18" width="1.8" height="34" rx="0.9" fill="${light}"/>
-                <rect x="4.6" y="53" width="8.8" height="7" fill="#3a3d45"/>
-                <path d="M4.6 60 L13.4 60 L10 69 L8 69 Z" fill="#d7dbe2"/>
-                <circle cx="9" cy="69.3" r="1.2" fill="${color}"/>
+        // ---------- 펜 SVG (옻칠 몸통 · 금장 클립) ----------
+        function shade(hex, k) {
+            const n = parseInt(hex.slice(1), 16);
+            const f = c => Math.max(0, Math.min(255, Math.round(k < 0 ? c * (1 + k) : c + (255 - c) * k)));
+            return `rgb(${f(n >> 16)}, ${f((n >> 8) & 255)}, ${f(n & 255)})`;
+        }
+        let svgSeq = 0;
+        function penSvg(color, w = 16, h = 74) {
+            const id = `pg${++svgSeq}`;
+            return `<svg viewBox="0 0 16 74" width="${w}" height="${h}" aria-hidden="true">
+                <defs>
+                    <linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="${shade(color, -0.45)}"/><stop offset="0.28" stop-color="${shade(color, 0.28)}"/><stop offset="0.45" stop-color="${color}"/><stop offset="1" stop-color="${shade(color, -0.55)}"/></linearGradient>
+                    <linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#8a6a2e"/><stop offset="0.4" stop-color="#f3dc9a"/><stop offset="1" stop-color="#7a5a22"/></linearGradient>
+                    <linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#7d828c"/><stop offset="0.4" stop-color="#f2f4f7"/><stop offset="1" stop-color="#6c717b"/></linearGradient>
+                </defs>
+                <rect x="3.5" y="1" width="9" height="20" rx="4.5" fill="url(#${id}b)"/>
+                <rect x="10.6" y="3" width="2" height="22" rx="1" fill="url(#${id}g)"/>
+                <rect x="3.4" y="20" width="9.2" height="2.2" fill="url(#${id}g)"/>
+                <rect x="3.8" y="22" width="8.4" height="34" rx="1.2" fill="url(#${id}b)"/>
+                <rect x="4" y="55.5" width="8" height="2" fill="url(#${id}g)"/>
+                <path d="M4.2 57.5 H11.8 L9.6 68.5 H6.4 Z" fill="url(#${id}m)"/>
+                <path d="M6.4 68.5 H9.6 L8 72.5 Z" fill="#2a2d33"/>
             </svg>`;
         }
         function pencilSvg() {
-            return `<svg viewBox="0 0 18 72" width="18" height="72" aria-hidden="true">
-                <rect x="4.5" y="1" width="9" height="8" rx="2.5" fill="#f29bb0"/>
-                <rect x="4.5" y="8" width="9" height="5" fill="#c9ced6"/>
-                <rect x="4.5" y="13" width="9" height="44" fill="#f6c343"/>
-                <rect x="7.8" y="13" width="2.4" height="44" fill="#e9ac25"/>
-                <path d="M4.5 57 L13.5 57 L9.8 68 L8.2 68 Z" fill="#f1d3a6"/>
-                <path d="M8.2 68 L9.8 68 L9 71 Z" fill="#4a4a52"/>
+            const id = `pc${++svgSeq}`;
+            return `<svg viewBox="0 0 16 74" width="16" height="74" aria-hidden="true">
+                <defs>
+                    <linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#0d0e10"/><stop offset="0.35" stop-color="#3a3d44"/><stop offset="0.55" stop-color="#1c1e22"/><stop offset="1" stop-color="#060607"/></linearGradient>
+                    <linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#7d828c"/><stop offset="0.4" stop-color="#f2f4f7"/><stop offset="1" stop-color="#6c717b"/></linearGradient>
+                </defs>
+                <rect x="4" y="1" width="8" height="7" rx="2.5" fill="#efece6"/>
+                <rect x="4" y="7.5" width="8" height="5" fill="url(#${id}m)"/>
+                <rect x="4" y="12.5" width="8" height="45" fill="url(#${id}b)"/>
+                <path d="M4 57.5 H12 L8.9 68 H7.1 Z" fill="#e8cfa4"/>
+                <path d="M7.1 68 H8.9 L8 71.5 Z" fill="#3b3c40"/>
             </svg>`;
         }
 
-        // ---------- 칸에 쓰러 가는 펜 ----------
-        let handPen = null, handAnim = null;
-        function flyPenTo(td) {
-            if (reduceMotion || !td) return 0;
-            const from = document.querySelector('#pen-tray .nb-pen.active');
-            if (!from) return 0;
-            if (!handPen) {
-                handPen = document.createElement('div');
-                handPen.id = 'nb-hand-pen';
-                document.body.appendChild(handPen);
+        // ---------- 펜을 쥔 손 ----------
+        // 손 그림의 좌표계에서 펜촉 위치 (300×300, 손목은 오른쪽 아래 화면 밖으로 이어짐)
+        const HAND_TIP = [40, 250];
+        const HAND_BOX = 300;
+        function handSvg(color) {
+            const id = `hd${++svgSeq}`;
+            const pen = penSvg(color).replace(/^<svg[^>]*>|<\/svg>$/g, '');
+            return `<svg viewBox="0 0 300 300" aria-hidden="true">
+                <defs>
+                    <linearGradient id="${id}s" x1="0.1" y1="0.1" x2="0.8" y2="0.9"><stop offset="0" stop-color="#f6d6c2"/><stop offset="0.55" stop-color="#ebbd9f"/><stop offset="1" stop-color="#d59c7c"/></linearGradient>
+                    <linearGradient id="${id}f" x1="0" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#f7d9c6"/><stop offset="0.6" stop-color="#ecbfa2"/><stop offset="1" stop-color="#d9a283"/></linearGradient>
+                    <linearGradient id="${id}t" x1="0" y1="0" x2="1" y2="0.6"><stop offset="0" stop-color="#f3cfb9"/><stop offset="1" stop-color="#dca587"/></linearGradient>
+                    <radialGradient id="${id}k" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff3ea" stop-opacity="0.8"/><stop offset="1" stop-color="#fff3ea" stop-opacity="0"/></radialGradient>
+                    <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f3542"/><stop offset="1" stop-color="#171a21"/></linearGradient>
+                    <pattern id="${id}knit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="6" height="6" fill="none"/><path d="M0 3 H6" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/></pattern>
+                    <filter id="${id}b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+                    <filter id="${id}b2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter>
+                </defs>
+                <!-- 팔목 -->
+                <path d="M250 226 L430 360 L386 444 L222 302 Z" fill="url(#${id}s)"/>
+                <!-- 손등 -->
+                <path d="M150 152 C185 164 226 196 264 236 L238 298 C214 293 190 287 172 280 C154 273 138 261 130 245 C121 228 124 204 130 188 C136 172 142 160 150 152 Z" fill="url(#${id}s)"/>
+                <path d="M238 296 C212 290 186 283 168 276 C152 270 140 260 133 248" stroke="#b77a5b" stroke-width="10" fill="none" opacity="0.28" filter="url(#${id}b)"/>
+                <path d="M156 160 C190 172 224 200 256 234" stroke="#fff4ec" stroke-width="6" fill="none" opacity="0.35" filter="url(#${id}b)"/>
+                <ellipse cx="170" cy="176" rx="20" ry="9" transform="rotate(34 170 176)" fill="url(#${id}k)"/>
+                <!-- 말아 쥔 약지 · 새끼손가락 -->
+                <path d="M198 288 C182 294 160 290 146 278 C160 276 180 280 198 284 Z" fill="#d49a7a"/>
+                <path d="M226 296 C214 300 200 298 190 292 C202 290 214 292 226 292 Z" fill="#cf9476"/>
+                <!-- 중지 (펜 아래) -->
+                <path d="M62 233 C58 226 64 221 72 222 C88 224 110 230 140 238 L138 258 C112 252 90 246 74 240 C68 238 64 237 62 233 Z" fill="url(#${id}f)"/>
+                <path d="M74 238 C92 244 114 250 136 255" stroke="#b97a5c" stroke-width="3" fill="none" opacity="0.35" filter="url(#${id}b2)"/>
+                <!-- 엄지 -->
+                <path d="M76 226 C72 219 78 213 86 214 C100 216 120 222 150 230 C160 233 166 244 158 254 C132 252 106 244 88 236 C82 233 78 231 76 226 Z" fill="url(#${id}t)"/>
+                <path d="M79 223 C78 219 81 216 85 216 C89 216 91 219 90 222 C89 225 86 227 83 226 C81 226 79 225 79 223 Z" fill="#f9e1d6" opacity="0.95"/>
+                <!-- 펜 -->
+                <g transform="translate(${HAND_TIP[0]},${HAND_TIP[1]}) rotate(42)"><g transform="translate(-7.6,-232) scale(0.95,3.2)">${pen}</g></g>
+                <!-- 검지 (펜 위를 누름) -->
+                <path d="M84 212 C96 204 108 196 124 188 C136 182 148 178 160 176 L156 152 C142 152 130 156 118 162 C102 170 88 182 78 190 C70 197 70 206 76 210 C79 212 81 213 84 212 Z" fill="url(#${id}f)"/>
+                <path d="M75 204 C73 199 76 195 81 194 C85 193 88 196 88 200 C88 204 85 207 81 207 C78 207 76 206 75 204 Z" fill="#f9e1d6" opacity="0.95"/>
+                <path d="M110 172 C114 176 116 181 116 186" stroke="#c48667" stroke-width="1.3" fill="none" opacity="0.4" stroke-linecap="round"/>
+                <path d="M134 162 C138 166 140 171 140 176" stroke="#c48667" stroke-width="1.3" fill="none" opacity="0.35" stroke-linecap="round"/>
+                <ellipse cx="146" cy="160" rx="10" ry="6" transform="rotate(-20 146 160)" fill="url(#${id}k)"/>
+                <!-- 손가락 사이 그늘 -->
+                <path d="M92 210 C110 214 132 222 154 232" stroke="#9c6348" stroke-width="5" fill="none" opacity="0.18" filter="url(#${id}b)"/>
+                <!-- 소매 -->
+                <path d="M272 232 L446 356 L400 452 L236 322 C244 292 256 262 272 232 Z" fill="url(#${id}c)"/>
+                <path d="M272 232 L446 356 L400 452 L236 322 C244 292 256 262 272 232 Z" fill="url(#${id}knit)"/>
+                <path d="M272 234 C256 262 244 292 237 322" stroke="#4b5363" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+            </svg>`;
+        }
+
+        let hand = null, handAnim = null;
+        function ensureHand() {
+            if (!hand) {
+                hand = document.createElement('div');
+                hand.id = 'nb-hand';
+                document.body.appendChild(hand);
             }
-            handPen.innerHTML = penSvg(pen, 22, 92);
+            const size = Math.max(190, Math.min(270, window.innerWidth * 0.55));
+            hand.style.width = `${size}px`;
+            hand.style.height = `${size}px`;
+            hand.style.transformOrigin = `${HAND_TIP[0] / HAND_BOX * 100}% ${HAND_TIP[1] / HAND_BOX * 100}%`;
+            return size;
+        }
+        function placeHand(size, x, y) {
+            hand.style.left = `${x - size * HAND_TIP[0] / HAND_BOX}px`;
+            hand.style.top = `${y - size * HAND_TIP[1] / HAND_BOX}px`;
+        }
+
+        // 칸에 펜촉을 대고 쓰는 손
+        function writeWithHand(td) {
+            if (reduceMotion || !td) return 0;
+            const size = ensureHand();
+            hand.innerHTML = handSvg(pen);
             const r = td.getBoundingClientRect();
-            const f = from.getBoundingClientRect();
-            const tipX = r.left + r.width / 2, tipY = r.top + r.height / 2;
-            handPen.style.left = `${tipX - 11}px`;
-            handPen.style.top = `${tipY - 92}px`;
-            const dx = (f.left + f.width / 2) - tipX, dy = (f.top + f.height / 2) - tipY + 46;
+            placeHand(size, r.left + r.width / 2 - 6, r.top + r.height / 2 + 4);
+            const off = `translate(${window.innerWidth * 0.5}px, ${window.innerHeight * 0.45}px) rotate(8deg)`;
             if (handAnim) handAnim.cancel();
-            handAnim = handPen.animate([
-                { opacity: 0, transform: `translate(${dx}px, ${dy}px) rotate(-32deg)` },
-                { opacity: 1, transform: `translate(${dx * 0.1}px, ${dy * 0.1 - 18}px) rotate(18deg)`, offset: 0.28 },
-                { opacity: 1, transform: 'translate(0px, 0px) rotate(22deg)', offset: 0.38 },
-                { opacity: 1, transform: 'translate(4px, -2px) rotate(20deg)', offset: 0.48 },
-                { opacity: 1, transform: 'translate(-2px, 1px) rotate(23deg)', offset: 0.56 },
-                { opacity: 1, transform: 'translate(6px, -4px) rotate(19deg)', offset: 0.66 },
-                { opacity: 1, transform: 'translate(9px, -16px) rotate(16deg)', offset: 0.78 },
-                { opacity: 0, transform: `translate(${dx * 0.6}px, ${dy * 0.6}px) rotate(-20deg)` }
-            ], { duration: 1100, easing: 'ease-in-out' });
-            return 0.36;
+            handAnim = hand.animate([
+                { opacity: 0, transform: off },
+                { opacity: 1, transform: 'translate(10px, 8px) rotate(2deg)', offset: 0.3 },
+                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.38 },
+                { opacity: 1, transform: 'translate(4px, 5px) rotate(-1deg)', offset: 0.46 },
+                { opacity: 1, transform: 'translate(8px, -2px) rotate(0.5deg)', offset: 0.55 },
+                { opacity: 1, transform: 'translate(14px, -9px) rotate(1deg)', offset: 0.64 },
+                { opacity: 1, transform: 'translate(20px, -18px) rotate(3deg)', offset: 0.74 },
+                { opacity: 0, transform: off }
+            ], { duration: 1250, easing: 'cubic-bezier(.45, .05, .35, 1)' });
+            return 0.44;
+        }
+
+        // 책상 위 펜을 집어 드는 손
+        function pickUpWithHand(btn, done) {
+            if (reduceMotion || !btn) { done(); return; }
+            const size = ensureHand();
+            const prev = pen;
+            hand.innerHTML = handSvg(btn.dataset.color);
+            const r = btn.getBoundingClientRect();
+            placeHand(size, r.left + r.width * 0.3, r.top + r.height * 0.8);
+            const off = `translate(${window.innerWidth * 0.5}px, ${window.innerHeight * 0.3}px) rotate(10deg)`;
+            if (handAnim) handAnim.cancel();
+            // 손이 오는 동안에는 새 펜이 아직 책상 위에 있음
+            btn.style.opacity = '1';
+            handAnim = hand.animate([
+                { opacity: 0, transform: off },
+                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.42 },
+                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.5 },
+                { opacity: 1, transform: 'translate(40px, -60px) rotate(6deg)', offset: 0.72 },
+                { opacity: 0, transform: off }
+            ], { duration: 1100, easing: 'cubic-bezier(.45, .05, .35, 1)' });
+            setTimeout(() => { btn.style.opacity = ''; done(); }, 520);
+            void prev;
         }
 
         // 사용자가 칸에 쓰거나 지웠을 때
@@ -1981,7 +2103,7 @@
                 inkMap[key] = pen;
                 td.style.setProperty('--ink-c', pen);
                 styleCell(td, key);
-                const delay = flyPenTo(td);
+                const delay = writeWithHand(td);
                 restartAnim(td, 'ink-anim', delay);
             } else {
                 delete inkMap[key];
@@ -1996,19 +2118,27 @@
             animateNextLoad = false;
             suppressCascade = false;
             document.querySelectorAll('#table-body td[data-c]').forEach(td => {
-                const day = td.dataset.d, cat = td.dataset.c;
-                const key = cellKey(day, cat);
+                const key = cellKey(td.dataset.d, td.dataset.c);
                 const color = inkMap[key];
                 if (color) td.style.setProperty('--ink-c', color); else td.style.removeProperty('--ink-c');
                 styleCell(td, key);
-                if (!animate || !cellHasValue(td)) return;
-                const delay = Math.min(1.2, (Number(day) - 1) * 0.03 + Math.random() * 0.08) + 0.15;
+            });
+            if (animate && opening) { pendingCascade = true; drawMoodLine(false); }
+            else if (animate) cascade();
+            else drawMoodLine(false);
+            const w = loadWaiters; loadWaiters = [];
+            w.forEach(fn => fn());
+        }
+        // 날짜 순서대로 한 칸씩 써 내려가는 효과
+        function cascade() {
+            if (reduceMotion) return;
+            document.querySelectorAll('#table-body td[data-c]').forEach(td => {
+                if (!cellHasValue(td)) return;
+                const delay = Math.min(1.2, (Number(td.dataset.d) - 1) * 0.03 + Math.random() * 0.08) + 0.15;
                 const isSticker = td.classList.contains('cell-event') || (td.classList.contains('cell-icon') && !td.classList.contains('checked'));
                 restartAnim(td, isSticker ? 'sticker-pop' : 'ink-anim', delay);
             });
-            drawMoodLine(animate);
-            const w = loadWaiters; loadWaiters = [];
-            w.forEach(fn => fn());
+            drawMoodLine(true);
         }
         function cellHasValue(td) {
             return td.classList.contains('checked') ||
@@ -2322,8 +2452,8 @@
                 else { x = (sin(th) - sin(uPhi)) / c; z = (cos(uPhi) - cos(th)) / c; }
                 vec3 n = vec3(-sin(th), 0.0, cos(th));
                 vec3 L = normalize(vec3(0.35, -0.3, 0.88));
-                vShade = clamp(0.62 + 0.42 * dot(n, L), 0.0, 1.1);
-                vBack = clamp(0.62 + 0.42 * dot(-n, L), 0.0, 1.1);
+                vShade = clamp(0.74 + 0.30 * dot(n, L), 0.0, 1.06);
+                vBack = clamp(0.74 + 0.30 * dot(-n, L), 0.0, 1.06);
                 vec2 sc = uOrigin + vec2(x, y);
                 float k = uPersp / (uPersp - z);
                 vec2 scr = uCenter + (sc - uCenter) * k;
@@ -2346,9 +2476,9 @@
                     gl_FragColor = vec4(c.rgb * vShade * gutter, 1.0) * uAlpha;
                 } else {
                     // 뒷면: 종이 + 앞면 글씨가 거울처럼 살짝 비침
-                    vec3 paper = vec3(0.972, 0.955, 0.912);
+                    vec3 paper = vec3(0.984, 0.972, 0.945);
                     vec3 show = texture2D(uFront, vec2(vUV.x, vUV.y)).rgb;
-                    vec3 c = mix(paper, paper * show, 0.14);
+                    vec3 c = mix(paper, paper * show, 0.10);
                     gl_FragColor = vec4(c * vBack, 1.0) * uAlpha;
                 }
             }
@@ -2462,8 +2592,8 @@
                     const phi = phiFrom + (phiTo - phiFrom) * e;
                     const lift = Math.sin(Math.min(Math.PI, phi));
                     // 손으로 모서리를 잡아 넘기듯 바깥쪽이 앞서 휘고, 위쪽이 먼저 넘어감
-                    const bend = motion * 0.95 * lift;
-                    const skew = 0.55;
+                    const bend = motion * 0.62 * lift;
+                    const skew = 0.38;
                     const foot = phi < Math.PI / 2 ? W * Math.cos(phi) : 0;
 
                     gl.clearColor(0, 0, 0, 0);
@@ -2524,7 +2654,7 @@
                 if (dir > 0) {
                     // 다음 달: 지금 페이지가 제본선을 축으로 왼쪽으로 넘어가며 새 페이지가 드러남
                     doRender();
-                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, phiFrom: 0, phiTo: END, duration: 1100 });
+                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, phiFrom: 0, phiTo: END, duration: 1250 });
                     gl.deleteTexture(oldTex);
                 } else {
                     // 이전 달: 왼쪽으로 넘겨 두었던 앞 장이 되돌아와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
@@ -2536,7 +2666,7 @@
                     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
                     const newSnap = snapshotPage(scale);
                     const newTex = texFrom(newSnap.canvas);
-                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: END, phiTo: 0, duration: 1100 });
+                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: END, phiTo: 0, duration: 1250 });
                     gl.deleteTexture(newTex); gl.deleteTexture(oldTex);
                 }
             } catch (e) {
@@ -2564,7 +2694,7 @@
         function buildDecor() {
             const main = document.getElementById('main-screen');
             if (!document.getElementById('nb-cover')) {
-                ['nb-cover', 'nb-rings', 'nb-ribbon'].forEach(id => {
+                ['nb-cover', 'nb-ribbon'].forEach(id => {
                     const el = document.createElement('div');
                     el.id = id; el.setAttribute('aria-hidden', 'true');
                     main.insertBefore(el, main.firstChild);
@@ -2643,7 +2773,7 @@
                 b.setAttribute('role', 'radio');
                 b.setAttribute('aria-label', `${p.name} 펜`);
                 b.innerHTML = penSvg(p.color);
-                b.onclick = () => { pen = p.color; store.set(PEN_KEY, pen); applyPen(); toast(`${p.name} 펜을 들었어요`); };
+                b.onclick = () => { if (p.color === pen) return; pickUpWithHand(b, () => { pen = p.color; store.set(PEN_KEY, pen); applyPen(); toast(`${p.name} 펜을 들었어요`); }); };
                 tray.appendChild(b);
             });
             const pc = document.createElement('button');
@@ -2666,11 +2796,112 @@
             applyPen();
         }
 
+        // ---------- 수첩 열기 · 닫기 ----------
+        let opening = false, pendingCascade = false;
+        function bookRect() {
+            const c = document.getElementById('nb-cover');
+            return c ? c.getBoundingClientRect() : null;
+        }
+        function buildBook(r) {
+            const book = document.createElement('div');
+            book.id = 'nb-book';
+            book.setAttribute('aria-hidden', 'true');
+            const board = document.createElement('div');
+            board.className = 'board';
+            Object.assign(board.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+            board.innerHTML = `
+                <div class="face front">
+                    <div class="emboss-ko">기분기록지</div>
+                    <div class="emboss-en">MOOD JOURNAL</div>
+                    <div class="emboss-foot">분당서울대학교병원 기분장애클리닉</div>
+                </div>
+                <div class="face inside"></div>`;
+            const band = document.createElement('div');
+            band.className = 'band';
+            Object.assign(band.style, { left: `${r.right - 44}px`, top: `${r.top - 2}px`, height: `${r.height + 4}px` });
+            const shadeEl = document.createElement('div');
+            shadeEl.className = 'shade';
+            Object.assign(shadeEl.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+            book.append(shadeEl, board, band);
+            document.body.appendChild(book);
+            return { book, board, band, shadeEl };
+        }
+        const wait = ms => new Promise(res => setTimeout(res, ms));
+        const run = (el, frames, opts) => el.animate(frames, { fill: 'forwards', ...opts }).finished;
+
+        async function openBook() {
+            const r = bookRect();
+            if (reduceMotion || !r || !document.body.animate) { ribbonOut(false); return; }
+            opening = true;
+            const ribbon = document.getElementById('nb-ribbon');
+            if (ribbon) ribbon.style.opacity = '0';
+            const { book, board, band, shadeEl } = buildBook(r);
+            try {
+                await run(board, [{ transform: 'translateY(14px) scale(0.965)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.2, .8, .3, 1)' });
+                await wait(220);
+                // 고무 밴드를 옆으로 풀어냄
+                await run(band, [{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(26px) scaleY(1.02)', opacity: 0 }], { duration: 420, easing: 'cubic-bezier(.5, 0, .3, 1)' });
+                // 표지를 왼쪽으로 넘김
+                shadeEl.style.opacity = '1';
+                run(shadeEl, [{ opacity: 1 }, { opacity: 0 }], { duration: 1300, easing: 'ease-out' });
+                await run(board, [
+                    { transform: 'rotateY(0deg)' },
+                    { transform: 'rotateY(-100deg)', offset: 0.55 },
+                    { transform: 'rotateY(-178deg)' }
+                ], { duration: 1400, easing: 'cubic-bezier(.55, .05, .3, 1)' });
+                await run(book, [{ opacity: 1 }, { opacity: 0 }], { duration: 260 });
+            } finally {
+                book.remove();
+                opening = false;
+            }
+            ribbonOut(true);
+            if (pendingCascade) { pendingCascade = false; cascade(); }
+        }
+
+        function ribbonOut(animate) {
+            const ribbon = document.getElementById('nb-ribbon');
+            if (!ribbon) return;
+            ribbon.style.opacity = '';
+            if (!animate || reduceMotion) return;
+            ribbon.animate([
+                { transform: 'translateY(-72px)', opacity: 0 },
+                { transform: 'translateY(4px) rotate(2deg)', opacity: 1, offset: 0.7 },
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 }
+            ], { duration: 800, easing: 'cubic-bezier(.3, .7, .3, 1)' });
+        }
+
+        async function closeBook() {
+            const r = bookRect();
+            if (reduceMotion || !r || !document.body.animate) return;
+            const ribbon = document.getElementById('nb-ribbon');
+            try {
+                if (ribbon) await run(ribbon, [{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-72px)', opacity: 0 }], { duration: 480, easing: 'cubic-bezier(.5, 0, .7, .4)' });
+                const { book, board, band, shadeEl } = buildBook(r);
+                band.style.opacity = '0';
+                book.style.pointerEvents = 'auto';
+                run(shadeEl, [{ opacity: 0 }, { opacity: 1 }], { duration: 1200, easing: 'ease-in' });
+                await run(board, [
+                    { transform: 'rotateY(-178deg)' },
+                    { transform: 'rotateY(-80deg)', offset: 0.5 },
+                    { transform: 'rotateY(0deg)' }
+                ], { duration: 1250, easing: 'cubic-bezier(.55, .05, .3, 1)' });
+                await run(band, [{ transform: 'translateX(26px)', opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.2, .8, .3, 1)' });
+                await wait(450);
+            } catch (e) { /* 닫는 효과는 실패해도 무시 */ }
+        }
+
         function onLogin() {
             buildDecor();
             buildTray();
             document.getElementById('pen-tray').classList.toggle('hidden', isAdminUser());
             animateNextLoad = true;
+            openBook();
+        }
+
+        async function close() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar?.classList.contains('open')) { toggleSidebar(); await wait(320); }
+            await closeBook();
         }
 
         window.addEventListener('resize', scheduleMoodLine);
@@ -2683,7 +2914,8 @@
             const once = () => { if (!rendered) { rendered = true; doRender(); } };
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender) };
+        const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose };
     })();
 </script>
 </body>

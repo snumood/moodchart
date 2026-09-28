@@ -1,0 +1,4 @@
+MaruBuri
+Copyright (c) NAVER Corp. and NAVER Cultural Foundation.
+Licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org/open-font-license-official-text/).
+The files here are glyph subsets of the original fonts, made for this app.
