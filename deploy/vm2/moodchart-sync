@@ -16,28 +16,39 @@ git -C "${repo_dir}" fetch --quiet --prune origin main
 commit="$(git -C "${repo_dir}" rev-parse origin/main)"
 release_dir="${releases_dir}/${commit}"
 
-install -d -m 0755 "${release_dir}"
-for asset in \
-    index.html \
-    admin-login.html \
-    bg.jpg \
-    bg2.jpg \
-    favicon-16x16.png \
-    favicon-32x32.png \
-    favicon.ico \
-    apple-touch-icon.png \
-    android-chrome-192x192.png \
-    android-chrome-512x512.png \
+assets=(
+    index.html
+    admin-login.html
+    bg.jpg
+    bg2.jpg
+    favicon-16x16.png
+    favicon-32x32.png
+    favicon.ico
+    apple-touch-icon.png
+    android-chrome-192x192.png
+    android-chrome-512x512.png
     site.webmanifest
-do
-    if [[ ! -f "${release_dir}/${asset}" ]]; then
-        git -C "${repo_dir}" show "${commit}:${asset}" > "${release_dir}/${asset}"
-        chmod 0644 "${release_dir}/${asset}"
+)
+# Every tracked file under vendor/ (browser scripts and self-hosted fonts).
+mapfile -t vendor_assets < <(git -C "${repo_dir}" ls-tree -r --name-only "${commit}" -- vendor)
+
+install -d -m 0755 "${release_dir}"
+for asset in "${assets[@]}" "${vendor_assets[@]}"; do
+    if [[ ! "${asset}" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ || "${asset}" == *..* ]]; then
+        echo "skipping unexpected path: ${asset}" >&2
+        continue
+    fi
+    if [[ ! -s "${release_dir}/${asset}" ]]; then
+        install -d -m 0755 "$(dirname "${release_dir}/${asset}")"
+        git -C "${repo_dir}" show "${commit}:${asset}" > "${release_dir}/${asset}.tmp"
+        chmod 0644 "${release_dir}/${asset}.tmp"
+        mv -f "${release_dir}/${asset}.tmp" "${release_dir}/${asset}"
     fi
 done
 
 grep -q '<title>기분기록지' "${release_dir}/index.html"
 grep -q 'SUPABASE_URL' "${release_dir}/index.html"
+test -s "${release_dir}/vendor/supabase.js"
 
 ln -sfn "${release_dir}" "${base_dir}/current.new"
 mv -Tf "${base_dir}/current.new" "${base_dir}/current"
