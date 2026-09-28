@@ -17,6 +17,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>기분기록지 1.07 | 분당서울대학교병원</title>
+<link rel="stylesheet" href="vendor/fonts/gaegu.css">
 <script src="vendor/supabase.js"></script>
 <script src="vendor/chart.js"></script>
 <script src="vendor/luxon.js"></script>
@@ -189,6 +190,281 @@
     @media (max-width: 768px) {
         :root { --col-w: 130px; }
         .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    /* --- 책상 위의 스프링 노트 (종이 · 링 · 표지 · 펜) --- */
+    :root {
+        --paper: #fffcf3;
+        --grid-line: rgba(92, 128, 190, 0.16);
+        --grid-strong: rgba(92, 128, 190, 0.34);
+        --ink: #2c3445;
+        --pencil: rgba(72, 76, 96, 0.62);
+        --hand: 'Gaegu', 'Pretendard', 'Malgun Gothic', sans-serif;
+        --nb-top: 34px;
+        --nb-x: 12px;
+        --nb-right: 12px;
+        --nb-bottom: 84px;
+        --tape-mood: rgba(255, 170, 170, 0.8);
+        --tape-scale: rgba(255, 214, 110, 0.85);
+        --tape-body: rgba(140, 210, 160, 0.85);
+        --tape-event: rgba(170, 190, 255, 0.85);
+        --check-v1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5' fill='none' stroke='%23000' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    @media (min-width: 900px) {
+        :root { --nb-top: 40px; --nb-x: 36px; --nb-right: 64px; --nb-bottom: 96px; }
+    }
+
+    /* 책상 (나뭇결) */
+    body {
+        background-color: #b98a5c;
+        background-image:
+            repeating-linear-gradient(92deg, rgba(90, 50, 20, 0.07) 0 3px, transparent 3px 11px, rgba(255, 230, 190, 0.05) 11px 13px, transparent 13px 29px),
+            radial-gradient(120% 90% at 30% 20%, #cfa375 0%, #b38255 55%, #9c6d43 100%);
+    }
+
+    /* 노트 종이 (페이지 묶음) */
+    #main-screen .container {
+        position: fixed;
+        top: var(--nb-top); left: var(--nb-x); right: var(--nb-right); bottom: var(--nb-bottom);
+        height: auto;
+        background: var(--paper);
+        border-radius: 3px 3px 6px 6px;
+        box-shadow:
+            1px 1px 0 #efe8d8, 2px 2px 0 #fbf7ec, 3px 3px 0 #e9e1cf, 4px 4px 0 #f8f3e7, 5px 5px 0 #e2d9c5,
+            6px 6px 0 #f5efe2, 7px 7px 0 #dcd2bd,
+            0 22px 34px rgba(50, 28, 8, 0.38);
+        perspective: 2400px;
+    }
+    #main-screen .grid-wrapper { height: auto; min-height: 0; flex: 1; }
+
+    /* 하드커버 */
+    #nb-cover {
+        position: fixed; z-index: 0; pointer-events: none;
+        top: calc(var(--nb-top) - 10px); left: calc(var(--nb-x) - 8px);
+        right: calc(var(--nb-right) - 16px); bottom: calc(var(--nb-bottom) - 16px);
+        border-radius: 10px;
+        background:
+            radial-gradient(140% 100% at 20% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
+            repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px),
+            #2d4677;
+        box-shadow: 0 18px 40px rgba(40, 22, 6, 0.5), inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+    }
+    #main-screen { position: relative; }
+    #main-screen .container { z-index: 1; }
+
+    /* 스프링 링 */
+    #nb-rings {
+        position: fixed; z-index: 120; pointer-events: none;
+        top: calc(var(--nb-top) - 20px); left: calc(var(--nb-x) + 10px); right: calc(var(--nb-right) + 10px);
+        height: 36px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='36' viewBox='0 0 26 36'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%236f7682'/%3E%3Cstop offset='.35' stop-color='%23f4f6f9'/%3E%3Cstop offset='.6' stop-color='%23a9b0bb'/%3E%3Cstop offset='1' stop-color='%23565c66'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cellipse cx='13' cy='28' rx='4' ry='4.3' fill='%23574a36' opacity='.55'/%3E%3Cellipse cx='13' cy='27.4' rx='3.2' ry='3.5' fill='%232b2418' opacity='.7'/%3E%3Cpath d='M10 28 V7 a3 3 0 0 1 6 0 V28' fill='none' stroke='url(%23g)' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-position: center top;
+        filter: drop-shadow(0 2px 1.5px rgba(40, 25, 10, 0.35));
+    }
+
+    /* 리본 책갈피 */
+    #nb-ribbon {
+        position: fixed; z-index: 0; pointer-events: none;
+        right: calc(var(--nb-right) + 46px); bottom: calc(var(--nb-bottom) - 44px);
+        width: 12px; height: 60px;
+        background: linear-gradient(90deg, #a51d2d, #d8394a 45%, #a51d2d);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 월 인덱스 탭 (넓은 화면) */
+    #nb-tabs { display: none; }
+    @media (min-width: 900px) {
+        #nb-tabs {
+            display: flex; flex-direction: column; gap: 3px;
+            position: fixed; z-index: 0;
+            top: calc(var(--nb-top) + 64px); right: calc(var(--nb-right) - 38px);
+            width: 44px;
+        }
+        .nb-tab {
+            height: 34px; border: none; border-radius: 0 9px 9px 0; cursor: pointer;
+            padding-left: 12px; text-align: left;
+            font-family: var(--hand); font-size: 15px; font-weight: 700; color: rgba(40, 40, 60, 0.75);
+            background: var(--tab); box-shadow: 2px 2px 3px rgba(40, 22, 6, 0.3);
+            transform: translateX(-8px); transition: transform .2s;
+        }
+        .nb-tab:hover { transform: translateX(-3px); }
+        .nb-tab.current { transform: translateX(0); box-shadow: 3px 2px 5px rgba(40, 22, 6, 0.4); color: #1d2233; }
+    }
+
+    /* 머리말: 노트 윗부분 제목 */
+    .header {
+        background: transparent; border-bottom: 1.5px solid rgba(230, 120, 120, 0.35); box-shadow: none;
+        padding-top: 12px; height: calc(var(--header-h) + 14px);
+    }
+    .month-nav { gap: 6px; }
+    .btn-nav {
+        font-family: var(--hand); font-size: 15px; font-weight: 700; color: #4a5068;
+        background: transparent; border: 1.5px dashed rgba(74, 80, 104, 0.35); border-radius: 50%;
+        width: 32px; height: 32px; padding: 0;
+    }
+    .btn-nav:active { background: rgba(74, 80, 104, 0.1); }
+    #date-picker { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    #nb-title {
+        font-family: var(--hand); font-size: 27px; font-weight: 700; color: #26304a; cursor: pointer;
+        padding: 0 6px; line-height: 1; white-space: nowrap;
+        background: linear-gradient(transparent 62%, rgba(255, 220, 90, 0.55) 62%, rgba(255, 220, 90, 0.55) 92%, transparent 92%);
+    }
+    .btn-menu { color: #4a5068; }
+
+    /* 월간 평가: 테이프로 붙인 포스트잇 */
+    .top-assessment-bar {
+        position: relative; margin: 8px 12px 6px; border-radius: 2px;
+        background: #fff4b8; border-bottom: none;
+        box-shadow: 0 4px 6px -3px rgba(120, 100, 40, 0.4);
+        transform: rotate(-0.6deg);
+        font-family: var(--hand); font-size: 15px; height: 38px; overflow: visible;
+    }
+    .top-assessment-bar::before {
+        content: ""; position: absolute; top: -8px; left: 50%; width: 64px; height: 16px; margin-left: -32px;
+        background: rgba(210, 230, 255, 0.7); transform: rotate(2deg);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .top-assessment-bar a { font-size: 15px; color: #5b4a1c; text-decoration-style: wavy; text-decoration-color: rgba(91, 74, 28, 0.35); }
+    .top-assessment-bar input {
+        font-family: var(--hand); font-size: 17px; font-weight: 700; color: var(--ink);
+        background: transparent; border: none; border-bottom: 2px solid rgba(91, 74, 28, 0.4); border-radius: 0;
+    }
+
+    @media (max-width: 480px) {
+        .top-assessment-bar { margin: 8px 6px 4px; gap: 4px; padding: 0 6px; font-size: 13px; justify-content: space-between; }
+        .top-assessment-bar a { font-size: 13px; }
+        .top-assessment-bar input { width: 40px; font-size: 16px; }
+    }
+
+    /* 모눈 종이 */
+    .grid-wrapper {
+        background-color: var(--paper);
+        background-image:
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+        border-radius: 0 0 6px 6px;
+    }
+    th, td { border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); }
+    thead tr:nth-child(1) th, thead tr:nth-child(2) th { background: var(--paper); font-family: var(--hand); font-size: 15px; font-weight: 700; color: #4a5068; }
+    thead tr:nth-child(1) th { border-bottom: 1px solid var(--grid-strong); }
+    thead tr:nth-child(2) th { border-bottom: 2px solid var(--grid-strong); font-size: 14px; }
+    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { background: var(--paper); font-family: var(--hand); font-size: 14px; }
+    .col-label {
+        border-right: 2px solid rgba(230, 120, 120, 0.45);
+        background: linear-gradient(var(--row-tint, transparent), var(--row-tint, transparent)), var(--paper) !important;
+        box-shadow: inset 5px 0 0 var(--tape, transparent);
+        padding-left: 12px;
+    }
+    tr.sec-mood { --tape: var(--tape-mood); }
+    tr.sec-scale { --tape: var(--tape-scale); }
+    tr.sec-body { --tape: var(--tape-body); }
+    tr.sec-event { --tape: var(--tape-event); }
+    .block-divider td, .block-divider th { border-top: 2px solid var(--grid-strong) !important; }
+    .bg-scale { background-color: rgba(255, 226, 120, 0.13); }
+    .bg-body { background-color: rgba(150, 215, 165, 0.12); }
+    .bg-event { background-color: transparent; }
+    .disabled-cell { background-color: rgba(120, 110, 90, 0.06) !important; color: #c9c0ad; }
+
+    /* 오늘: 형광펜 */
+    .today-header, .today-dow {
+        background: linear-gradient(176deg, transparent 18%, rgba(255, 232, 80, 0.62) 20%, rgba(255, 226, 60, 0.55) 82%, transparent 85%), var(--paper) !important;
+        border: none !important; color: #c62828 !important;
+    }
+    .today-badge { background: none; color: #c62828; font-family: var(--hand); font-size: 12px; font-weight: 700; width: auto; }
+    td.today-col { background-image: linear-gradient(rgba(255, 232, 80, 0.12), rgba(255, 232, 80, 0.12)); }
+    .day-sun, .day-holiday { background-color: rgba(255, 120, 120, 0.07) !important; }
+    .day-sat { background-color: rgba(100, 150, 255, 0.07) !important; }
+
+    /* 펜 체크 */
+    .cell-check.checked::after, .cell-mixed.checked::after {
+        content: ""; display: inline-block; width: 22px; height: 22px; vertical-align: middle;
+        background: var(--ink-c, var(--ink));
+        -webkit-mask: var(--check, var(--check-v1)) no-repeat center / contain;
+        mask: var(--check, var(--check-v1)) no-repeat center / contain;
+        transform: rotate(var(--rot, 0deg));
+    }
+    .cell-mixed.checked::after { background: #8e44ad; }
+    td.v2 { --check: var(--check-v2); }
+    td.v3 { --check: var(--check-v3); }
+    td.ink-anim.checked::after { animation: penStroke .42s cubic-bezier(.3, .7, .4, 1) both; animation-delay: var(--ink-delay, 0s); }
+
+    /* 손글씨 숫자·글자 */
+    .cell-select, .cell-input { font-family: var(--hand); font-size: 17px; font-weight: 700; color: var(--ink-c, var(--ink)); }
+    .cell-input { font-size: 15px; }
+    .cell-input::placeholder { color: rgba(90, 100, 130, 0.35); font-weight: 400; }
+    td.ink-anim .cell-select, td.ink-anim .cell-input { animation: penStroke .5s ease-out both; animation-delay: var(--ink-delay, 0s); }
+    @keyframes penStroke {
+        from { clip-path: inset(-20% 100% -20% 0); }
+        to { clip-path: inset(-20% -5% -20% 0); }
+    }
+
+    /* 스티커 (약 · 운동 · 생활사건) */
+    .cell-icon, .cell-event { filter: drop-shadow(0 1.5px 0.5px rgba(80, 60, 30, 0.28)); }
+    .cell-icon:not(.checked), .cell-event { font-size: 20px; }
+    td.sticker-pop { animation: stickerPop .45s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: var(--ink-delay, 0s); }
+    @keyframes stickerPop {
+        0% { font-size: 4px; opacity: 0; }
+        70% { font-size: 25px; opacity: 1; }
+        100% { font-size: 20px; opacity: 1; }
+    }
+
+    /* 기분 흐름선 (연필) */
+    #mood-line { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 25; overflow: visible; }
+    #mood-line path.pencil { fill: none; stroke: var(--pencil); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    #mood-line path.pencil-2 { fill: none; stroke: rgba(72, 76, 96, 0.22); stroke-width: 1; stroke-linecap: round; }
+    #mood-line circle { fill: rgba(72, 76, 96, 0.55); }
+    #mood-line.drawing path { animation: drawLine 1.4s ease-out both; }
+    @keyframes drawLine { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+
+    /* 페이지 넘김 (위쪽 스프링을 축으로) */
+    .nb-flipper { position: absolute; z-index: 96; pointer-events: none; transform-style: preserve-3d; transform-origin: 50% 0; }
+    .nb-flipper > .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+    .nb-flipper > .face.front { background: var(--paper); }
+    .nb-flipper > .face.front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(60, 40, 10, var(--shade, 0)), rgba(60, 40, 10, 0) 70%); pointer-events: none; }
+    .nb-flipper > .face.back {
+        transform: rotateX(180deg);
+        background-color: #f7f2e6;
+        background-image: repeating-linear-gradient(0deg, rgba(92, 128, 190, 0.07) 0 1px, transparent 1px 34px), repeating-linear-gradient(90deg, rgba(92, 128, 190, 0.07) 0 1px, transparent 1px 44px);
+        box-shadow: inset 0 -30px 40px -20px rgba(60, 40, 10, 0.25);
+    }
+    .nb-underlay { position: absolute; z-index: 95; pointer-events: none; overflow: hidden; }
+    .nb-cast { position: absolute; z-index: 94; pointer-events: none; background: linear-gradient(180deg, rgba(50, 30, 10, 0.28), rgba(50, 30, 10, 0) 80%); }
+
+    /* 책상 위의 펜 */
+    #pen-tray {
+        position: fixed; z-index: 950; left: 50%; bottom: 6px; transform: translateX(-50%);
+        height: 72px; display: flex; align-items: flex-end; gap: 2px; padding: 0 6px;
+    }
+    .nb-pen {
+        width: 40px; height: 72px; border: none; background: none; padding: 0; cursor: pointer; position: relative;
+        transition: transform .25s cubic-bezier(.2, 1.3, .4, 1), filter .25s;
+        transform: rotate(-32deg) translateY(6px);
+        filter: drop-shadow(3px 4px 2px rgba(40, 22, 6, 0.45));
+        -webkit-tap-highlight-color: transparent;
+    }
+    .nb-pen svg { width: 18px; height: 72px; display: block; margin: 0 auto; }
+    .nb-pen:hover { transform: rotate(-32deg) translateY(1px); }
+    .nb-pen.active { transform: rotate(-24deg) translateY(-8px) scale(1.08); filter: drop-shadow(6px 10px 4px rgba(40, 22, 6, 0.4)); }
+    .nb-pen.pencil { margin-left: 10px; }
+    .nb-pen.pencil.off { transform: rotate(-60deg) translateY(12px); filter: drop-shadow(2px 3px 2px rgba(40, 22, 6, 0.35)) grayscale(0.35); }
+    .nb-pen.pencil:not(.off) { transform: rotate(-38deg) translateY(-2px); }
+    #nb-toast {
+        position: fixed; z-index: 960; left: 50%; bottom: 84px; transform: translateX(-50%) rotate(-1deg);
+        background: #fff9d6; color: #3b3a2a; font-family: var(--hand); font-size: 17px; font-weight: 700;
+        padding: 6px 14px; border-radius: 3px; box-shadow: 0 4px 10px rgba(40, 22, 6, 0.3);
+        opacity: 0; transition: opacity .25s; pointer-events: none;
+    }
+    #nb-toast.show { opacity: 1; }
+
+    /* 칸에 쓰러 가는 펜 */
+    #nb-hand-pen { position: fixed; z-index: 1200; width: 22px; height: 92px; pointer-events: none; left: 0; top: 0; opacity: 0; transform-origin: 50% 100%; filter: drop-shadow(8px 10px 5px rgba(30, 20, 5, 0.35)); }
+    #nb-hand-pen svg { width: 100%; height: 100%; display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+        td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path { animation: none; }
     }
 </style>
 </head>
@@ -518,6 +794,7 @@
         document.getElementById('data-menu-section').classList.add('hidden');
         document.getElementById('score-ls').disabled = true;
         document.getElementById('score-mssi').disabled = true;
+        Notebook.onLogin();
         toggleSidebar();
         return true;
     }
@@ -670,6 +947,7 @@
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = id;
         document.getElementById('doc-panel').classList.remove('active');
+        Notebook.onLogin();
         renderTable();
     }
 
@@ -885,6 +1163,7 @@
     function renderTable() {
         const year = curDate.getFullYear(), month = curDate.getMonth();
         document.getElementById('date-picker').value = `${year}-${String(month+1).padStart(2,'0')}-01`;
+        Notebook.onRender();
         const today = new Date();
         const isCurMonth = today.getFullYear()===year && today.getMonth()===month;
         const todayDate = today.getDate();
@@ -917,7 +1196,7 @@
             const isToday = isCurMonth && d === todayDate;
 
             let th = document.createElement('th'); 
-            if(isToday) th.innerHTML = `<span class='today-badge'>TODAY</span>${d}`; else th.innerText = d;
+            if(isToday) th.innerHTML = `<span class='today-badge'>오늘</span>${d}`; else th.innerText = d;
             
             if(isRed) th.className = 'day-holiday';
             else if(dayIdx===6) th.className = 'day-sat';
@@ -941,10 +1220,11 @@
             lastSection = item.section;
             if (item.section === 'mood' && item.color) tr.style.backgroundColor = item.color;
             else tr.classList.add('bg-' + item.section);
+            tr.classList.add('sec-' + item.section);
 
             let th = document.createElement('th');
             th.className = 'col-label tooltip-target'; th.innerText = item.label; th.setAttribute('data-tip', item.desc);
-            if (item.section === 'mood' && item.color) th.style.backgroundColor = item.color;
+            if (item.section === 'mood' && item.color) tr.style.setProperty('--row-tint', item.color);
             tr.appendChild(th);
 
             for(let d=1; d<=lastDay; d++) {
@@ -988,6 +1268,7 @@
                             () => {
                                 if(isChecked) { td.classList.remove('checked'); saveData(d, item.id, null); } 
                                 else { td.classList.add('checked'); saveData(d, item.id, 'Y'); }
+                                Notebook.ink(td, d, item.id, !isChecked);
                                 if(item.id !== 'mixed') updateMixedState(d);
                             }
                         );
@@ -1010,6 +1291,7 @@
                             () => {},
                             () => {
                                 updateCheckVisual(td, item, val);
+                                Notebook.ink(td, d, item.id, !!val, (item.colorGroup === 'meds' || item.colorGroup === 'exer') ? 'sticker' : undefined);
                                 saveData(d, item.id, val);
                             }
                         );
@@ -1021,7 +1303,7 @@
                         const oldVal = e.target.dataset.oldval || '';
                         checkPastEdit(d,
                             () => { e.target.value = oldVal; updateScaleColor(td, oldVal); },
-                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); updateScaleColor(td, newVal); }
+                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); updateScaleColor(td, newVal); Notebook.ink(td, d, item.id, newVal !== ''); }
                         );
                     }; 
                     td.appendChild(sel);
@@ -1032,7 +1314,7 @@
                         const oldVal = e.target.dataset.oldval || '';
                         checkPastEdit(d,
                             () => { e.target.value = oldVal; updateSleepColor(td, oldVal); },
-                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); updateSleepColor(td, newVal); }
+                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); updateSleepColor(td, newVal); Notebook.ink(td, d, item.id, newVal !== ''); }
                         );
                     }; 
                     td.appendChild(sel);
@@ -1045,7 +1327,7 @@
                         if(newVal === oldVal) return;
                         checkPastEdit(d, 
                             () => { e.target.value = oldVal; },
-                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); }
+                            () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); Notebook.ink(td, d, item.id, newVal !== ''); }
                         );
                     };
                     td.appendChild(inp);
@@ -1061,7 +1343,7 @@
                             if(newVal === oldVal) return;
                             checkPastEdit(d,
                                 () => { e.target.value = oldVal; },
-                                () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); }
+                                () => { e.target.dataset.oldval = newVal; saveData(d, item.id, newVal); Notebook.ink(td, d, item.id, newVal !== ''); }
                             );
                         };
                     }
@@ -1081,6 +1363,7 @@
                         );
                     };
                 }
+                if (isCurMonth && d === todayDate) td.classList.add('today-col');
                 tr.appendChild(td);
             }
             body.appendChild(tr);
@@ -1146,10 +1429,11 @@
             if(!mixedCell) return;
             const isMixed = (posCount === 1 && negCount === 1);
             if(isMixed) { 
-                if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); } 
+                if(!mixedCell.classList.contains('checked')) { mixedCell.classList.add('checked'); saveData(day, 'mixed', 'Y'); Notebook.ink(mixedCell, day, 'mixed', true, 'auto'); } 
             } else { 
                 if(mixedCell.classList.contains('checked')) { mixedCell.classList.remove('checked'); saveData(day, 'mixed', null); } 
             }
+            Notebook.scheduleMoodLine();
         }, 50);
     }
 
@@ -1233,6 +1517,8 @@
                 }
             }
         });
+
+        Notebook.afterLoad();
 
         if(!isAdminUser()) {
             const today = new Date();
@@ -1482,6 +1768,7 @@
             if(cell) {
                 cell.innerText = icon; 
                 cell.setAttribute('title', fullVal);
+                Notebook.ink(cell, modalTarget.day, modalTarget.id, true, 'sticker');
             }
         }
         closeEventModal(); 
@@ -1537,10 +1824,824 @@
         const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
         if(data==='success') { await revokeStoredDeviceLogin(); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
     }
-    function moveMonth(n) { curDate.setMonth(curDate.getMonth() + n); renderTable(); }
-    function jumpToDate(val) { curDate = new Date(val); renderTable(); }
+    function moveMonth(n) { Notebook.flip(n, () => { curDate.setMonth(curDate.getMonth() + n); renderTable(); }); }
+    function jumpToDate(val) {
+        const next = new Date(val);
+        if (isNaN(next)) return;
+        const dir = (next.getFullYear() * 12 + next.getMonth()) - (curDate.getFullYear() * 12 + curDate.getMonth());
+        if (dir === 0) { curDate = next; renderTable(); return; }
+        Notebook.flip(dir, () => { curDate = next; renderTable(); });
+    }
     async function exportData() { if(isAdminUser()) return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
     async function importData(input) { if(isAdminUser()) return alert("불가"); const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+</script>
+<script>
+    // --- 책상 위의 스프링 노트: 펜 · 펜으로 쓰기 · 스티커 · WebGL 페이지 넘김 · 기분 흐름선 ---
+    // 화면 표현만 담당합니다. 기록 값과 저장 방식(RPC)은 바꾸지 않습니다.
+    const Notebook = (() => {
+        const PENS = [
+            { name: '먹색', color: '#2c3445' },
+            { name: '파랑', color: '#2f5fd0' },
+            { name: '빨강', color: '#d9463e' },
+            { name: '초록', color: '#2e8b57' },
+            { name: '보라', color: '#7a4cc2' },
+            { name: '주황', color: '#e07b28' }
+        ];
+        const TAB_COLORS = ['#ffb3b3', '#ffd59e', '#fff0a0', '#c9f0b0', '#a8e6d8', '#b3d4ff', '#c9b8ff', '#f5b8e6', '#ffc9a8', '#d8e8a0', '#a0d8f0', '#e0c0ff'];
+        const INK_KEY = 'mood_ink_v1';
+        const PEN_KEY = 'mood_pen_color';
+        const LINE_KEY = 'mood_line_on';
+        const MOOD_ROWS = ['m_p4', 'm_p3', 'm_p2', 'm_p1', 'm_0', 'm_m1', 'm_m2', 'm_m3', 'm_m4'];
+        const CHECK_PATHS = [
+            'M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5',
+            'M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5',
+            'M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4'
+        ];
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const store = {
+            get(key, fallback) { try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; } },
+            set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* 저장 불가 환경은 무시 */ } }
+        };
+
+        let pen = PENS.some(p => p.color === store.get(PEN_KEY, '')) ? store.get(PEN_KEY, '') : PENS[0].color;
+        let lineOn = store.get(LINE_KEY, '1') === '1';
+        let inkMap = {};
+        try { inkMap = JSON.parse(store.get(INK_KEY, '{}')) || {}; } catch (e) { inkMap = {}; }
+        let animateNextLoad = true;
+        let suppressCascade = false;
+        let lineTimer = null;
+        let flipping = false;
+        let loadWaiters = [];
+
+        function owner() { return (typeof target === 'string' && target) ? target : (user?.username || ''); }
+        function dateKey(day) {
+            const y = curDate.getFullYear(), m = String(curDate.getMonth() + 1).padStart(2, '0');
+            return `${y}-${m}-${String(day).padStart(2, '0')}`;
+        }
+        function cellKey(day, cat) { return `${owner()}|${dateKey(day)}|${cat}`; }
+        function hash(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+        // 칸마다 조금씩 다른 손글씨 느낌 (같은 칸은 항상 같은 모양)
+        function styleCell(td, key) {
+            const h = hash(key);
+            td.style.setProperty('--rot', `${(h % 17) - 8}deg`);
+            td.classList.remove('v2', 'v3');
+            const v = h % 3;
+            if (v === 1) td.classList.add('v2'); else if (v === 2) td.classList.add('v3');
+        }
+
+        function saveInk() {
+            const keys = Object.keys(inkMap);
+            if (keys.length > 6000) keys.slice(0, keys.length - 6000).forEach(k => delete inkMap[k]);
+            store.set(INK_KEY, JSON.stringify(inkMap));
+        }
+
+        function restartAnim(td, cls, delay = 0) {
+            if (reduceMotion) return;
+            td.classList.remove(cls);
+            td.style.setProperty('--ink-delay', `${delay}s`);
+            void td.offsetWidth;
+            td.classList.add(cls);
+        }
+
+        // ---------- 펜 SVG ----------
+        function penSvg(color, w = 18, h = 72) {
+            const light = 'rgba(255,255,255,0.55)';
+            return `<svg viewBox="0 0 18 72" width="${w}" height="${h}" aria-hidden="true">
+                <defs><linearGradient id="pb${color.slice(1)}" x1="0" x2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.85"/><stop offset="0.35" stop-color="${color}"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/></linearGradient></defs>
+                <rect x="4" y="2" width="10" height="16" rx="4" fill="${color}"/>
+                <rect x="12.4" y="3" width="2.2" height="20" rx="1" fill="#c9ced6"/>
+                <rect x="4" y="16" width="10" height="38" rx="1.5" fill="url(#pb${color.slice(1)})"/>
+                <rect x="5.4" y="18" width="1.8" height="34" rx="0.9" fill="${light}"/>
+                <rect x="4.6" y="53" width="8.8" height="7" fill="#3a3d45"/>
+                <path d="M4.6 60 L13.4 60 L10 69 L8 69 Z" fill="#d7dbe2"/>
+                <circle cx="9" cy="69.3" r="1.2" fill="${color}"/>
+            </svg>`;
+        }
+        function pencilSvg() {
+            return `<svg viewBox="0 0 18 72" width="18" height="72" aria-hidden="true">
+                <rect x="4.5" y="1" width="9" height="8" rx="2.5" fill="#f29bb0"/>
+                <rect x="4.5" y="8" width="9" height="5" fill="#c9ced6"/>
+                <rect x="4.5" y="13" width="9" height="44" fill="#f6c343"/>
+                <rect x="7.8" y="13" width="2.4" height="44" fill="#e9ac25"/>
+                <path d="M4.5 57 L13.5 57 L9.8 68 L8.2 68 Z" fill="#f1d3a6"/>
+                <path d="M8.2 68 L9.8 68 L9 71 Z" fill="#4a4a52"/>
+            </svg>`;
+        }
+
+        // ---------- 칸에 쓰러 가는 펜 ----------
+        let handPen = null, handAnim = null;
+        function flyPenTo(td) {
+            if (reduceMotion || !td) return 0;
+            const from = document.querySelector('#pen-tray .nb-pen.active');
+            if (!from) return 0;
+            if (!handPen) {
+                handPen = document.createElement('div');
+                handPen.id = 'nb-hand-pen';
+                document.body.appendChild(handPen);
+            }
+            handPen.innerHTML = penSvg(pen, 22, 92);
+            const r = td.getBoundingClientRect();
+            const f = from.getBoundingClientRect();
+            const tipX = r.left + r.width / 2, tipY = r.top + r.height / 2;
+            handPen.style.left = `${tipX - 11}px`;
+            handPen.style.top = `${tipY - 92}px`;
+            const dx = (f.left + f.width / 2) - tipX, dy = (f.top + f.height / 2) - tipY + 46;
+            if (handAnim) handAnim.cancel();
+            handAnim = handPen.animate([
+                { opacity: 0, transform: `translate(${dx}px, ${dy}px) rotate(-32deg)` },
+                { opacity: 1, transform: `translate(${dx * 0.1}px, ${dy * 0.1 - 18}px) rotate(18deg)`, offset: 0.28 },
+                { opacity: 1, transform: 'translate(0px, 0px) rotate(22deg)', offset: 0.38 },
+                { opacity: 1, transform: 'translate(4px, -2px) rotate(20deg)', offset: 0.48 },
+                { opacity: 1, transform: 'translate(-2px, 1px) rotate(23deg)', offset: 0.56 },
+                { opacity: 1, transform: 'translate(6px, -4px) rotate(19deg)', offset: 0.66 },
+                { opacity: 1, transform: 'translate(9px, -16px) rotate(16deg)', offset: 0.78 },
+                { opacity: 0, transform: `translate(${dx * 0.6}px, ${dy * 0.6}px) rotate(-20deg)` }
+            ], { duration: 1100, easing: 'ease-in-out' });
+            return 0.36;
+        }
+
+        // 사용자가 칸에 쓰거나 지웠을 때
+        function ink(td, day, cat, written, kind) {
+            if (!td) return;
+            const key = cellKey(day, cat);
+            if (kind === 'sticker') {
+                if (written) restartAnim(td, 'sticker-pop');
+                return;
+            }
+            if (kind === 'auto') {
+                styleCell(td, key);
+                if (written) restartAnim(td, 'ink-anim', 0.2);
+                return;
+            }
+            if (written) {
+                inkMap[key] = pen;
+                td.style.setProperty('--ink-c', pen);
+                styleCell(td, key);
+                const delay = flyPenTo(td);
+                restartAnim(td, 'ink-anim', delay);
+            } else {
+                delete inkMap[key];
+                td.style.removeProperty('--ink-c');
+            }
+            saveInk();
+        }
+
+        // 기록을 불러온 뒤 저장해 둔 펜 색을 입히고, 페이지를 넘긴 직후라면 차례로 써 내려가는 효과
+        function afterLoad() {
+            const animate = animateNextLoad && !reduceMotion && !suppressCascade;
+            animateNextLoad = false;
+            suppressCascade = false;
+            document.querySelectorAll('#table-body td[data-c]').forEach(td => {
+                const day = td.dataset.d, cat = td.dataset.c;
+                const key = cellKey(day, cat);
+                const color = inkMap[key];
+                if (color) td.style.setProperty('--ink-c', color); else td.style.removeProperty('--ink-c');
+                styleCell(td, key);
+                if (!animate || !cellHasValue(td)) return;
+                const delay = Math.min(1.2, (Number(day) - 1) * 0.03 + Math.random() * 0.08) + 0.15;
+                const isSticker = td.classList.contains('cell-event') || (td.classList.contains('cell-icon') && !td.classList.contains('checked'));
+                restartAnim(td, isSticker ? 'sticker-pop' : 'ink-anim', delay);
+            });
+            drawMoodLine(animate);
+            const w = loadWaiters; loadWaiters = [];
+            w.forEach(fn => fn());
+        }
+        function cellHasValue(td) {
+            return td.classList.contains('checked') ||
+                (td.querySelector('select, input')?.value || '') !== '' ||
+                ((td.classList.contains('cell-event') || td.classList.contains('cell-icon')) && td.innerText.trim() !== '');
+        }
+        function waitForLoad(ms) {
+            return new Promise(res => {
+                const t = setTimeout(res, ms);
+                loadWaiters.push(() => { clearTimeout(t); res(); });
+            });
+        }
+
+        // ---------- 기분 흐름선 ----------
+        function ensureLineSvg() {
+            let svg = document.getElementById('mood-line');
+            if (!svg) {
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.id = 'mood-line';
+                svg.setAttribute('aria-hidden', 'true');
+                document.getElementById('grid-container').appendChild(svg);
+            }
+            return svg;
+        }
+        // 표 안에서의 위치 (화면 변형과 무관하게 계산)
+        function posInTable(el, table) {
+            let x = 0, y = 0, n = el;
+            while (n && n !== table) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+            return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+        }
+        function drawMoodLine(animate) {
+            const svg = ensureLineSvg();
+            svg.innerHTML = '';
+            svg.classList.remove('drawing');
+            if (!lineOn) return;
+            const table = document.getElementById('mood-table');
+            svg.style.left = `${table.offsetLeft}px`;
+            svg.style.top = `${table.offsetTop}px`;
+            svg.setAttribute('width', table.scrollWidth);
+            svg.setAttribute('height', table.offsetHeight);
+
+            const rowY = {};
+            MOOD_ROWS.forEach(id => {
+                const cell = document.querySelector(`#table-body td[data-c="${id}"]`);
+                if (cell) { const p = posInTable(cell, table); rowY[id] = p.y + p.h / 2; }
+            });
+            const points = [];
+            const lastDay = new Date(curDate.getFullYear(), curDate.getMonth() + 1, 0).getDate();
+            for (let d = 1; d <= lastDay; d++) {
+                const ys = MOOD_ROWS.filter(id => document.querySelector(`#table-body td[data-d="${d}"][data-c="${id}"].checked`)).map(id => rowY[id]);
+                if (!ys.length) continue;
+                const cell = document.querySelector(`#table-body td[data-d="${d}"][data-c="m_0"]`);
+                if (!cell) continue;
+                const p = posInTable(cell, table);
+                points.push({ d, x: p.x + p.w / 2, y: ys.reduce((a, b) => a + b, 0) / ys.length });
+            }
+            if (!points.length) return;
+
+            // 연속된 날끼리만 잇고, 이틀 이상 비면 선을 끊음
+            const runs = [];
+            points.forEach(p => {
+                const run = runs[runs.length - 1];
+                if (run && p.d - run[run.length - 1].d <= 2) run.push(p); else runs.push([p]);
+            });
+            const wobble = (p, k) => ((hash(`${p.d}-${k}`) % 100) / 100 - 0.5) * 1.6;
+            const ns = 'http://www.w3.org/2000/svg';
+            runs.forEach(run => {
+                if (run.length > 1) {
+                    [['pencil', 0], ['pencil-2', 1]].forEach(([cls, k]) => {
+                        let dstr = `M${run[0].x + wobble(run[0], k)},${run[0].y + wobble(run[0], k + 5)}`;
+                        for (let i = 1; i < run.length; i++) {
+                            const p0 = run[i - 1], p1 = run[i];
+                            const mx = (p0.x + p1.x) / 2;
+                            dstr += ` C${mx},${p0.y + wobble(p0, k + 2)} ${mx},${p1.y + wobble(p1, k + 3)} ${p1.x + wobble(p1, k)},${p1.y + wobble(p1, k + 5)}`;
+                        }
+                        const path = document.createElementNS(ns, 'path');
+                        path.setAttribute('d', dstr);
+                        path.setAttribute('class', cls);
+                        svg.appendChild(path);
+                        if (animate) {
+                            const len = path.getTotalLength();
+                            path.style.strokeDasharray = `${len}`;
+                            path.style.setProperty('--len', `${len}`);
+                        }
+                    });
+                }
+                run.forEach(p => {
+                    const c = document.createElementNS(ns, 'circle');
+                    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 2.6);
+                    svg.appendChild(c);
+                });
+            });
+            if (animate) { void svg.getBoundingClientRect(); svg.classList.add('drawing'); }
+        }
+        function scheduleMoodLine() {
+            clearTimeout(lineTimer);
+            lineTimer = setTimeout(() => drawMoodLine(false), 80);
+        }
+
+        // ---------- 페이지를 그림으로 옮기기 (WebGL 텍스처용) ----------
+        function snapshotPage(scale) {
+            const cont = document.querySelector('#main-screen .container');
+            const cr = cont.getBoundingClientRect();
+            const cv = document.createElement('canvas');
+            cv.width = Math.round(cr.width * scale);
+            cv.height = Math.round(cr.height * scale);
+            const c = cv.getContext('2d');
+            c.scale(scale, scale);
+            c.translate(-cr.left, -cr.top);
+            c.fillStyle = '#fffcf3';
+            c.fillRect(cr.left, cr.top, cr.width, cr.height);
+
+            const rectOf = el => el.getBoundingClientRect();
+            const text = (el, str, r, opts = {}) => {
+                const cs = getComputedStyle(el);
+                c.font = opts.font || `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+                c.fillStyle = opts.color || cs.color;
+                c.textBaseline = 'middle';
+                const align = opts.align || (cs.textAlign === 'left' || cs.textAlign === 'start' ? 'left' : 'center');
+                c.textAlign = align;
+                const x = align === 'left' ? r.left + (parseFloat(cs.paddingLeft) || 0) : r.left + r.width / 2;
+                c.fillText(str, x, r.top + r.height / 2 + 1, r.width - 4);
+            };
+
+            // 머리말 제목과 빨간 여백선
+            const title = document.getElementById('nb-title');
+            if (title) {
+                const r = rectOf(title);
+                c.fillStyle = 'rgba(255, 220, 90, 0.55)';
+                c.fillRect(r.left, r.top + r.height * 0.62, r.width, r.height * 0.3);
+                text(title, title.textContent, r, { align: 'center' });
+            }
+            const header = document.querySelector('#main-screen .header');
+            if (header) { const r = rectOf(header); c.fillStyle = 'rgba(230, 120, 120, 0.35)'; c.fillRect(r.left, r.bottom - 1.5, r.width, 1.5); }
+            document.querySelectorAll('#main-screen .header button').forEach(btn => {
+                const r = rectOf(btn);
+                if (btn.classList.contains('btn-nav')) {
+                    c.save(); c.setLineDash([3, 3]); c.strokeStyle = 'rgba(74, 80, 104, 0.35)'; c.lineWidth = 1.5;
+                    c.beginPath(); c.arc(r.left + r.width / 2, r.top + r.height / 2, r.width / 2 - 1, 0, Math.PI * 2); c.stroke(); c.restore();
+                }
+                text(btn, btn.textContent, r, { align: 'center' });
+            });
+
+            // 포스트잇
+            const bar = document.querySelector('.top-assessment-bar');
+            if (bar) {
+                const r = rectOf(bar);
+                c.save();
+                c.shadowColor = 'rgba(120, 100, 40, 0.35)'; c.shadowBlur = 6; c.shadowOffsetY = 3;
+                c.fillStyle = '#fff4b8'; c.fillRect(r.left, r.top, r.width, r.height);
+                c.restore();
+                bar.querySelectorAll('a, input, span').forEach(el => {
+                    const er = rectOf(el);
+                    const str = el.tagName === 'INPUT' ? (el.value || '') : el.textContent;
+                    if (str) text(el, str, er, { align: 'center' });
+                    else if (el.tagName === 'INPUT' && el.placeholder) text(el, el.placeholder, er, { align: 'center', color: 'rgba(91, 74, 28, 0.45)' });
+                });
+            }
+
+            // 표 (보이는 부분만)
+            const gw = document.getElementById('grid-container');
+            const gr = rectOf(gw);
+            c.save();
+            c.beginPath(); c.rect(gr.left, gr.top, gr.width, gr.height); c.clip();
+            const visible = r => r.right > gr.left && r.left < gr.right && r.bottom > gr.top && r.top < gr.bottom;
+            const bgOf = (el) => {
+                const b = getComputedStyle(el).backgroundColor;
+                return (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') ? b : null;
+            };
+            const drawCell = (el, isHead) => {
+                const r = rectOf(el);
+                if (!visible(r)) return;
+                c.fillStyle = '#fffcf3'; if (isHead) c.fillRect(r.left, r.top, r.width, r.height);
+                const rowBg = bgOf(el.parentElement), cellBg = bgOf(el);
+                const isLabel = el.classList.contains('col-label');
+                if (rowBg && !isLabel) { c.fillStyle = rowBg; c.fillRect(r.left, r.top, r.width, r.height); }
+                if (isLabel) {
+                    const tint = el.parentElement.style.getPropertyValue('--row-tint');
+                    if (tint) { c.fillStyle = tint; c.fillRect(r.left, r.top, r.width, r.height); }
+                    const tape = getComputedStyle(el.parentElement).getPropertyValue('--tape').trim();
+                    if (tape) { c.fillStyle = tape.startsWith('var') ? 'rgba(255,190,150,0.8)' : tape; c.fillRect(r.left, r.top, 5, r.height); }
+                } else if (cellBg) { c.fillStyle = cellBg; c.fillRect(r.left, r.top, r.width, r.height); }
+                if (el.classList.contains('today-header') || el.classList.contains('today-dow')) {
+                    c.fillStyle = 'rgba(255, 228, 70, 0.6)'; c.fillRect(r.left, r.top + r.height * 0.18, r.width, r.height * 0.66);
+                }
+                c.fillStyle = 'rgba(92, 128, 190, 0.18)';
+                c.fillRect(r.right - 1, r.top, 1, r.height);
+                c.fillRect(r.left, r.bottom - 1, r.width, 1);
+                if (el.classList.contains('col-label')) { c.fillStyle = 'rgba(230, 120, 120, 0.45)'; c.fillRect(r.right - 2, r.top, 2, r.height); }
+
+                // 내용
+                const ctl = el.querySelector('select, input');
+                if (ctl && ctl.value) { text(ctl, ctl.value, r, { align: 'center' }); return; }
+                if (el.classList.contains('checked') && (el.classList.contains('cell-check') || el.classList.contains('cell-mixed'))) {
+                    const cs = getComputedStyle(el);
+                    const color = el.classList.contains('cell-mixed') ? '#8e44ad' : (cs.getPropertyValue('--ink-c').trim() || '#2c3445');
+                    const rot = parseFloat(cs.getPropertyValue('--rot')) || 0;
+                    const v = el.classList.contains('v2') ? 1 : el.classList.contains('v3') ? 2 : 0;
+                    c.save();
+                    c.translate(r.left + r.width / 2, r.top + r.height / 2);
+                    c.rotate(rot * Math.PI / 180);
+                    c.scale(22 / 24, 22 / 24);
+                    c.translate(-12, -12);
+                    c.strokeStyle = color; c.lineWidth = 2.8; c.lineCap = 'round'; c.lineJoin = 'round';
+                    c.stroke(new Path2D(CHECK_PATHS[v]));
+                    c.restore();
+                    return;
+                }
+                const str = el.innerText.replace(/\s+/g, ' ').trim();
+                if (str) text(el, str, r);
+            };
+            gw.querySelectorAll('#table-body td').forEach(el => drawCell(el, false));
+            // 연필 선
+            const svg = document.getElementById('mood-line');
+            if (svg && svg.childNodes.length) {
+                const sr = rectOf(svg);
+                c.save();
+                c.translate(sr.left, sr.top);
+                svg.querySelectorAll('path').forEach(p => {
+                    c.strokeStyle = p.classList.contains('pencil') ? 'rgba(72, 76, 96, 0.62)' : 'rgba(72, 76, 96, 0.22)';
+                    c.lineWidth = p.classList.contains('pencil') ? 2.2 : 1; c.lineCap = 'round';
+                    c.stroke(new Path2D(p.getAttribute('d')));
+                });
+                c.fillStyle = 'rgba(72, 76, 96, 0.55)';
+                svg.querySelectorAll('circle').forEach(ci => { c.beginPath(); c.arc(+ci.getAttribute('cx'), +ci.getAttribute('cy'), 2.6, 0, Math.PI * 2); c.fill(); });
+                c.restore();
+            }
+            gw.querySelectorAll('#table-body th').forEach(el => drawCell(el, true));
+            gw.querySelectorAll('thead th:not(.col-label)').forEach(el => drawCell(el, true));
+            gw.querySelectorAll('thead th.col-label').forEach(el => drawCell(el, true));
+            c.restore();
+            return { canvas: cv, rect: cr };
+        }
+
+        // ---------- WebGL 페이지 컬 ----------
+        const GL = { ok: null, canvas: null, gl: null, prog: null, flatProg: null, buf: {}, count: 0, u: {}, fu: {} };
+        const VS = `
+            attribute vec2 aUV;
+            uniform vec2 uPage;      // 페이지 크기 (px)
+            uniform vec2 uOrigin;    // 캔버스 안 페이지 왼쪽 위 (px)
+            uniform vec2 uCanvas;    // 캔버스 크기 (px)
+            uniform float uFold;     // 접히는 선 위치 (방향축 기준 px)
+            uniform float uRadius;
+            uniform vec2 uDir;       // 말려 올라가는 방향 (페이지 아래쪽을 향함)
+            uniform float uPersp;
+            varying vec2 vUV;
+            varying float vShade;
+            varying float vBackShade;
+            const float PI = 3.14159265;
+            void main() {
+                vec2 p = aUV * uPage;
+                // 방향축 기준 거리 (위쪽 스프링에서 시작)
+                vec2 ref = vec2(uDir.x < 0.0 ? uPage.x : 0.0, 0.0);
+                float s = dot(p - ref, uDir);
+                vec3 pos = vec3(p, 0.0);
+                vec3 n = vec3(0.0, 0.0, 1.0);
+                if (s > uFold) {
+                    float d = s - uFold;
+                    float sNew;
+                    float z;
+                    if (d < PI * uRadius) {
+                        float th = d / uRadius;
+                        sNew = uFold + uRadius * sin(th);
+                        z = uRadius * (1.0 - cos(th));
+                        n = vec3(-uDir * sin(th), cos(th));
+                    } else {
+                        sNew = uFold - (d - PI * uRadius);
+                        z = 2.0 * uRadius;
+                        n = vec3(0.0, 0.0, -1.0);
+                    }
+                    pos.xy = p - uDir * (s - sNew);
+                    pos.z = z;
+                }
+                vec3 L = normalize(vec3(-0.25, -0.45, 0.86));
+                vShade = clamp(0.55 + 0.5 * dot(n, L), 0.0, 1.15);
+                vBackShade = clamp(0.55 + 0.5 * dot(-n, L), 0.0, 1.15);
+                // 원근
+                vec2 sc = uOrigin + pos.xy;
+                vec2 center = uCanvas * 0.5;
+                float k = uPersp / (uPersp - pos.z);
+                vec2 scr = center + (sc - center) * k;
+                vec2 clip = scr / uCanvas * 2.0 - 1.0;
+                gl_Position = vec4(clip.x, -clip.y, -pos.z / 4000.0, 1.0);
+                vUV = aUV;
+            }
+        `;
+        const FS = `
+            #ifdef GL_FRAGMENT_PRECISION_HIGH
+            precision highp float;
+            #else
+            precision mediump float;
+            #endif
+            uniform sampler2D uFront;
+            varying vec2 vUV;
+            varying float vShade;
+            varying float vBackShade;
+            void main() {
+                if (gl_FrontFacing) {
+                    vec4 c = texture2D(uFront, vUV);
+                    gl_FragColor = vec4(c.rgb * vShade, 1.0);
+                } else {
+                    // 뒷면: 모눈 + 앞면 글씨가 살짝 비침
+                    vec2 px = vUV * vec2(400.0, 600.0);
+                    float grid = max(step(0.96, fract(px.x / 11.0)), step(0.96, fract(px.y / 8.5))) * 0.05;
+                    vec3 paper = vec3(0.968, 0.949, 0.902) - grid;
+                    vec3 show = texture2D(uFront, vec2(1.0 - vUV.x, vUV.y)).rgb;
+                    vec3 c = mix(paper, paper * show, 0.12);
+                    gl_FragColor = vec4(c * vBackShade, 1.0);
+                }
+            }
+        `;
+        // 넘어가는 종이가 아래 페이지에 드리우는 그림자, 그리고 (이전 달로 갈 때) 아래에 깔리는 지금 페이지
+        const FLAT_VS = `
+            attribute vec2 aUV;
+            uniform vec2 uPage; uniform vec2 uOrigin; uniform vec2 uCanvas;
+            varying vec2 vUV;
+            void main() {
+                vec2 sc = uOrigin + aUV * uPage;
+                vec2 clip = sc / uCanvas * 2.0 - 1.0;
+                gl_Position = vec4(clip.x, -clip.y, 0.999, 1.0);
+                vUV = aUV;
+            }
+        `;
+        const FLAT_FS = `
+            #ifdef GL_FRAGMENT_PRECISION_HIGH
+            precision highp float;
+            #else
+            precision mediump float;
+            #endif
+            uniform sampler2D uTex;
+            uniform float uUseTex;
+            uniform vec2 uPage;
+            uniform vec2 uDir;
+            uniform float uFold;
+            uniform float uRadius;
+            uniform float uStrength;
+            varying vec2 vUV;
+            void main() {
+                vec2 p = vUV * uPage;
+                vec2 ref = vec2(uDir.x < 0.0 ? uPage.x : 0.0, 0.0);
+                float s = dot(p - ref, uDir);
+                float d = s - uFold;
+                // 접힌 선 바로 아래가 가장 어둡고 멀어질수록 옅어짐
+                float sh = d > 0.0 ? exp(-d / (uRadius * 1.6)) * uStrength : 0.0;
+                if (uUseTex > 0.5) {
+                    vec3 c = texture2D(uTex, vUV).rgb;
+                    gl_FragColor = vec4(c * (1.0 - sh), 1.0);
+                } else {
+                    gl_FragColor = vec4(vec3(0.18, 0.11, 0.04) * sh, sh);
+                }
+            }
+        `;
+
+        function initGL() {
+            if (GL.ok !== null) return GL.ok;
+            GL.ok = false;
+            try {
+                const cv = document.createElement('canvas');
+                cv.id = 'nb-gl';
+                Object.assign(cv.style, { position: 'fixed', zIndex: '110', pointerEvents: 'none', display: 'none' });
+                const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true });
+                if (!gl) return false;
+                const mk = (vs, fs) => {
+                    const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+                    const p = gl.createProgram();
+                    gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs));
+                    gl.linkProgram(p);
+                    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error('link: ' + gl.getProgramInfoLog(p));
+                    return p;
+                };
+                GL.prog = mk(VS, FS);
+                GL.flatProg = mk(FLAT_VS, FLAT_FS);
+                // 종이 격자 메시
+                const NX = 28, NY = 72, uv = [], idx = [];
+                for (let j = 0; j <= NY; j++) for (let i = 0; i <= NX; i++) uv.push(i / NX, j / NY);
+                for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
+                    const a = j * (NX + 1) + i, b = a + 1, c2 = a + NX + 1, d = c2 + 1;
+                    idx.push(a, c2, b, b, c2, d);
+                }
+                GL.buf.uv = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.uv); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uv), gl.STATIC_DRAW);
+                GL.buf.idx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+                GL.count = idx.length;
+                GL.buf.quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+                ['uPage', 'uOrigin', 'uCanvas', 'uFold', 'uRadius', 'uDir', 'uPersp', 'uFront'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
+                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uDir', 'uFold', 'uRadius', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
+                document.body.appendChild(cv);
+                GL.canvas = cv; GL.gl = gl; GL.ok = true;
+            } catch (e) {
+                console.warn('WebGL 페이지 넘김을 쓸 수 없어 기본 효과로 대체합니다:', e?.message || e);
+                GL.ok = false;
+            }
+            return GL.ok;
+        }
+
+        function texFrom(canvas) {
+            const gl = GL.gl, t = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, t);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+            return t;
+        }
+
+        // curlTex: 말려 넘어가는 종이, underTex: 그 아래 깔린 종이(없으면 실제 화면이 보임)
+        function runCurl({ curlTex, underTex, rect, forward, duration }) {
+            const gl = GL.gl, cv = GL.canvas;
+            const pad = 60;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const cw = rect.width + pad * 2, ch = rect.height + pad;
+            cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+            Object.assign(cv.style, { left: `${rect.left - pad}px`, top: `${rect.top}px`, width: `${cw}px`, height: `${ch}px`, display: 'block' });
+            gl.viewport(0, 0, cv.width, cv.height);
+            const W = rect.width, H = rect.height, R0 = Math.max(40, Math.min(90, H * 0.1));
+            const origin = [pad, 0];
+
+            return new Promise(resolve => {
+                const t0 = performance.now();
+                const frame = (now) => {
+                    let t = Math.min(1, (now - t0) / duration);
+                    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                    const prog = forward ? e : 1 - e;
+                    // 오른쪽 아래 모서리부터 들리다가 점점 스프링과 나란해짐
+                    const tilt = 0.32 * (1 - prog) * (1 - prog) + 0.02;
+                    const dir = [Math.sin(tilt), Math.cos(tilt)];
+                    const radius = R0 * (0.7 + 0.6 * Math.sin(Math.PI * Math.min(1, prog * 1.2)));
+                    const sMax = W * Math.sin(tilt) + H * Math.cos(tilt);
+                    const fold = sMax - prog * (sMax + radius * 1.6);
+
+                    gl.clearColor(0, 0, 0, 0);
+                    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+                    // 아래 페이지 + 그림자
+                    gl.useProgram(GL.flatProg);
+                    gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad);
+                    const la = gl.getAttribLocation(GL.flatProg, 'aUV');
+                    gl.enableVertexAttribArray(la);
+                    gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
+                    gl.uniform2f(GL.fu.uPage, W, H); gl.uniform2f(GL.fu.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.fu.uCanvas, cw, ch);
+                    gl.uniform2f(GL.fu.uDir, dir[0], dir[1]); gl.uniform1f(GL.fu.uFold, fold); gl.uniform1f(GL.fu.uRadius, radius);
+                    gl.uniform1f(GL.fu.uStrength, 0.42 * Math.sin(Math.PI * Math.min(1, prog * 1.1)));
+                    gl.activeTexture(gl.TEXTURE0);
+                    if (underTex) { gl.bindTexture(gl.TEXTURE_2D, underTex); gl.uniform1i(GL.fu.uTex, 0); gl.uniform1f(GL.fu.uUseTex, 1); }
+                    else gl.uniform1f(GL.fu.uUseTex, 0);
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+                    // 말려 넘어가는 종이
+                    gl.enable(gl.DEPTH_TEST);
+                    gl.useProgram(GL.prog);
+                    gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.uv);
+                    const a = gl.getAttribLocation(GL.prog, 'aUV');
+                    gl.enableVertexAttribArray(a);
+                    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx);
+                    gl.uniform2f(GL.u.uPage, W, H); gl.uniform2f(GL.u.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.u.uCanvas, cw, ch);
+                    gl.uniform1f(GL.u.uFold, fold); gl.uniform1f(GL.u.uRadius, radius); gl.uniform2f(GL.u.uDir, dir[0], dir[1]);
+                    gl.uniform1f(GL.u.uPersp, 1600);
+                    gl.bindTexture(gl.TEXTURE_2D, curlTex); gl.uniform1i(GL.u.uFront, 0);
+                    gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
+                    gl.disable(gl.DEPTH_TEST);
+
+                    if (t < 1) requestAnimationFrame(frame);
+                    else resolve();
+                };
+                requestAnimationFrame(frame);
+            });
+        }
+
+        async function flip(dir, doRender) {
+            animateNextLoad = true;
+            if (flipping) { doRender(); return; }
+            if (reduceMotion || !document.querySelector('#main-screen .container')) { doRender(); return; }
+            if (!initGL()) { cssFlip(dir, doRender); return; }
+            flipping = true;
+            try {
+                const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+                const oldSnap = snapshotPage(scale);
+                const gl = GL.gl;
+                const oldTex = texFrom(oldSnap.canvas);
+                if (dir > 0) {
+                    // 다음 달: 지금 페이지가 위로 말려 넘어가며 새 페이지가 드러남
+                    doRender();
+                    await runCurl({ curlTex: oldTex, underTex: null, rect: oldSnap.rect, forward: true, duration: 1150 });
+                    gl.deleteTexture(oldTex);
+                } else {
+                    // 이전 달: 앞 장이 위에서 내려와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
+                    suppressCascade = true;
+                    // 불러오는 동안 지금 페이지를 그대로 보여 줌
+                    await runCurl({ curlTex: oldTex, underTex: oldTex, rect: oldSnap.rect, forward: false, duration: 1 });
+                    const loaded = waitForLoad(1500);
+                    doRender();
+                    await loaded;
+                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+                    const newSnap = snapshotPage(scale);
+                    const newTex = texFrom(newSnap.canvas);
+                    await runCurl({ curlTex: newTex, underTex: oldTex, rect: oldSnap.rect, forward: false, duration: 1150 });
+                    gl.deleteTexture(newTex); gl.deleteTexture(oldTex);
+                }
+            } catch (e) {
+                console.warn('페이지 넘김 효과 오류(무시됨):', e?.message || e);
+            } finally {
+                if (GL.canvas) GL.canvas.style.display = 'none';
+                flipping = false;
+                scheduleMoodLine();
+            }
+        }
+
+        // WebGL 을 쓸 수 없는 기기: 간단한 3D 넘김
+        function cssFlip(dir, doRender) {
+            const gw = document.getElementById('grid-container');
+            doRender();
+            if (!gw.animate) return;
+            gw.animate([
+                { transform: `rotateX(${dir > 0 ? -8 : 8}deg)`, opacity: 0.4 },
+                { transform: 'rotateX(0deg)', opacity: 1 }
+            ], { duration: 450, easing: 'ease-out' });
+        }
+
+        // ---------- 노트 꾸미기 (표지 · 스프링 · 리본 · 인덱스 탭 · 제목 · 펜) ----------
+        function buildDecor() {
+            const main = document.getElementById('main-screen');
+            if (!document.getElementById('nb-cover')) {
+                ['nb-cover', 'nb-rings', 'nb-ribbon'].forEach(id => {
+                    const el = document.createElement('div');
+                    el.id = id; el.setAttribute('aria-hidden', 'true');
+                    main.insertBefore(el, main.firstChild);
+                });
+                const tabs = document.createElement('div');
+                tabs.id = 'nb-tabs';
+                for (let m = 1; m <= 12; m++) {
+                    const b = document.createElement('button');
+                    b.type = 'button'; b.className = 'nb-tab'; b.dataset.m = m;
+                    b.textContent = `${m}월`;
+                    b.style.setProperty('--tab', TAB_COLORS[m - 1]);
+                    b.onclick = () => jumpToDate(`${curDate.getFullYear()}-${String(m).padStart(2, '0')}-01`);
+                    tabs.appendChild(b);
+                }
+                main.appendChild(tabs);
+                const picker = document.getElementById('date-picker');
+                const title = document.createElement('span');
+                title.id = 'nb-title';
+                title.setAttribute('role', 'button');
+                title.tabIndex = 0;
+                title.title = '날짜 고르기';
+                const open = () => { try { picker.showPicker(); } catch (e) { picker.focus(); picker.click(); } };
+                title.onclick = open;
+                title.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } };
+                picker.after(title);
+            }
+        }
+
+        function onRender() {
+            const title = document.getElementById('nb-title');
+            if (title) title.textContent = `${curDate.getFullYear()}년 ${curDate.getMonth() + 1}월`;
+            document.querySelectorAll('.nb-tab').forEach(b => b.classList.toggle('current', Number(b.dataset.m) === curDate.getMonth() + 1));
+        }
+
+        let toastTimer = null;
+        function toast(msg) {
+            let t = document.getElementById('nb-toast');
+            if (!t) { t = document.createElement('div'); t.id = 'nb-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 1400);
+        }
+
+        function applyPen() {
+            document.querySelectorAll('#pen-tray .nb-pen[data-color]').forEach(b => {
+                const on = b.dataset.color === pen;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-checked', on ? 'true' : 'false');
+            });
+        }
+
+        function buildTray() {
+            if (document.getElementById('pen-tray')) return;
+            const tray = document.createElement('div');
+            tray.id = 'pen-tray';
+            tray.setAttribute('role', 'radiogroup');
+            tray.setAttribute('aria-label', '펜 고르기');
+            PENS.forEach(p => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'nb-pen';
+                b.dataset.color = p.color;
+                b.title = `${p.name} 펜`;
+                b.setAttribute('role', 'radio');
+                b.setAttribute('aria-label', `${p.name} 펜`);
+                b.innerHTML = penSvg(p.color);
+                b.onclick = () => { pen = p.color; store.set(PEN_KEY, pen); applyPen(); toast(`${p.name} 펜을 들었어요`); };
+                tray.appendChild(b);
+            });
+            const pc = document.createElement('button');
+            pc.type = 'button';
+            pc.className = 'nb-pen pencil' + (lineOn ? '' : ' off');
+            pc.title = '연필: 기분 흐름선';
+            pc.setAttribute('aria-label', '연필로 기분 흐름선 보기');
+            pc.setAttribute('aria-pressed', lineOn ? 'true' : 'false');
+            pc.innerHTML = pencilSvg();
+            pc.onclick = () => {
+                lineOn = !lineOn;
+                store.set(LINE_KEY, lineOn ? '1' : '0');
+                pc.classList.toggle('off', !lineOn);
+                pc.setAttribute('aria-pressed', lineOn ? 'true' : 'false');
+                drawMoodLine(lineOn);
+                toast(lineOn ? '연필로 기분 흐름선을 그렸어요' : '기분 흐름선을 지웠어요');
+            };
+            tray.appendChild(pc);
+            document.body.appendChild(tray);
+            applyPen();
+        }
+
+        function onLogin() {
+            buildDecor();
+            buildTray();
+            document.getElementById('pen-tray').classList.toggle('hidden', isAdminUser());
+            animateNextLoad = true;
+        }
+
+        window.addEventListener('resize', scheduleMoodLine);
+        if (document.fonts?.ready) document.fonts.ready.then(scheduleMoodLine);
+
+        // 꾸미기 효과에서 오류가 나도 기록 저장·화면 전환은 계속되도록 감쌈
+        const safe = fn => (...args) => { try { return fn(...args); } catch (e) { console.warn('노트 효과 오류(무시됨):', e?.message || e); } };
+        const safeFlip = (dir, doRender) => {
+            let rendered = false;
+            const once = () => { if (!rendered) { rendered = true; doRender(); } };
+            Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
+        };
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender) };
+    })();
 </script>
 </body>
 </html>

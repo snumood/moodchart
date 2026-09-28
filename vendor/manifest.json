@@ -43,5 +43,17 @@
     "version": "3.1.0",
     "sha256": "ff03786a60f6c93ccacfe0fbb6c2e3c671d7930856a3689f2f393113d8d655ec",
     "bytes": 38359
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/fonts/gaegu.css",
+    "source": "https://cdn.jsdelivr.net/npm/@fontsource/gaegu@5.3.0",
+    "resolved_url": "https://cdn.jsdelivr.net/npm/@fontsource/gaegu@5.3.0/{400,700}.css",
+    "version": "5.3.0",
+    "license": "OFL-1.1 (vendor/fonts/gaegu/OFL.txt)",
+    "sha256": "5cc3d39f58722756bcc651ca7dfb77a3f972eedabcd51aff1eeab49de16e4c9c",
+    "bytes": 94661,
+    "font_files": 178,
+    "font_files_sha256_of_sorted_hashes": "688b3550719ed06f7d0d686a97e61e1bd8cd4b87233e52f1e6f7ef2a5968887e"
   }
 ]
