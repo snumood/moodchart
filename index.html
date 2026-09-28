@@ -17,7 +17,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>기분기록지 1.07 | 분당서울대학교병원</title>
-<link rel="stylesheet" href="vendor/fonts/gaegu.css">
+<link rel="stylesheet" href="vendor/fonts/nanum-pen-script.css">
+<link rel="stylesheet" href="vendor/fonts/cormorant-garamond.css">
 <script src="vendor/supabase.js"></script>
 <script src="vendor/chart.js"></script>
 <script src="vendor/luxon.js"></script>
@@ -192,191 +193,190 @@
         .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    /* --- 책상 위의 스프링 노트 (종이 · 링 · 표지 · 펜) --- */
+    /* --- 책상 위의 가죽 플래너 (가죽 표지 · 스티치 · 찢긴 종이 · 인쇄 활자 · 펜 글씨) --- */
     :root {
-        --paper: #fffcf3;
-        --grid-line: rgba(92, 128, 190, 0.16);
-        --grid-strong: rgba(92, 128, 190, 0.34);
-        --ink: #2c3445;
+        --paper: #fdfaf2;
+        --grid-line: rgba(70, 80, 100, 0.12);
+        --grid-strong: rgba(70, 80, 100, 0.28);
+        --print-ink: #3b4152;
+        --print-soft: #8a8f9c;
+        --ink: #243049;
         --pencil: rgba(72, 76, 96, 0.62);
-        --hand: 'Gaegu', 'Pretendard', 'Malgun Gothic', sans-serif;
-        --nb-top: 34px;
-        --nb-x: 12px;
-        --nb-right: 12px;
+        --hand: 'Nanum Pen Script', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        --print: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+        --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+        --leather: #8a5a33;
+        --nb-top: 30px;
+        --nb-x: 14px;
+        --nb-right: 14px;
         --nb-bottom: 84px;
-        --tape-mood: rgba(255, 170, 170, 0.8);
-        --tape-scale: rgba(255, 214, 110, 0.85);
-        --tape-body: rgba(140, 210, 160, 0.85);
-        --tape-event: rgba(170, 190, 255, 0.85);
-        --check-v1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5' fill='none' stroke='%23000' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        --check-v2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        --check-v3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --tape-mood: #e8a4a0;
+        --tape-scale: #e9c77a;
+        --tape-body: #9fc7a4;
+        --tape-event: #a9b6e0;
+        --check-v1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 12.5C5.5 13.5 7.5 16 9 19C11.5 12 15.5 7 21 3.5' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13C6 14.5 7.8 16.8 9.2 18.6C12 11.5 16 7.5 20.5 4.5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --check-v3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11.8C5.3 12.8 7.2 15.5 8.6 18.8C10.8 13 14.6 7.8 21.2 4' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
     }
     @media (min-width: 900px) {
-        :root { --nb-top: 40px; --nb-x: 36px; --nb-right: 64px; --nb-bottom: 96px; }
+        :root { --nb-top: 40px; --nb-x: 40px; --nb-right: 68px; --nb-bottom: 96px; }
     }
 
-    /* 책상 (나뭇결) */
+    /* 책상 (호두나무 결) */
     body {
-        background-color: #b98a5c;
+        background-color: #6f4a2d;
         background-image:
-            repeating-linear-gradient(92deg, rgba(90, 50, 20, 0.07) 0 3px, transparent 3px 11px, rgba(255, 230, 190, 0.05) 11px 13px, transparent 13px 29px),
-            radial-gradient(120% 90% at 30% 20%, #cfa375 0%, #b38255 55%, #9c6d43 100%);
+            radial-gradient(120% 90% at 35% 15%, rgba(255, 210, 160, 0.22), transparent 60%),
+            repeating-linear-gradient(91deg, rgba(40, 20, 5, 0.10) 0 2px, transparent 2px 9px, rgba(255, 220, 180, 0.05) 9px 11px, transparent 11px 23px),
+            linear-gradient(180deg, #7a5233, #5e3d24);
     }
 
-    /* 노트 종이 (페이지 묶음) */
+    /* 가죽 표지 + 스티치 */
+    #nb-cover {
+        position: fixed; z-index: 0; pointer-events: none;
+        top: calc(var(--nb-top) - 22px); left: calc(var(--nb-x) - 10px);
+        right: calc(var(--nb-right) - 18px); bottom: calc(var(--nb-bottom) - 18px);
+        border-radius: 12px;
+        background-color: var(--leather);
+        background-image: var(--grain), radial-gradient(130% 100% at 25% 0%, rgba(255, 230, 190, 0.22), transparent 55%), linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.18));
+        box-shadow: 0 20px 44px rgba(25, 12, 2, 0.55), inset 0 1px 0 rgba(255, 235, 200, 0.25), inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+    }
+    #nb-cover::after {
+        content: ""; position: absolute; inset: 6px; border-radius: 8px;
+        border: 1.5px dashed rgba(255, 228, 185, 0.55);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    }
+    #main-screen { position: relative; }
+
+    /* 종이 (쌓인 페이지) */
     #main-screen .container {
-        position: fixed;
+        position: fixed; z-index: 1;
         top: var(--nb-top); left: var(--nb-x); right: var(--nb-right); bottom: var(--nb-bottom);
         height: auto;
         background: var(--paper);
-        border-radius: 3px 3px 6px 6px;
+        border-radius: 2px 2px 4px 4px;
         box-shadow:
-            1px 1px 0 #efe8d8, 2px 2px 0 #fbf7ec, 3px 3px 0 #e9e1cf, 4px 4px 0 #f8f3e7, 5px 5px 0 #e2d9c5,
-            6px 6px 0 #f5efe2, 7px 7px 0 #dcd2bd,
-            0 22px 34px rgba(50, 28, 8, 0.38);
-        perspective: 2400px;
+            0 1px 0 #efe9da, 0 2px 0 #faf6ec, 0 3px 0 #e8e1d0, 0 4px 0 #f7f2e6, 0 5px 0 #e1d8c4,
+            1px 0 0 #ece5d4, 2px 0 0 #f8f3e8, 3px 0 0 #e4dcc9,
+            0 10px 18px rgba(25, 12, 2, 0.35);
     }
     #main-screen .grid-wrapper { height: auto; min-height: 0; flex: 1; }
 
-    /* 하드커버 */
-    #nb-cover {
-        position: fixed; z-index: 0; pointer-events: none;
-        top: calc(var(--nb-top) - 10px); left: calc(var(--nb-x) - 8px);
-        right: calc(var(--nb-right) - 16px); bottom: calc(var(--nb-bottom) - 16px);
-        border-radius: 10px;
-        background:
-            radial-gradient(140% 100% at 20% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
-            repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px),
-            #2d4677;
-        box-shadow: 0 18px 40px rgba(40, 22, 6, 0.5), inset 0 0 0 2px rgba(255, 255, 255, 0.06);
-    }
-    #main-screen { position: relative; }
-    #main-screen .container { z-index: 1; }
-
-    /* 스프링 링 */
+    /* 위쪽 가죽 제본 띠 + 찢겨 나간 종이 조각 */
     #nb-rings {
         position: fixed; z-index: 120; pointer-events: none;
-        top: calc(var(--nb-top) - 20px); left: calc(var(--nb-x) + 10px); right: calc(var(--nb-right) + 10px);
-        height: 36px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='36' viewBox='0 0 26 36'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%236f7682'/%3E%3Cstop offset='.35' stop-color='%23f4f6f9'/%3E%3Cstop offset='.6' stop-color='%23a9b0bb'/%3E%3Cstop offset='1' stop-color='%23565c66'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cellipse cx='13' cy='28' rx='4' ry='4.3' fill='%23574a36' opacity='.55'/%3E%3Cellipse cx='13' cy='27.4' rx='3.2' ry='3.5' fill='%232b2418' opacity='.7'/%3E%3Cpath d='M10 28 V7 a3 3 0 0 1 6 0 V28' fill='none' stroke='url(%23g)' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: repeat-x;
-        background-position: center top;
-        filter: drop-shadow(0 2px 1.5px rgba(40, 25, 10, 0.35));
+        top: calc(var(--nb-top) - 22px); left: calc(var(--nb-x) - 10px); right: calc(var(--nb-right) - 18px);
+        height: 30px; border-radius: 12px 12px 3px 3px;
+        background-color: #7a4c29;
+        background-image: var(--grain), linear-gradient(180deg, rgba(255, 225, 180, 0.25), rgba(0, 0, 0, 0.25));
+        box-shadow: 0 3px 5px rgba(25, 12, 2, 0.45);
+    }
+    #nb-rings::before {
+        content: ""; position: absolute; left: 10px; right: 10px; top: 7px; height: 0;
+        border-top: 1.5px dashed rgba(255, 228, 185, 0.6);
+    }
+    #nb-rings::after {
+        content: ""; position: absolute; left: 6px; right: 6px; top: 100%; height: 9px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='9' viewBox='0 0 120 9'%3E%3Cpath d='M0 0H120V2L116 3.5L113 1.8L109 5.5L105 2.4L101 3.2L98 1.6L94 6.2L90 2.2L86 4L83 1.9L79 3L75 7L71 2.6L67 3.6L64 1.7L60 4.8L56 2.1L52 3.4L49 1.5L45 6.6L41 2.3L37 3.9L34 1.8L30 2.9L26 5.8L22 2L18 3.3L15 1.6L11 4.4L7 2.5L3 3.1L0 1.9Z' fill='%23fbf7ee'/%3E%3C/svg%3E") repeat-x;
+        filter: drop-shadow(0 1px 0.5px rgba(60, 40, 10, 0.25));
     }
 
     /* 리본 책갈피 */
     #nb-ribbon {
         position: fixed; z-index: 0; pointer-events: none;
-        right: calc(var(--nb-right) + 46px); bottom: calc(var(--nb-bottom) - 44px);
-        width: 12px; height: 60px;
-        background: linear-gradient(90deg, #a51d2d, #d8394a 45%, #a51d2d);
+        right: calc(var(--nb-right) + 46px); bottom: calc(var(--nb-bottom) - 50px);
+        width: 12px; height: 62px;
+        background: linear-gradient(90deg, #6e1420, #a3283a 45%, #6e1420);
         clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
     /* 월 인덱스 탭 (넓은 화면) */
     #nb-tabs { display: none; }
     @media (min-width: 900px) {
         #nb-tabs {
-            display: flex; flex-direction: column; gap: 3px;
+            display: flex; flex-direction: column; gap: 2px;
             position: fixed; z-index: 0;
-            top: calc(var(--nb-top) + 64px); right: calc(var(--nb-right) - 38px);
-            width: 44px;
+            top: calc(var(--nb-top) + 70px); right: calc(var(--nb-right) - 40px);
+            width: 46px;
         }
         .nb-tab {
-            height: 34px; border: none; border-radius: 0 9px 9px 0; cursor: pointer;
-            padding-left: 12px; text-align: left;
-            font-family: var(--hand); font-size: 15px; font-weight: 700; color: rgba(40, 40, 60, 0.75);
-            background: var(--tab); box-shadow: 2px 2px 3px rgba(40, 22, 6, 0.3);
-            transform: translateX(-8px); transition: transform .2s;
+            height: 34px; border: none; border-radius: 0 7px 7px 0; cursor: pointer;
+            padding-left: 13px; text-align: left;
+            font-family: var(--serif); font-size: 17px; font-weight: 600; color: #5b4a36;
+            background: linear-gradient(90deg, #e9dcc3, #f4ead6);
+            box-shadow: 2px 1px 2px rgba(25, 12, 2, 0.35), inset -1px 0 0 rgba(0, 0, 0, 0.06);
+            transform: translateX(-9px); transition: transform .2s;
         }
-        .nb-tab:hover { transform: translateX(-3px); }
-        .nb-tab.current { transform: translateX(0); box-shadow: 3px 2px 5px rgba(40, 22, 6, 0.4); color: #1d2233; }
+        .nb-tab:hover { transform: translateX(-4px); }
+        .nb-tab.current { transform: translateX(0); background: linear-gradient(90deg, #fff8e8, #fffdf6); color: #2a2218; }
     }
 
-    /* 머리말: 노트 윗부분 제목 */
+    /* 머리말: 인쇄된 플래너 제목 */
     .header {
-        background: transparent; border-bottom: 1.5px solid rgba(230, 120, 120, 0.35); box-shadow: none;
-        padding-top: 12px; height: calc(var(--header-h) + 14px);
+        background: transparent; border-bottom: 1px solid var(--grid-strong); box-shadow: none;
+        padding-top: 12px; height: calc(var(--header-h) + 22px);
     }
-    .month-nav { gap: 6px; }
+    .month-nav { gap: 10px; }
     .btn-nav {
-        font-family: var(--hand); font-size: 15px; font-weight: 700; color: #4a5068;
-        background: transparent; border: 1.5px dashed rgba(74, 80, 104, 0.35); border-radius: 50%;
-        width: 32px; height: 32px; padding: 0;
+        font-size: 11px; color: var(--print-soft); background: transparent;
+        border: 1px solid rgba(70, 80, 100, 0.25); border-radius: 50%; width: 30px; height: 30px; padding: 0;
     }
-    .btn-nav:active { background: rgba(74, 80, 104, 0.1); }
+    .btn-nav:active { background: rgba(70, 80, 100, 0.08); }
     #date-picker { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-    #nb-title {
-        font-family: var(--hand); font-size: 27px; font-weight: 700; color: #26304a; cursor: pointer;
-        padding: 0 6px; line-height: 1; white-space: nowrap;
-        background: linear-gradient(transparent 62%, rgba(255, 220, 90, 0.55) 62%, rgba(255, 220, 90, 0.55) 92%, transparent 92%);
-    }
-    .btn-menu { color: #4a5068; }
+    #nb-title { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; line-height: 1; white-space: nowrap; }
+    #nb-title .t-num { font-family: var(--serif); font-weight: 300; font-size: 46px; color: #2a2f3d; letter-spacing: -1px; }
+    #nb-title .t-meta { display: flex; flex-direction: column; gap: 3px; }
+    #nb-title .t-en { font-family: var(--serif); font-weight: 600; font-size: 13px; letter-spacing: 3.5px; color: #b0413e; }
+    #nb-title .t-ko { font-family: var(--print); font-weight: 500; font-size: 11px; letter-spacing: 1px; color: var(--print-soft); }
+    .btn-menu { color: var(--print-soft); font-size: 22px; }
 
-    /* 월간 평가: 테이프로 붙인 포스트잇 */
+    /* 월간 평가: 인쇄된 칸 */
     .top-assessment-bar {
-        position: relative; margin: 8px 12px 6px; border-radius: 2px;
-        background: #fff4b8; border-bottom: none;
-        box-shadow: 0 4px 6px -3px rgba(120, 100, 40, 0.4);
-        transform: rotate(-0.6deg);
-        font-family: var(--hand); font-size: 15px; height: 38px; overflow: visible;
+        background: transparent; border-bottom: 1px solid var(--grid-line);
+        font-family: var(--print); font-size: 11.5px; color: var(--print-ink); height: 40px; gap: 10px;
     }
-    .top-assessment-bar::before {
-        content: ""; position: absolute; top: -8px; left: 50%; width: 64px; height: 16px; margin-left: -32px;
-        background: rgba(210, 230, 255, 0.7); transform: rotate(2deg);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-    .top-assessment-bar a { font-size: 15px; color: #5b4a1c; text-decoration-style: wavy; text-decoration-color: rgba(91, 74, 28, 0.35); }
+    .top-assessment-bar a { font-size: 11.5px; font-weight: 600; color: var(--print-ink); text-decoration: none; border-bottom: 1px dotted rgba(59, 65, 82, 0.5); }
     .top-assessment-bar input {
-        font-family: var(--hand); font-size: 17px; font-weight: 700; color: var(--ink);
-        background: transparent; border: none; border-bottom: 2px solid rgba(91, 74, 28, 0.4); border-radius: 0;
+        font-family: var(--hand); font-size: 24px; font-weight: 400; color: var(--ink); width: 54px; height: 30px;
+        background: transparent; border: none; border-bottom: 1px solid rgba(59, 65, 82, 0.45); border-radius: 0;
     }
+    .top-assessment-bar input::placeholder { font-family: var(--print); font-size: 10px; color: #b8bcc6; }
 
-    @media (max-width: 480px) {
-        .top-assessment-bar { margin: 8px 6px 4px; gap: 4px; padding: 0 6px; font-size: 13px; justify-content: space-between; }
-        .top-assessment-bar a { font-size: 13px; }
-        .top-assessment-bar input { width: 40px; font-size: 16px; }
-    }
-
-    /* 모눈 종이 */
+    /* 종이 결 */
     .grid-wrapper {
         background-color: var(--paper);
-        background-image:
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-        border-radius: 0 0 6px 6px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
     }
     th, td { border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); }
-    thead tr:nth-child(1) th, thead tr:nth-child(2) th { background: var(--paper); font-family: var(--hand); font-size: 15px; font-weight: 700; color: #4a5068; }
-    thead tr:nth-child(1) th { border-bottom: 1px solid var(--grid-strong); }
-    thead tr:nth-child(2) th { border-bottom: 2px solid var(--grid-strong); font-size: 14px; }
-    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { background: var(--paper); font-family: var(--hand); font-size: 14px; }
+    thead tr:nth-child(1) th, thead tr:nth-child(2) th { background: var(--paper); color: var(--print-ink); }
+    thead tr:nth-child(1) th { border-bottom: 1px solid var(--grid-line); font-family: var(--serif); font-size: 18px; font-weight: 600; }
+    thead tr:nth-child(2) th { border-bottom: 1.5px solid var(--grid-strong); font-family: var(--print); font-size: 10px; font-weight: 500; letter-spacing: 1px; color: var(--print-soft); }
+    thead tr:nth-child(1) th.col-label, thead tr:nth-child(2) th.col-label { background: var(--paper); font-family: var(--print); font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--print-soft); }
     .col-label {
-        border-right: 2px solid rgba(230, 120, 120, 0.45);
+        font-family: var(--print); font-size: 11px; font-weight: 600; color: var(--print-ink); letter-spacing: -0.2px;
+        border-right: 1px solid rgba(176, 65, 62, 0.45);
         background: linear-gradient(var(--row-tint, transparent), var(--row-tint, transparent)), var(--paper) !important;
-        box-shadow: inset 5px 0 0 var(--tape, transparent);
+        box-shadow: inset 4px 0 0 var(--tape, transparent);
         padding-left: 12px;
     }
     tr.sec-mood { --tape: var(--tape-mood); }
     tr.sec-scale { --tape: var(--tape-scale); }
     tr.sec-body { --tape: var(--tape-body); }
     tr.sec-event { --tape: var(--tape-event); }
-    .block-divider td, .block-divider th { border-top: 2px solid var(--grid-strong) !important; }
-    .bg-scale { background-color: rgba(255, 226, 120, 0.13); }
-    .bg-body { background-color: rgba(150, 215, 165, 0.12); }
+    .block-divider td, .block-divider th { border-top: 1.5px solid var(--grid-strong) !important; }
+    .bg-scale { background-color: rgba(233, 199, 122, 0.08); }
+    .bg-body { background-color: rgba(159, 199, 164, 0.08); }
     .bg-event { background-color: transparent; }
-    .disabled-cell { background-color: rgba(120, 110, 90, 0.06) !important; color: #c9c0ad; }
+    .disabled-cell { background-color: rgba(120, 110, 90, 0.05) !important; color: #d0c8b6; }
 
-    /* 오늘: 형광펜 */
-    .today-header, .today-dow {
-        background: linear-gradient(176deg, transparent 18%, rgba(255, 232, 80, 0.62) 20%, rgba(255, 226, 60, 0.55) 82%, transparent 85%), var(--paper) !important;
-        border: none !important; color: #c62828 !important;
-    }
-    .today-badge { background: none; color: #c62828; font-family: var(--hand); font-size: 12px; font-weight: 700; width: auto; }
-    td.today-col { background-image: linear-gradient(rgba(255, 232, 80, 0.12), rgba(255, 232, 80, 0.12)); }
-    .day-sun, .day-holiday { background-color: rgba(255, 120, 120, 0.07) !important; }
-    .day-sat { background-color: rgba(100, 150, 255, 0.07) !important; }
+    /* 오늘: 인쇄된 동그라미 표시 */
+    .today-header, .today-dow { background: var(--paper) !important; border: none !important; color: #b0413e !important; }
+    .today-header { background: radial-gradient(circle at 50% 62%, rgba(176, 65, 62, 0.12) 0 13px, transparent 14px), var(--paper) !important; }
+    .today-badge { background: none; color: #b0413e; font-family: var(--print); font-size: 8.5px; font-weight: 700; letter-spacing: 1px; width: auto; margin-bottom: 0; }
+    td.today-col { background-image: linear-gradient(rgba(176, 65, 62, 0.045), rgba(176, 65, 62, 0.045)); }
+    .day-sun, .day-holiday { color: #b0413e !important; background-color: var(--paper) !important; }
+    .day-sat { color: #3d64a8 !important; background-color: var(--paper) !important; }
 
     /* 펜 체크 */
     .cell-check.checked::after, .cell-mixed.checked::after {
@@ -391,10 +391,10 @@
     td.v3 { --check: var(--check-v3); }
     td.ink-anim.checked::after { animation: penStroke .42s cubic-bezier(.3, .7, .4, 1) both; animation-delay: var(--ink-delay, 0s); }
 
-    /* 손글씨 숫자·글자 */
-    .cell-select, .cell-input { font-family: var(--hand); font-size: 17px; font-weight: 700; color: var(--ink-c, var(--ink)); }
-    .cell-input { font-size: 15px; }
-    .cell-input::placeholder { color: rgba(90, 100, 130, 0.35); font-weight: 400; }
+    /* 펜 글씨 */
+    .cell-select, .cell-input { font-family: var(--hand); font-size: 23px; font-weight: 400; color: var(--ink-c, var(--ink)); }
+    .cell-input { font-size: 20px; }
+    .cell-input::placeholder { font-family: var(--print); font-size: 9px; color: rgba(90, 100, 130, 0.35); }
     td.ink-anim .cell-select, td.ink-anim .cell-input { animation: penStroke .5s ease-out both; animation-delay: var(--ink-delay, 0s); }
     @keyframes penStroke {
         from { clip-path: inset(-20% 100% -20% 0); }
@@ -411,27 +411,23 @@
         100% { font-size: 20px; opacity: 1; }
     }
 
-    /* 기분 흐름선 (연필) */
+    /* 기분 흐름선 (연필) — 두 기분을 체크한 날은 위·아래 선으로 갈라지고 사이를 칠함 */
     #mood-line { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 25; overflow: visible; }
-    #mood-line path.pencil { fill: none; stroke: var(--pencil); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-    #mood-line path.pencil-2 { fill: none; stroke: rgba(72, 76, 96, 0.22); stroke-width: 1; stroke-linecap: round; }
-    #mood-line circle { fill: rgba(72, 76, 96, 0.55); }
-    #mood-line.drawing path { animation: drawLine 1.4s ease-out both; }
+    #mood-line path.pencil { fill: none; stroke: var(--pencil); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    #mood-line path.pencil-2 { fill: none; stroke: rgba(72, 76, 96, 0.2); stroke-width: 1; stroke-linecap: round; }
+    #mood-line path.band { stroke: none; fill: rgba(72, 76, 96, 0.08); }
+    #mood-line path.band.mixed { fill: url(#mixed-hatch); }
+    #mood-line line.span { stroke: rgba(72, 76, 96, 0.5); stroke-width: 1.4; stroke-dasharray: 2 3; stroke-linecap: round; }
+    #mood-line line.span.mixed { stroke: rgba(142, 68, 173, 0.75); }
+    #mood-line circle { fill: rgba(72, 76, 96, 0.6); }
+    #mood-line circle.mixed { fill: #8e44ad; }
+    #mood-line.drawing path.pencil, #mood-line.drawing path.pencil-2 { animation: drawLine 1.4s ease-out both; }
+    #mood-line.drawing path.band, #mood-line.drawing line { animation: fadeIn 1s .5s ease-out both; }
     @keyframes drawLine { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* 페이지 넘김 (위쪽 스프링을 축으로) */
-    .nb-flipper { position: absolute; z-index: 96; pointer-events: none; transform-style: preserve-3d; transform-origin: 50% 0; }
-    .nb-flipper > .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
-    .nb-flipper > .face.front { background: var(--paper); }
-    .nb-flipper > .face.front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(60, 40, 10, var(--shade, 0)), rgba(60, 40, 10, 0) 70%); pointer-events: none; }
-    .nb-flipper > .face.back {
-        transform: rotateX(180deg);
-        background-color: #f7f2e6;
-        background-image: repeating-linear-gradient(0deg, rgba(92, 128, 190, 0.07) 0 1px, transparent 1px 34px), repeating-linear-gradient(90deg, rgba(92, 128, 190, 0.07) 0 1px, transparent 1px 44px);
-        box-shadow: inset 0 -30px 40px -20px rgba(60, 40, 10, 0.25);
-    }
-    .nb-underlay { position: absolute; z-index: 95; pointer-events: none; overflow: hidden; }
-    .nb-cast { position: absolute; z-index: 94; pointer-events: none; background: linear-gradient(180deg, rgba(50, 30, 10, 0.28), rgba(50, 30, 10, 0) 80%); }
+    /* 페이지 넘김 (CSS 대체용) */
+    .nb-cast { position: absolute; z-index: 94; pointer-events: none; }
 
     /* 책상 위의 펜 */
     #pen-tray {
@@ -442,19 +438,18 @@
         width: 40px; height: 72px; border: none; background: none; padding: 0; cursor: pointer; position: relative;
         transition: transform .25s cubic-bezier(.2, 1.3, .4, 1), filter .25s;
         transform: rotate(-32deg) translateY(6px);
-        filter: drop-shadow(3px 4px 2px rgba(40, 22, 6, 0.45));
-        -webkit-tap-highlight-color: transparent;
+        filter: drop-shadow(3px 4px 2px rgba(20, 10, 2, 0.55));
     }
     .nb-pen svg { width: 18px; height: 72px; display: block; margin: 0 auto; }
     .nb-pen:hover { transform: rotate(-32deg) translateY(1px); }
-    .nb-pen.active { transform: rotate(-24deg) translateY(-8px) scale(1.08); filter: drop-shadow(6px 10px 4px rgba(40, 22, 6, 0.4)); }
+    .nb-pen.active { transform: rotate(-24deg) translateY(-8px) scale(1.08); filter: drop-shadow(6px 10px 4px rgba(20, 10, 2, 0.45)); }
     .nb-pen.pencil { margin-left: 10px; }
-    .nb-pen.pencil.off { transform: rotate(-60deg) translateY(12px); filter: drop-shadow(2px 3px 2px rgba(40, 22, 6, 0.35)) grayscale(0.35); }
+    .nb-pen.pencil.off { transform: rotate(-60deg) translateY(12px); filter: drop-shadow(2px 3px 2px rgba(20, 10, 2, 0.45)) grayscale(0.35); }
     .nb-pen.pencil:not(.off) { transform: rotate(-38deg) translateY(-2px); }
     #nb-toast {
-        position: fixed; z-index: 960; left: 50%; bottom: 84px; transform: translateX(-50%) rotate(-1deg);
-        background: #fff9d6; color: #3b3a2a; font-family: var(--hand); font-size: 17px; font-weight: 700;
-        padding: 6px 14px; border-radius: 3px; box-shadow: 0 4px 10px rgba(40, 22, 6, 0.3);
+        position: fixed; z-index: 960; left: 50%; bottom: 84px; transform: translateX(-50%);
+        background: rgba(35, 28, 20, 0.88); color: #f6efe2; font-family: var(--print); font-size: 12.5px; font-weight: 500; letter-spacing: 0.2px;
+        padding: 7px 14px; border-radius: 16px; box-shadow: 0 4px 10px rgba(20, 10, 2, 0.35);
         opacity: 0; transition: opacity .25s; pointer-events: none;
     }
     #nb-toast.show { opacity: 1; }
@@ -463,8 +458,15 @@
     #nb-hand-pen { position: fixed; z-index: 1200; width: 22px; height: 92px; pointer-events: none; left: 0; top: 0; opacity: 0; transform-origin: 50% 100%; filter: drop-shadow(8px 10px 5px rgba(30, 20, 5, 0.35)); }
     #nb-hand-pen svg { width: 100%; height: 100%; display: block; }
 
+    @media (max-width: 480px) {
+        .top-assessment-bar { gap: 6px; padding: 0 8px; justify-content: space-between; font-size: 10.5px; }
+        .top-assessment-bar a { font-size: 10.5px; }
+        .top-assessment-bar input { width: 44px; }
+        #nb-title .t-num { font-size: 40px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-        td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path { animation: none; }
+        td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
     }
 </style>
 </head>
@@ -2053,50 +2055,73 @@
                 const cell = document.querySelector(`#table-body td[data-c="${id}"]`);
                 if (cell) { const p = posInTable(cell, table); rowY[id] = p.y + p.h / 2; }
             });
+            // 하루에 기분을 두 개까지 체크할 수 있으므로 평균 내지 않고 위·아래 기분을 따로 잇는다
             const points = [];
             const lastDay = new Date(curDate.getFullYear(), curDate.getMonth() + 1, 0).getDate();
             for (let d = 1; d <= lastDay; d++) {
-                const ys = MOOD_ROWS.filter(id => document.querySelector(`#table-body td[data-d="${d}"][data-c="${id}"].checked`)).map(id => rowY[id]);
-                if (!ys.length) continue;
+                const ids = MOOD_ROWS.filter(id => document.querySelector(`#table-body td[data-d="${d}"][data-c="${id}"].checked`));
+                if (!ids.length) continue;
                 const cell = document.querySelector(`#table-body td[data-d="${d}"][data-c="m_0"]`);
                 if (!cell) continue;
                 const p = posInTable(cell, table);
-                points.push({ d, x: p.x + p.w / 2, y: ys.reduce((a, b) => a + b, 0) / ys.length });
+                const ys = ids.map(id => rowY[id]);
+                const up = ids.some(id => id.startsWith('m_p')), down = ids.some(id => id.startsWith('m_m'));
+                const mixedCell = document.querySelector(`#table-body td[data-d="${d}"][data-c="mixed"]`);
+                points.push({
+                    d, x: p.x + p.w / 2,
+                    hi: Math.min(...ys), lo: Math.max(...ys),
+                    two: ids.length > 1,
+                    mixed: (up && down) || !!mixedCell?.classList.contains('checked')
+                });
             }
             if (!points.length) return;
 
-            // 연속된 날끼리만 잇고, 이틀 이상 비면 선을 끊음
             const runs = [];
             points.forEach(p => {
                 const run = runs[runs.length - 1];
                 if (run && p.d - run[run.length - 1].d <= 2) run.push(p); else runs.push([p]);
             });
-            const wobble = (p, k) => ((hash(`${p.d}-${k}`) % 100) / 100 - 0.5) * 1.6;
+            const wobble = (p, k) => ((hash(`${p.d}-${k}`) % 100) / 100 - 0.5) * 1.4;
             const ns = 'http://www.w3.org/2000/svg';
+            const el = (tag, attrs, parent) => { const e = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); parent.appendChild(e); return e; };
+            const curve = (run, key, k) => {
+                let s = `M${run[0].x + wobble(run[0], k)},${run[0][key] + wobble(run[0], k + 5)}`;
+                for (let i = 1; i < run.length; i++) {
+                    const p0 = run[i - 1], p1 = run[i], mx = (p0.x + p1.x) / 2;
+                    s += ` C${mx},${p0[key] + wobble(p0, k + 2)} ${mx},${p1[key] + wobble(p1, k + 3)} ${p1.x + wobble(p1, k)},${p1[key] + wobble(p1, k + 5)}`;
+                }
+                return s;
+            };
+            // 같은 선이 겹쳐도 진해지지 않도록 그룹 투명도로 칠함
+            const bandG = el('g', {}, svg);
+            const lineG = el('g', { opacity: '0.62' }, svg);
+            const line2G = el('g', { opacity: '0.2' }, svg);
+            const markG = el('g', {}, svg);
             runs.forEach(run => {
+                const split = run.some(p => p.two);
                 if (run.length > 1) {
-                    [['pencil', 0], ['pencil-2', 1]].forEach(([cls, k]) => {
-                        let dstr = `M${run[0].x + wobble(run[0], k)},${run[0].y + wobble(run[0], k + 5)}`;
-                        for (let i = 1; i < run.length; i++) {
-                            const p0 = run[i - 1], p1 = run[i];
-                            const mx = (p0.x + p1.x) / 2;
-                            dstr += ` C${mx},${p0.y + wobble(p0, k + 2)} ${mx},${p1.y + wobble(p1, k + 3)} ${p1.x + wobble(p1, k)},${p1.y + wobble(p1, k + 5)}`;
-                        }
-                        const path = document.createElementNS(ns, 'path');
-                        path.setAttribute('d', dstr);
-                        path.setAttribute('class', cls);
-                        svg.appendChild(path);
-                        if (animate) {
-                            const len = path.getTotalLength();
-                            path.style.strokeDasharray = `${len}`;
-                            path.style.setProperty('--len', `${len}`);
-                        }
+                    const keys = split ? ['hi', 'lo'] : ['hi'];
+                    keys.forEach(key => {
+                        const a = el('path', { d: curve(run, key, 0), class: 'pencil', style: 'stroke: rgb(72,76,96)' }, lineG);
+                        const b = el('path', { d: curve(run, key, 1), class: 'pencil-2', style: 'stroke: rgb(72,76,96)' }, line2G);
+                        if (animate) [a, b].forEach(path => { const len = path.getTotalLength(); path.style.strokeDasharray = `${len}`; path.style.setProperty('--len', `${len}`); });
                     });
+                    if (split) {
+                        // 위·아래 선 사이를 옅게 칠해 두 기분이 함께 있었음을 표시
+                        let d = curve(run, 'hi', 0);
+                        const rev = [...run].reverse();
+                        d += ` L${rev[0].x},${rev[0].lo}`;
+                        for (let i = 1; i < rev.length; i++) {
+                            const p0 = rev[i - 1], p1 = rev[i], mx = (p0.x + p1.x) / 2;
+                            d += ` C${mx},${p0.lo} ${mx},${p1.lo} ${p1.x},${p1.lo}`;
+                        }
+                        el('path', { d: d + ' Z', class: 'band' }, bandG);
+                    }
                 }
                 run.forEach(p => {
-                    const c = document.createElementNS(ns, 'circle');
-                    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 2.6);
-                    svg.appendChild(c);
+                    if (p.two) el('line', { x1: p.x, y1: p.hi + 3, x2: p.x, y2: p.lo - 3, class: 'span' + (p.mixed ? ' mixed' : '') }, markG);
+                    el('circle', { cx: p.x, cy: p.hi, r: 2.6, class: p.mixed ? 'mixed' : '' }, markG);
+                    if (p.two) el('circle', { cx: p.x, cy: p.lo, r: 2.6, class: p.mixed ? 'mixed' : '' }, markG);
                 });
             });
             if (animate) { void svg.getBoundingClientRect(); svg.classList.add('drawing'); }
@@ -2131,16 +2156,21 @@
                 c.fillText(str, x, r.top + r.height / 2 + 1, r.width - 4);
             };
 
-            // 머리말 제목과 빨간 여백선
-            const title = document.getElementById('nb-title');
-            if (title) {
-                const r = rectOf(title);
-                c.fillStyle = 'rgba(255, 220, 90, 0.55)';
-                c.fillRect(r.left, r.top + r.height * 0.62, r.width, r.height * 0.3);
-                text(title, title.textContent, r, { align: 'center' });
-            }
+            // 머리말 제목
+            document.querySelectorAll('#nb-title .t-num, #nb-title .t-en, #nb-title .t-ko').forEach(el => {
+                const r = rectOf(el);
+                const cs = getComputedStyle(el);
+                c.save();
+                c.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+                c.fillStyle = cs.color;
+                c.textBaseline = 'middle';
+                c.textAlign = 'left';
+                if ('letterSpacing' in c) c.letterSpacing = cs.letterSpacing === 'normal' ? '0px' : cs.letterSpacing;
+                c.fillText(el.textContent, r.left, r.top + r.height / 2 + 1);
+                c.restore();
+            });
             const header = document.querySelector('#main-screen .header');
-            if (header) { const r = rectOf(header); c.fillStyle = 'rgba(230, 120, 120, 0.35)'; c.fillRect(r.left, r.bottom - 1.5, r.width, 1.5); }
+            if (header) { const r = rectOf(header); c.fillStyle = 'rgba(70, 80, 100, 0.28)'; c.fillRect(r.left, r.bottom - 1, r.width, 1); }
             document.querySelectorAll('#main-screen .header button').forEach(btn => {
                 const r = rectOf(btn);
                 if (btn.classList.contains('btn-nav')) {
@@ -2155,14 +2185,14 @@
             if (bar) {
                 const r = rectOf(bar);
                 c.save();
-                c.shadowColor = 'rgba(120, 100, 40, 0.35)'; c.shadowBlur = 6; c.shadowOffsetY = 3;
-                c.fillStyle = '#fff4b8'; c.fillRect(r.left, r.top, r.width, r.height);
+                
+                c.fillStyle = '#fdfaf2'; c.fillRect(r.left, r.top, r.width, r.height);
                 c.restore();
                 bar.querySelectorAll('a, input, span').forEach(el => {
                     const er = rectOf(el);
                     const str = el.tagName === 'INPUT' ? (el.value || '') : el.textContent;
                     if (str) text(el, str, er, { align: 'center' });
-                    else if (el.tagName === 'INPUT' && el.placeholder) text(el, el.placeholder, er, { align: 'center', color: 'rgba(91, 74, 28, 0.45)' });
+                    else if (el.tagName === 'INPUT' && el.placeholder) text(el, el.placeholder, er, { align: 'center', font: `400 10px ${getComputedStyle(document.documentElement).getPropertyValue('--print')}`, color: '#b8bcc6' });
                 });
             }
 
@@ -2189,17 +2219,29 @@
                     const tape = getComputedStyle(el.parentElement).getPropertyValue('--tape').trim();
                     if (tape) { c.fillStyle = tape.startsWith('var') ? 'rgba(255,190,150,0.8)' : tape; c.fillRect(r.left, r.top, 5, r.height); }
                 } else if (cellBg) { c.fillStyle = cellBg; c.fillRect(r.left, r.top, r.width, r.height); }
-                if (el.classList.contains('today-header') || el.classList.contains('today-dow')) {
-                    c.fillStyle = 'rgba(255, 228, 70, 0.6)'; c.fillRect(r.left, r.top + r.height * 0.18, r.width, r.height * 0.66);
+                if (el.classList.contains('today-header')) {
+                    c.fillStyle = 'rgba(176, 65, 62, 0.12)'; c.beginPath(); c.arc(r.left + r.width / 2, r.top + r.height * 0.62, 13, 0, Math.PI * 2); c.fill();
                 }
-                c.fillStyle = 'rgba(92, 128, 190, 0.18)';
+                c.fillStyle = 'rgba(70, 80, 100, 0.12)';
                 c.fillRect(r.right - 1, r.top, 1, r.height);
                 c.fillRect(r.left, r.bottom - 1, r.width, 1);
-                if (el.classList.contains('col-label')) { c.fillStyle = 'rgba(230, 120, 120, 0.45)'; c.fillRect(r.right - 2, r.top, 2, r.height); }
+                if (el.classList.contains('col-label')) { c.fillStyle = 'rgba(176, 65, 62, 0.45)'; c.fillRect(r.right - 1, r.top, 1, r.height); }
 
                 // 내용
                 const ctl = el.querySelector('select, input');
-                if (ctl && ctl.value) { text(ctl, ctl.value, r, { align: 'center' }); return; }
+                if (ctl) {
+                    if (ctl.value) text(ctl, ctl.value, r, { align: 'center' });
+                    else if (ctl.placeholder) text(ctl, ctl.placeholder, r, { align: 'center', font: `500 9px ${getComputedStyle(document.documentElement).getPropertyValue('--print')}`, color: 'rgba(90, 100, 130, 0.35)' });
+                    return;
+                }
+                const badge = el.querySelector('.today-badge');
+                if (badge) {
+                    const br = rectOf(badge);
+                    text(badge, badge.textContent, br, { align: 'center' });
+                    const rest = el.textContent.replace(badge.textContent, '').trim();
+                    text(el, rest, { left: r.left, top: br.bottom, width: r.width, height: r.bottom - br.bottom }, { align: 'center' });
+                    return;
+                }
                 if (el.classList.contains('checked') && (el.classList.contains('cell-check') || el.classList.contains('cell-mixed'))) {
                     const cs = getComputedStyle(el);
                     const color = el.classList.contains('cell-mixed') ? '#8e44ad' : (cs.getPropertyValue('--ink-c').trim() || '#2c3445');
@@ -2219,19 +2261,26 @@
                 if (str) text(el, str, r);
             };
             gw.querySelectorAll('#table-body td').forEach(el => drawCell(el, false));
-            // 연필 선
+            // 연필 선 (위·아래 선, 사이 칠, 혼재 표시)
             const svg = document.getElementById('mood-line');
             if (svg && svg.childNodes.length) {
                 const sr = rectOf(svg);
                 c.save();
                 c.translate(sr.left, sr.top);
-                svg.querySelectorAll('path').forEach(p => {
-                    c.strokeStyle = p.classList.contains('pencil') ? 'rgba(72, 76, 96, 0.62)' : 'rgba(72, 76, 96, 0.22)';
-                    c.lineWidth = p.classList.contains('pencil') ? 2.2 : 1; c.lineCap = 'round';
-                    c.stroke(new Path2D(p.getAttribute('d')));
+                c.fillStyle = 'rgba(72, 76, 96, 0.08)';
+                svg.querySelectorAll('path.band').forEach(p => c.fill(new Path2D(p.getAttribute('d'))));
+                c.lineCap = 'round';
+                svg.querySelectorAll('path.pencil').forEach(p => { c.strokeStyle = 'rgba(72, 76, 96, 0.62)'; c.lineWidth = 2; c.stroke(new Path2D(p.getAttribute('d'))); });
+                svg.querySelectorAll('path.pencil-2').forEach(p => { c.strokeStyle = 'rgba(72, 76, 96, 0.2)'; c.lineWidth = 1; c.stroke(new Path2D(p.getAttribute('d'))); });
+                svg.querySelectorAll('line.span').forEach(l => {
+                    c.save(); c.setLineDash([2, 3]); c.lineWidth = 1.4;
+                    c.strokeStyle = l.classList.contains('mixed') ? 'rgba(142, 68, 173, 0.75)' : 'rgba(72, 76, 96, 0.5)';
+                    c.beginPath(); c.moveTo(+l.getAttribute('x1'), +l.getAttribute('y1')); c.lineTo(+l.getAttribute('x2'), +l.getAttribute('y2')); c.stroke(); c.restore();
                 });
-                c.fillStyle = 'rgba(72, 76, 96, 0.55)';
-                svg.querySelectorAll('circle').forEach(ci => { c.beginPath(); c.arc(+ci.getAttribute('cx'), +ci.getAttribute('cy'), 2.6, 0, Math.PI * 2); c.fill(); });
+                svg.querySelectorAll('circle').forEach(ci => {
+                    c.fillStyle = ci.classList.contains('mixed') ? '#8e44ad' : 'rgba(72, 76, 96, 0.6)';
+                    c.beginPath(); c.arc(+ci.getAttribute('cx'), +ci.getAttribute('cy'), 2.6, 0, Math.PI * 2); c.fill();
+                });
                 c.restore();
             }
             gw.querySelectorAll('#table-body th').forEach(el => drawCell(el, true));
@@ -2241,84 +2290,70 @@
             return { canvas: cv, rect: cr };
         }
 
-        // ---------- WebGL 페이지 컬 ----------
+        // ---------- WebGL 페이지 넘김 (왼쪽 제본선을 축으로 휘어지며 넘어감) ----------
         const GL = { ok: null, canvas: null, gl: null, prog: null, flatProg: null, buf: {}, count: 0, u: {}, fu: {} };
-        const VS = `
-            attribute vec2 aUV;
-            uniform vec2 uPage;      // 페이지 크기 (px)
-            uniform vec2 uOrigin;    // 캔버스 안 페이지 왼쪽 위 (px)
-            uniform vec2 uCanvas;    // 캔버스 크기 (px)
-            uniform float uFold;     // 접히는 선 위치 (방향축 기준 px)
-            uniform float uRadius;
-            uniform vec2 uDir;       // 말려 올라가는 방향 (페이지 아래쪽을 향함)
-            uniform float uPersp;
-            varying vec2 vUV;
-            varying float vShade;
-            varying float vBackShade;
-            const float PI = 3.14159265;
-            void main() {
-                vec2 p = aUV * uPage;
-                // 방향축 기준 거리 (위쪽 스프링에서 시작)
-                vec2 ref = vec2(uDir.x < 0.0 ? uPage.x : 0.0, 0.0);
-                float s = dot(p - ref, uDir);
-                vec3 pos = vec3(p, 0.0);
-                vec3 n = vec3(0.0, 0.0, 1.0);
-                if (s > uFold) {
-                    float d = s - uFold;
-                    float sNew;
-                    float z;
-                    if (d < PI * uRadius) {
-                        float th = d / uRadius;
-                        sNew = uFold + uRadius * sin(th);
-                        z = uRadius * (1.0 - cos(th));
-                        n = vec3(-uDir * sin(th), cos(th));
-                    } else {
-                        sNew = uFold - (d - PI * uRadius);
-                        z = 2.0 * uRadius;
-                        n = vec3(0.0, 0.0, -1.0);
-                    }
-                    pos.xy = p - uDir * (s - sNew);
-                    pos.z = z;
-                }
-                vec3 L = normalize(vec3(-0.25, -0.45, 0.86));
-                vShade = clamp(0.55 + 0.5 * dot(n, L), 0.0, 1.15);
-                vBackShade = clamp(0.55 + 0.5 * dot(-n, L), 0.0, 1.15);
-                // 원근
-                vec2 sc = uOrigin + pos.xy;
-                vec2 center = uCanvas * 0.5;
-                float k = uPersp / (uPersp - pos.z);
-                vec2 scr = center + (sc - center) * k;
-                vec2 clip = scr / uCanvas * 2.0 - 1.0;
-                gl_Position = vec4(clip.x, -clip.y, -pos.z / 4000.0, 1.0);
-                vUV = aUV;
-            }
-        `;
-        const FS = `
+        const PREC = `
             #ifdef GL_FRAGMENT_PRECISION_HIGH
             precision highp float;
             #else
             precision mediump float;
             #endif
-            uniform sampler2D uFront;
+        `;
+        const VS = `
+            attribute vec2 aUV;
+            uniform vec2 uPage;      // 페이지 크기 (px)
+            uniform vec2 uOrigin;    // 캔버스 안 페이지 왼쪽 위 (px)
+            uniform vec2 uCanvas;    // 캔버스 크기 (px)
+            uniform vec2 uCenter;    // 원근 중심 (px)
+            uniform float uPhi;      // 넘어간 각도 (0 = 제자리, PI = 완전히 넘어감)
+            uniform float uBend;     // 종이가 휘는 정도 (페이지 폭 전체에서 더해지는 각도)
+            uniform float uSkew;     // 위쪽이 먼저 넘어가는 정도
+            uniform float uPersp;
             varying vec2 vUV;
             varying float vShade;
-            varying float vBackShade;
+            varying float vBack;
+            void main() {
+                float u = aUV.x * uPage.x;
+                float y = aUV.y * uPage.y;
+                float c = uBend * (1.0 + uSkew * (0.5 - aUV.y)) / uPage.x;
+                float th = uPhi + c * u;
+                float x, z;
+                if (abs(c) < 1e-6) { x = u * cos(uPhi); z = u * sin(uPhi); }
+                else { x = (sin(th) - sin(uPhi)) / c; z = (cos(uPhi) - cos(th)) / c; }
+                vec3 n = vec3(-sin(th), 0.0, cos(th));
+                vec3 L = normalize(vec3(0.35, -0.3, 0.88));
+                vShade = clamp(0.62 + 0.42 * dot(n, L), 0.0, 1.1);
+                vBack = clamp(0.62 + 0.42 * dot(-n, L), 0.0, 1.1);
+                vec2 sc = uOrigin + vec2(x, y);
+                float k = uPersp / (uPersp - z);
+                vec2 scr = uCenter + (sc - uCenter) * k;
+                vec2 clip = scr / uCanvas * 2.0 - 1.0;
+                gl_Position = vec4(clip.x, -clip.y, -z / (uPage.x * 4.0 + 1.0), 1.0);
+                vUV = aUV;
+            }
+        `;
+        const FS = PREC + `
+            uniform sampler2D uFront;
+            uniform float uAlpha;
+            varying vec2 vUV;
+            varying float vShade;
+            varying float vBack;
             void main() {
                 if (gl_FrontFacing) {
                     vec4 c = texture2D(uFront, vUV);
-                    gl_FragColor = vec4(c.rgb * vShade, 1.0);
+                    // 제본선 쪽이 살짝 어두움
+                    float gutter = 1.0 - 0.10 * exp(-vUV.x * 18.0);
+                    gl_FragColor = vec4(c.rgb * vShade * gutter, 1.0) * uAlpha;
                 } else {
-                    // 뒷면: 모눈 + 앞면 글씨가 살짝 비침
-                    vec2 px = vUV * vec2(400.0, 600.0);
-                    float grid = max(step(0.96, fract(px.x / 11.0)), step(0.96, fract(px.y / 8.5))) * 0.05;
-                    vec3 paper = vec3(0.968, 0.949, 0.902) - grid;
-                    vec3 show = texture2D(uFront, vec2(1.0 - vUV.x, vUV.y)).rgb;
-                    vec3 c = mix(paper, paper * show, 0.12);
-                    gl_FragColor = vec4(c * vBackShade, 1.0);
+                    // 뒷면: 종이 + 앞면 글씨가 거울처럼 살짝 비침
+                    vec3 paper = vec3(0.972, 0.955, 0.912);
+                    vec3 show = texture2D(uFront, vec2(vUV.x, vUV.y)).rgb;
+                    vec3 c = mix(paper, paper * show, 0.14);
+                    gl_FragColor = vec4(c * vBack, 1.0) * uAlpha;
                 }
             }
         `;
-        // 넘어가는 종이가 아래 페이지에 드리우는 그림자, 그리고 (이전 달로 갈 때) 아래에 깔리는 지금 페이지
+        // 아래 페이지(그림 또는 실제 화면)에 드리우는 그림자
         const FLAT_VS = `
             attribute vec2 aUV;
             uniform vec2 uPage; uniform vec2 uOrigin; uniform vec2 uCanvas;
@@ -2330,32 +2365,25 @@
                 vUV = aUV;
             }
         `;
-        const FLAT_FS = `
-            #ifdef GL_FRAGMENT_PRECISION_HIGH
-            precision highp float;
-            #else
-            precision mediump float;
-            #endif
+        const FLAT_FS = PREC + `
             uniform sampler2D uTex;
             uniform float uUseTex;
             uniform vec2 uPage;
-            uniform vec2 uDir;
-            uniform float uFold;
-            uniform float uRadius;
+            uniform float uFoot;     // 넘어가는 종이가 아래 페이지 위에 걸친 오른쪽 끝 (px)
             uniform float uStrength;
             varying vec2 vUV;
             void main() {
-                vec2 p = vUV * uPage;
-                vec2 ref = vec2(uDir.x < 0.0 ? uPage.x : 0.0, 0.0);
-                float s = dot(p - ref, uDir);
-                float d = s - uFold;
-                // 접힌 선 바로 아래가 가장 어둡고 멀어질수록 옅어짐
-                float sh = d > 0.0 ? exp(-d / (uRadius * 1.6)) * uStrength : 0.0;
+                float x = vUV.x * uPage.x;
+                float y = vUV.y * uPage.y;
+                float foot = uFoot + (0.5 - vUV.y) * 40.0 * uStrength;
+                float sh = (1.0 - smoothstep(foot - 10.0, foot + uPage.x * 0.28, x)) * uStrength;
+                sh += 0.10 * uStrength * exp(-x / 30.0);
+                sh = clamp(sh, 0.0, 0.6);
                 if (uUseTex > 0.5) {
                     vec3 c = texture2D(uTex, vUV).rgb;
                     gl_FragColor = vec4(c * (1.0 - sh), 1.0);
                 } else {
-                    gl_FragColor = vec4(vec3(0.18, 0.11, 0.04) * sh, sh);
+                    gl_FragColor = vec4(vec3(0.16, 0.10, 0.04) * sh, sh);
                 }
             }
         `;
@@ -2366,7 +2394,7 @@
             try {
                 const cv = document.createElement('canvas');
                 cv.id = 'nb-gl';
-                Object.assign(cv.style, { position: 'fixed', zIndex: '110', pointerEvents: 'none', display: 'none' });
+                Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '110', pointerEvents: 'none', display: 'none' });
                 const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true });
                 if (!gl) return false;
                 const mk = (vs, fs) => {
@@ -2379,8 +2407,7 @@
                 };
                 GL.prog = mk(VS, FS);
                 GL.flatProg = mk(FLAT_VS, FLAT_FS);
-                // 종이 격자 메시
-                const NX = 28, NY = 72, uv = [], idx = [];
+                const NX = 64, NY = 24, uv = [], idx = [];
                 for (let j = 0; j <= NY; j++) for (let i = 0; i <= NX; i++) uv.push(i / NX, j / NY);
                 for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
                     const a = j * (NX + 1) + i, b = a + 1, c2 = a + NX + 1, d = c2 + 1;
@@ -2390,8 +2417,8 @@
                 GL.buf.idx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
                 GL.count = idx.length;
                 GL.buf.quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
-                ['uPage', 'uOrigin', 'uCanvas', 'uFold', 'uRadius', 'uDir', 'uPersp', 'uFront'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
-                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uDir', 'uFold', 'uRadius', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
+                ['uPage', 'uOrigin', 'uCanvas', 'uCenter', 'uPhi', 'uBend', 'uSkew', 'uPersp', 'uFront', 'uAlpha'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
+                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uFoot', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
                 document.body.appendChild(cv);
                 GL.canvas = cv; GL.gl = gl; GL.ok = true;
             } catch (e) {
@@ -2412,51 +2439,51 @@
             return t;
         }
 
-        // curlTex: 말려 넘어가는 종이, underTex: 그 아래 깔린 종이(없으면 실제 화면이 보임)
-        function runCurl({ curlTex, underTex, rect, forward, duration }) {
+        // turnTex: 넘어가는 종이, underTex: 그 아래 종이(없으면 실제 화면이 보임)
+        // phiFrom → phiTo 로 넘어감 (0 = 페이지 위에 놓임, PI = 왼쪽으로 완전히 넘어감)
+        function runTurn({ turnTex, underTex, rect, phiFrom, phiTo, duration }) {
             const gl = GL.gl, cv = GL.canvas;
-            const pad = 60;
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            const cw = rect.width + pad * 2, ch = rect.height + pad;
+            const cw = window.innerWidth, ch = window.innerHeight;
             cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
-            Object.assign(cv.style, { left: `${rect.left - pad}px`, top: `${rect.top}px`, width: `${cw}px`, height: `${ch}px`, display: 'block' });
+            Object.assign(cv.style, { width: `${cw}px`, height: `${ch}px`, display: 'block' });
             gl.viewport(0, 0, cv.width, cv.height);
-            const W = rect.width, H = rect.height, R0 = Math.max(40, Math.min(90, H * 0.1));
-            const origin = [pad, 0];
+            const W = rect.width, H = rect.height;
+            const origin = [rect.left, rect.top];
+            const center = [rect.left + W / 2, rect.top + H * 0.45];
+            const persp = Math.max(1700, W * 2.4);
+            const motion = Math.sign(phiTo - phiFrom) || 1;
 
             return new Promise(resolve => {
                 const t0 = performance.now();
                 const frame = (now) => {
-                    let t = Math.min(1, (now - t0) / duration);
+                    const t = duration <= 1 ? 1 : Math.min(1, (now - t0) / duration);
                     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                    const prog = forward ? e : 1 - e;
-                    // 오른쪽 아래 모서리부터 들리다가 점점 스프링과 나란해짐
-                    const tilt = 0.32 * (1 - prog) * (1 - prog) + 0.02;
-                    const dir = [Math.sin(tilt), Math.cos(tilt)];
-                    const radius = R0 * (0.7 + 0.6 * Math.sin(Math.PI * Math.min(1, prog * 1.2)));
-                    const sMax = W * Math.sin(tilt) + H * Math.cos(tilt);
-                    const fold = sMax - prog * (sMax + radius * 1.6);
+                    const phi = phiFrom + (phiTo - phiFrom) * e;
+                    const lift = Math.sin(Math.min(Math.PI, phi));
+                    // 손으로 모서리를 잡아 넘기듯 바깥쪽이 앞서 휘고, 위쪽이 먼저 넘어감
+                    const bend = motion * 0.95 * lift;
+                    const skew = 0.55;
+                    const foot = phi < Math.PI / 2 ? W * Math.cos(phi) : 0;
 
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                     gl.enable(gl.BLEND);
                     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-                    // 아래 페이지 + 그림자
                     gl.useProgram(GL.flatProg);
                     gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad);
                     const la = gl.getAttribLocation(GL.flatProg, 'aUV');
                     gl.enableVertexAttribArray(la);
                     gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
                     gl.uniform2f(GL.fu.uPage, W, H); gl.uniform2f(GL.fu.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.fu.uCanvas, cw, ch);
-                    gl.uniform2f(GL.fu.uDir, dir[0], dir[1]); gl.uniform1f(GL.fu.uFold, fold); gl.uniform1f(GL.fu.uRadius, radius);
-                    gl.uniform1f(GL.fu.uStrength, 0.42 * Math.sin(Math.PI * Math.min(1, prog * 1.1)));
+                    gl.uniform1f(GL.fu.uFoot, foot);
+                    gl.uniform1f(GL.fu.uStrength, 0.5 * lift);
                     gl.activeTexture(gl.TEXTURE0);
                     if (underTex) { gl.bindTexture(gl.TEXTURE_2D, underTex); gl.uniform1i(GL.fu.uTex, 0); gl.uniform1f(GL.fu.uUseTex, 1); }
                     else gl.uniform1f(GL.fu.uUseTex, 0);
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-                    // 말려 넘어가는 종이
                     gl.enable(gl.DEPTH_TEST);
                     gl.useProgram(GL.prog);
                     gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.uv);
@@ -2465,9 +2492,13 @@
                     gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
                     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx);
                     gl.uniform2f(GL.u.uPage, W, H); gl.uniform2f(GL.u.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.u.uCanvas, cw, ch);
-                    gl.uniform1f(GL.u.uFold, fold); gl.uniform1f(GL.u.uRadius, radius); gl.uniform2f(GL.u.uDir, dir[0], dir[1]);
-                    gl.uniform1f(GL.u.uPersp, 1600);
-                    gl.bindTexture(gl.TEXTURE_2D, curlTex); gl.uniform1i(GL.u.uFront, 0);
+                    gl.uniform2f(GL.u.uCenter, center[0], center[1]);
+                    gl.uniform1f(GL.u.uPhi, phi); gl.uniform1f(GL.u.uBend, bend); gl.uniform1f(GL.u.uSkew, skew);
+                    gl.uniform1f(GL.u.uPersp, persp);
+                    // 다 넘어간 종이는 책상 밖으로 사라지듯 옅어짐
+                    const alpha = motion > 0 ? 1 - Math.max(0, (t - 0.72) / 0.28) : Math.min(1, t / 0.22);
+                    gl.uniform1f(GL.u.uAlpha, duration <= 1 ? 1 : alpha);
+                    gl.bindTexture(gl.TEXTURE_2D, turnTex); gl.uniform1i(GL.u.uFront, 0);
                     gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
                     gl.disable(gl.DEPTH_TEST);
 
@@ -2489,23 +2520,23 @@
                 const oldSnap = snapshotPage(scale);
                 const gl = GL.gl;
                 const oldTex = texFrom(oldSnap.canvas);
+                const END = Math.PI * 0.97;
                 if (dir > 0) {
-                    // 다음 달: 지금 페이지가 위로 말려 넘어가며 새 페이지가 드러남
+                    // 다음 달: 지금 페이지가 제본선을 축으로 왼쪽으로 넘어가며 새 페이지가 드러남
                     doRender();
-                    await runCurl({ curlTex: oldTex, underTex: null, rect: oldSnap.rect, forward: true, duration: 1150 });
+                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, phiFrom: 0, phiTo: END, duration: 1100 });
                     gl.deleteTexture(oldTex);
                 } else {
-                    // 이전 달: 앞 장이 위에서 내려와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
+                    // 이전 달: 왼쪽으로 넘겨 두었던 앞 장이 되돌아와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
                     suppressCascade = true;
-                    // 불러오는 동안 지금 페이지를 그대로 보여 줌
-                    await runCurl({ curlTex: oldTex, underTex: oldTex, rect: oldSnap.rect, forward: false, duration: 1 });
+                    await runTurn({ turnTex: oldTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: 0, phiTo: 0, duration: 1 });
                     const loaded = waitForLoad(1500);
                     doRender();
                     await loaded;
                     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
                     const newSnap = snapshotPage(scale);
                     const newTex = texFrom(newSnap.canvas);
-                    await runCurl({ curlTex: newTex, underTex: oldTex, rect: oldSnap.rect, forward: false, duration: 1150 });
+                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: END, phiTo: 0, duration: 1100 });
                     gl.deleteTexture(newTex); gl.deleteTexture(oldTex);
                 }
             } catch (e) {
@@ -2522,9 +2553,10 @@
             const gw = document.getElementById('grid-container');
             doRender();
             if (!gw.animate) return;
+            gw.style.transformOrigin = 'left center';
             gw.animate([
-                { transform: `rotateX(${dir > 0 ? -8 : 8}deg)`, opacity: 0.4 },
-                { transform: 'rotateX(0deg)', opacity: 1 }
+                { transform: `perspective(1600px) rotateY(${dir > 0 ? 25 : -25}deg)`, opacity: 0.4 },
+                { transform: 'perspective(1600px) rotateY(0deg)', opacity: 1 }
             ], { duration: 450, easing: 'ease-out' });
         }
 
@@ -2561,9 +2593,20 @@
             }
         }
 
+        const EN_MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
         function onRender() {
             const title = document.getElementById('nb-title');
-            if (title) title.textContent = `${curDate.getFullYear()}년 ${curDate.getMonth() + 1}월`;
+            if (title) {
+                const y = curDate.getFullYear(), m = curDate.getMonth() + 1;
+                title.replaceChildren();
+                const num = document.createElement('b'); num.className = 't-num'; num.textContent = String(m);
+                const meta = document.createElement('span'); meta.className = 't-meta';
+                const en = document.createElement('span'); en.className = 't-en'; en.textContent = EN_MONTHS[m - 1];
+                const ko = document.createElement('span'); ko.className = 't-ko'; ko.textContent = `${y}년 ${m}월`;
+                meta.append(en, ko);
+                title.append(num, meta);
+                title.setAttribute('aria-label', `${y}년 ${m}월, 날짜 고르기`);
+            }
             document.querySelectorAll('.nb-tab').forEach(b => b.classList.toggle('current', Number(b.dataset.m) === curDate.getMonth() + 1));
         }
 

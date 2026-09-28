@@ -46,14 +46,26 @@
   },
   {
     "repo": "moodchart",
-    "path": "vendor/fonts/gaegu.css",
-    "source": "https://cdn.jsdelivr.net/npm/@fontsource/gaegu@5.3.0",
-    "resolved_url": "https://cdn.jsdelivr.net/npm/@fontsource/gaegu@5.3.0/{400,700}.css",
+    "path": "vendor/fonts/nanum-pen-script.css",
+    "source": "https://cdn.jsdelivr.net/npm/@fontsource/nanum-pen-script@5.3.0",
     "version": "5.3.0",
-    "license": "OFL-1.1 (vendor/fonts/gaegu/OFL.txt)",
-    "sha256": "5cc3d39f58722756bcc651ca7dfb77a3f972eedabcd51aff1eeab49de16e4c9c",
-    "bytes": 94661,
-    "font_files": 178,
-    "font_files_sha256_of_sorted_hashes": "688b3550719ed06f7d0d686a97e61e1bd8cd4b87233e52f1e6f7ef2a5968887e"
+    "weights": "400",
+    "license": "OFL-1.1 (vendor/fonts/nanum-pen-script/OFL.txt)",
+    "sha256": "5468a81a0216b91cd58e7705c0f3962a2dab74b7eda738d32bc2f4c9f6936456",
+    "bytes": 54084,
+    "font_files": 93,
+    "font_files_sha256_of_sorted_hashes": "eb2eebd75360c61a643e6180e84c3c108e53b03f177de5c8171abcda614164f9"
+  },
+  {
+    "repo": "moodchart",
+    "path": "vendor/fonts/cormorant-garamond.css",
+    "source": "https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.3.0",
+    "version": "5.3.0",
+    "weights": "300/500/600 + 500 italic, latin",
+    "license": "OFL-1.1 (vendor/fonts/cormorant-garamond/OFL.txt)",
+    "sha256": "977b7e5afe78e1df4ce2d5abceb45f0ac48d5ff9d8df2f5a77075a69890ceb60",
+    "bytes": 1840,
+    "font_files": 4,
+    "font_files_sha256_of_sorted_hashes": "b696b5197700cb8f64449091b24d2be04e8be1c1c8312fe7c76011386534ed39"
   }
 ]
