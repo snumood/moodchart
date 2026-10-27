@@ -1,0 +1,163 @@
+/* 기분기록지 1.2 · 안내 문서 공통 스타일: 책상 위에 펼친 크림색 수첩 한 권 */
+:root, :host {   /* :host — 기분기록지 안에서 펼칠 때(Shadow DOM)도 같은 값 */
+    --paper: #fbf8f1;
+    --paper-2: #f4efe4;
+    --ink: #33353d;
+    --ink-soft: #6f6a62;
+    --pen: #2c3445;
+    --accent: #9b2f35;
+    --rule: rgba(60, 58, 70, 0.075);
+    --line: rgba(60, 58, 70, 0.18);
+    --rose: #c96a6f;
+    --indigo: #5b7bb5;
+    --sage: #7fa58a;
+    --sand: #d9c28e;
+    --tape-mood: #e8c1bf;
+    --tape-scale: #eadcb6;
+    --tape-body: #cfe0d1;
+    --tape-event: #d3d9ee;
+    --hand: 'Nanum Pen Script', 'Apple SD Gothic Neo', cursive;
+    --print: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --serif-ko: 'MaruBuri', 'AppleMyungjo', 'Batang', serif;
+    --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+    --leather-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='l' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting surfaceScale='1.6' lighting-color='%23ffffff'%3E%3CfeDistantLight azimuth='235' elevation='48'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 -0.72'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23l)'/%3E%3C/svg%3E");
+    --linen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.10 0'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.012' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23a)'/%3E%3Crect width='300' height='300' filter='url(%23b)'/%3E%3C/svg%3E");
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+    margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--print); font-size: 15.5px; line-height: 1.85;
+    background-color: #e6e1d9;
+    background-image:
+        radial-gradient(90% 70% at 18% 0%, rgba(255, 252, 245, 0.85), rgba(255, 252, 245, 0) 60%),
+        radial-gradient(140% 110% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(70, 58, 44, 0.22) 100%),
+        var(--linen);
+    background-attachment: fixed;
+    word-break: keep-all; overflow-wrap: anywhere;
+}
+
+/* 머리띠: 검은 가죽 */
+.doc-bar {
+    position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px;
+    padding: 10px max(16px, calc((100vw - 980px) / 2)); min-height: 56px;
+    background-color: #18181b;
+    background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%);
+    box-shadow: 0 6px 16px rgba(30, 20, 10, 0.25);
+}
+.doc-bar .back {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 18px; text-decoration: none;
+    color: #e9e3d7; font-size: 13px; font-weight: 600; background: rgba(255, 255, 255, 0.07);
+}
+.doc-bar .back:hover, .doc-bar .back:focus-visible { background: rgba(255, 255, 255, 0.15); outline: none; }
+.doc-bar .brand { margin-left: auto; font-family: var(--serif-ko); letter-spacing: 3px; font-size: 14px; color: #cfc8bb; }
+.doc-bar .brand b { font-family: var(--serif); color: #c9a85a; letter-spacing: 1px; margin-left: 6px; }
+
+/* 수첩 한 권 */
+.book {
+    position: relative; width: min(940px, calc(100vw - 24px)); margin: 28px auto 60px;
+    padding: 14px 14px 14px 22px; border-radius: 6px 16px 16px 6px;
+    background-color: #18181b;
+    background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.07), transparent 55%);
+    box-shadow: 0 30px 60px -12px rgba(40, 30, 20, 0.45), 0 12px 24px -8px rgba(40, 30, 20, 0.35);
+}
+.book::after {   /* 고무 밴드 */
+    content: ""; position: absolute; top: -3px; bottom: -3px; right: 34px; width: 10px; border-radius: 2px;
+    background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e); box-shadow: -2px 0 4px rgba(0, 0, 0, 0.5);
+}
+.page {
+    position: relative; z-index: 1; border-radius: 3px 8px 8px 3px; padding: 46px clamp(18px, 6vw, 64px) 56px;
+    background:
+        linear-gradient(90deg, rgba(40, 30, 20, 0.14), rgba(40, 30, 20, 0.03) 22px, rgba(40, 30, 20, 0) 40px),
+        repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 31px, var(--rule) 31px 32px),
+        var(--paper);
+    box-shadow: 1px 0 0 #efeae0, 2px 0 0 #fbf8f1, 3px 1px 0 #e9e3d7, 4px 1px 0 #f8f4ec, 5px 2px 0 #e3dccf, 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.page::before {   /* 왼쪽 여백선 */
+    content: ""; position: absolute; top: 0; bottom: 0; left: clamp(10px, 4vw, 40px); width: 1px; background: rgba(155, 47, 53, 0.28);
+}
+
+/* 표제 */
+.cover { text-align: center; padding: 8px 0 26px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+.cover .kicker { font-family: var(--serif); font-size: 14px; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
+.cover h1 { font-family: var(--serif-ko); font-weight: 400; font-size: clamp(28px, 5vw, 40px); letter-spacing: 4px; margin: 6px 0 6px; color: #23252c; }
+.cover .sub { font-size: 13.5px; color: var(--ink-soft); }
+.cover img, .cover svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 18px auto 0; border-radius: 6px; }
+
+/* 목차: 색 인덱스 탭 */
+.toc { margin: 0 0 30px; padding: 16px 18px; border-radius: 4px; background: rgba(255, 255, 255, 0.5); box-shadow: inset 0 0 0 1px var(--line); }
+.toc h2 { margin: 0 0 8px; font-size: 14px; font-family: var(--serif-ko); letter-spacing: 3px; color: var(--accent); border: none; padding: 0; }
+.toc ol { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.toc a {
+    display: inline-block; padding: 3px 12px 3px 10px; border-radius: 0 8px 8px 0; text-decoration: none; color: var(--ink);
+    font-size: 0.87em; font-weight: 600; background: linear-gradient(90deg, var(--tab, #efe8da), #fbf7ee); box-shadow: 1px 1px 2px rgba(40, 30, 20, 0.18);
+}
+.toc a:hover, .toc a:focus-visible { color: var(--accent); outline: none; transform: translateX(2px); }
+
+/* 본문 */
+h2 {
+    font-family: var(--serif-ko); font-weight: 600; font-size: 1.45em; color: #23252c; letter-spacing: 1px;
+    margin: 46px 0 14px; padding: 0 0 6px 14px; border-left: 5px solid var(--tab, var(--accent)); border-bottom: 1px solid var(--line); scroll-margin-top: 76px;
+}
+h3 { font-family: var(--serif-ko); font-weight: 600; font-size: 1.16em; color: var(--accent); margin: 30px 0 10px; scroll-margin-top: 76px; }
+h4 { font-size: 1em; font-weight: 700; color: #23252c; margin: 22px 0 6px; }
+p { margin: 0 0 14px; }
+strong, b { font-weight: 700; color: #23252c; }
+.red { color: #b3262d; font-weight: 600; }
+u, .ul { text-decoration: underline; text-decoration-color: rgba(155, 47, 53, 0.55); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+mark { background: linear-gradient(transparent 55%, rgba(242, 208, 106, 0.55) 55%); color: inherit; padding: 0 1px; }
+ul, ol { margin: 0 0 14px; padding-left: 1.4em; }
+li { margin: 3px 0; }
+a { color: var(--accent); }
+.note {   /* 붙임쪽지 */
+    position: relative; margin: 18px 0; padding: 14px 18px; border-radius: 2px; background: #fdf3c8; box-shadow: 0 6px 14px -6px rgba(60, 40, 10, 0.35);
+    transform: rotate(-0.4deg);
+}
+.note::before { content: ""; position: absolute; top: -9px; left: 50%; width: 80px; height: 18px; margin-left: -40px; background: rgba(220, 205, 170, 0.75); transform: rotate(2deg); }
+.box { margin: 16px 0; padding: 14px 18px; border-radius: 6px; border: 1px dashed rgba(155, 47, 53, 0.35); background: rgba(255, 255, 255, 0.45); }
+.box > :last-child, .note > :last-child { margin-bottom: 0; }
+
+/* 표: 인쇄된 플래너 칸 */
+.tbl { width: 100%; overflow-x: auto; margin: 14px 0 20px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9em; line-height: 1.6; background: rgba(255, 255, 255, 0.55); }
+th, td { border: 1px solid var(--line); padding: 7px 10px; vertical-align: top; text-align: left; }
+th { background: rgba(155, 47, 53, 0.07); font-weight: 700; color: #23252c; }
+td.num, th.num { text-align: center; white-space: nowrap; width: 3.5em; }
+.scale-list { list-style: none; padding: 0; margin: 0; }
+.scale-list li { padding-left: 2.6em; text-indent: -2.6em; margin: 1px 0; }
+.scale-list .k { display: inline-block; width: 2.4em; text-indent: 0; font-weight: 700; color: var(--accent); }
+.scale-list li.lead { padding-left: 0; text-indent: 0; font-weight: 700; color: #23252c; margin-top: 6px; }
+
+/* 그림 */
+figure { margin: 22px 0 24px; text-align: center; }
+figure img, figure > svg { display: block; width: 100%; height: auto; margin: 0 auto; }
+figure.paper-fig { padding: 12px; border-radius: 4px; background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 0 0 1px var(--line); }
+figcaption { margin-top: 8px; font-size: 0.84em; color: var(--ink-soft); font-family: var(--serif-ko); }
+.fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+/* 맺음 */
+.colophon { margin-top: 50px; padding-top: 16px; border-top: 1px solid var(--line); text-align: center; font-size: 12.5px; color: var(--ink-soft); }
+.colophon b { font-family: var(--serif); color: var(--accent); }
+
+@media (max-width: 600px) {
+    body { font-size: 15px; }
+    h2 { font-size: 1.3em; }
+    .book { padding: 8px 8px 8px 12px; margin: 12px auto 40px; }
+    .book::after { right: 18px; }
+    .page { padding: 30px 16px 40px 22px; }
+    th, td { padding: 6px 7px; }
+}
+@media print {
+    body { background: #fff; }
+    .doc-bar, .book::after { display: none; }
+    .book { box-shadow: none; background: none; padding: 0; width: auto; }
+    .page { box-shadow: none; background: #fff; }
+}
+
+/* 수첩 안에서 펼쳐 읽을 때 (?embed=1): 바깥 가죽·머리띠 없이 종이만 */
+html.embed body { background: var(--paper); }
+html.embed .doc-bar { display: none; }
+html.embed .book { width: 100%; margin: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+html.embed .book::after { display: none; }
+html.embed .page { border-radius: 0; box-shadow: none; min-height: 100vh; padding-top: 34px; }
+html.embed h2, html.embed h3 { scroll-margin-top: 12px; }

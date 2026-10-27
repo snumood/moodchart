@@ -1,0 +1,52 @@
+/* 기분기록지 작성 예 - printed planner look */
+.ex-figure{margin:1.2rem 0;}
+.ex-figure figcaption{margin-top:.6rem;font:500 .85rem/1.4 'Pretendard Variable','Pretendard',sans-serif;color:#2c3445;text-align:center;}
+.ex-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:transparent;}
+.ex-chart{--line:rgba(60,58,70,.18);--ink:#2c3445;
+  border-collapse:collapse;table-layout:fixed;min-width:860px;width:100%;background:transparent;
+  font-family:'Pretendard Variable','Pretendard',sans-serif;font-size:10.5px;line-height:1.25;color:#2c3445;}
+.ex-chart caption{caption-side:top;background:#343f52;color:#fff;font-weight:700;font-size:13px;padding:6px 0;text-align:center;letter-spacing:.02em;}
+.ex-chart th,.ex-chart td{border:1px solid var(--line);padding:2px 3px;height:19px;font-weight:400;overflow:hidden;white-space:nowrap;}
+.ex-chart col.c-grp{width:34px}.ex-chart col.c-sc{width:20px}.ex-chart col.c-nm{width:108px}.ex-chart col.c-hint{width:190px}
+.ex-chart col.c-day{width:22px}
+.ex-chart thead th{background:transparent;text-align:center;font-size:10.5px;border-color:rgba(60,58,70,.35)}
+.ex-chart thead th[scope=row]{text-align:right;padding-right:10px}
+.ex-chart th.sat{color:#3a5fa8}.ex-chart th.sun{color:#c0504d}
+.ex-chart th.wk-end,.ex-chart td.wk-end{border-right:1.5px solid rgba(60,58,70,.5)}
+.ex-chart .grp{background:rgba(236,235,246,.7);text-align:center;font-size:10.5px;white-space:normal;}
+.ex-chart .sc{text-align:center;font-size:10.5px;}
+.ex-chart .nm{text-align:left;}
+.ex-chart .hint{text-align:left;font-size:9.5px;color:rgba(44,52,69,.85);}
+.ex-chart .mixed-nm{text-align:center}
+.ex-chart td.ck,.ex-chart td.num{font-family:'Nanum Pen Script',cursive;color:#2c3445;font-size:15px;text-align:center;padding:0;line-height:1;}
+.ex-chart td.ck{font-size:16px}
+.ex-chart td.num{font-size:16px}
+/* mood tints */
+.ex-chart .mood-p4>*{background:#f6d2cf}.ex-chart .mood-p3>*{background:#f7dad7}
+.ex-chart .mood-p2>*{background:#f9e3e0}.ex-chart .mood-p1>*{background:#fbeceb}
+.ex-chart .mood-0>*{background:#fff}
+.ex-chart .mood-m1>*{background:#ecebf6}.ex-chart .mood-m2>*{background:#e0e0f2}
+.ex-chart .mood-m3>*{background:#d6d9f0}.ex-chart .mood-m4>*{background:#cfd3ef}
+.ex-chart .mood-mixed>*{background:#fff}
+.ex-chart .mood-p4>.grp,.ex-chart .mood-p4>.grp~*{}
+.ex-chart tr.sec-mood>th.grp{background:rgba(236,235,246,.7)}
+/* sections */
+.ex-chart .sec-emotion>*{background:#e6eddc}.ex-chart .sec-emotion>.grp{background:#dfe8d3}
+.ex-chart .sec-will>*{background:#e2ebf5}.ex-chart .sec-will>.grp{background:#d9e5f2}
+.ex-chart .sec-thought>*{background:#f8e4d8}.ex-chart .sec-thought>.grp{background:#f3dccd}
+.ex-chart .sec-body.body-sleep>*{background:#fcf0ee}
+.ex-chart .sec-body.body-habit>*{background:#f1f0ef}
+.ex-chart .sec-body.body-sym>*{background:#fbefd0}
+.ex-chart .sec-body.body-ex>*{background:#e6eddc}
+.ex-chart .sec-body th.nm{text-align:left;font-size:10.5px}
+.ex-chart .sec-event>*{background:#fff}
+.ex-chart tr.spacer td{height:10px;background:transparent;border-left:0;border-right:0}
+.ex-chart tr.notes td,.ex-chart tr.notes th{border-style:dotted;height:21px;font-size:11px}
+.ex-chart .note-no{text-align:left;border-right:0}
+.ex-chart .note-tx{border-left:0;text-align:left}
+.ex-chart .hw{font-family:'Nanum Pen Script',cursive;font-size:16px;color:#2c3445}
+.ex-chart .habit-blank{border-color:transparent}
+.ex-chart .habit-h{background:transparent;text-align:center;border:1px solid rgba(60,58,70,.5)}
+.ex-chart .habit-score{text-align:center;border:1px solid rgba(60,58,70,.5);font-size:11px}
+.ex-chart .habit-score .hw{font-size:20px}
+@media print{.ex-scroll{overflow:visible}}

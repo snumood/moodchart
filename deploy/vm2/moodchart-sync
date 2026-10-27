@@ -29,8 +29,8 @@ assets=(
     android-chrome-512x512.png
     site.webmanifest
 )
-# Every tracked file under vendor/ (browser scripts and self-hosted fonts).
-mapfile -t vendor_assets < <(git -C "${repo_dir}" ls-tree -r --name-only "${commit}" -- vendor)
+# Every tracked file under vendor/ (browser scripts and self-hosted fonts) and guide/ (안내 문서와 그림).
+mapfile -t vendor_assets < <(git -C "${repo_dir}" ls-tree -r --name-only "${commit}" -- vendor guide)
 
 install -d -m 0755 "${release_dir}"
 for asset in "${assets[@]}" "${vendor_assets[@]}"; do
