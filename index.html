@@ -55,69 +55,141 @@
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    /* --- 첫 화면: 책상 위의 닫힌 수첩, 표지의 이름표에 로그인 --- */
+    /* --- 첫 화면: 잠긴 유리 책장. 열쇠 꼬리표에 로그인하면 열쇠가 돌고 문이 열려 수첩을 꺼냄 --- */
     #auth-screen {
-        position: fixed; inset: 0; z-index: 9999; height: 100dvh;
-        display: flex; justify-content: center; align-items: center; overflow: hidden;
+        position: fixed; inset: 0; z-index: 9999; height: 100dvh; overflow: hidden;
+        background-color: #e6e1d9;
+        background-image:
+            radial-gradient(90% 70% at 18% 0%, rgba(255, 252, 245, 0.85), rgba(255, 252, 245, 0) 60%),
+            radial-gradient(140% 110% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(70, 58, 44, 0.22) 100%),
+            var(--linen);
     }
-    .auth-book {
-        position: absolute; border-radius: 4px 14px 14px 4px;
-        top: calc(var(--nb-top) - 12px); bottom: calc(var(--nb-bottom) - 16px); left: 50%; transform: translateX(-50%);
-        width: min(calc(100vw - 24px), calc((100dvh - var(--nb-top) - var(--nb-bottom) + 28px) * 0.76));
-        background-color: #18181b;
-        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%), linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 6%);
-        box-shadow: 0 30px 60px -12px rgba(40, 30, 20, 0.45), 0 12px 24px -8px rgba(40, 30, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.10), inset -1px 0 0 rgba(255, 255, 255, 0.05);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px 64px 20px 28px;
-    }
-    /* 닫힌 수첩 옆면으로 보이는 종이 */
-    .auth-book::before {
-        content: ""; position: absolute; top: 6px; bottom: 6px; right: -5px; width: 6px; border-radius: 0 3px 3px 0; z-index: -1;
-        background: repeating-linear-gradient(180deg, #f3eee4 0 1px, #ddd5c6 1px 2px);
-        box-shadow: 2px 2px 4px rgba(40, 30, 20, 0.3);
-    }
-    .auth-band {
-        position: absolute; top: -2px; bottom: -2px; right: 33px; width: 11px; border-radius: 2px;
-        background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e);
-        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.5), 2px 0 3px rgba(0, 0, 0, 0.4);
-    }
-    .auth-emboss-ko { font-family: var(--serif-ko); font-weight: 300; font-size: 30px; letter-spacing: 12px; padding-left: 12px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16), 0 -1px 0 rgba(0, 0, 0, 0.7); }
-    .auth-emboss-en { font-family: var(--serif); font-weight: 500; font-size: 12px; letter-spacing: 7px; padding-left: 7px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15); margin-bottom: 6px; }
-    .auth-emboss-foot { position: absolute; bottom: 22px; left: 28px; right: 64px; text-align: center; font-family: var(--serif-ko); font-size: 10px; letter-spacing: 2px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.13); }
-    /* 표지에 붙인 이름표 */
-    .auth-box {
-        position: relative; width: min(340px, 100%); max-height: calc(100% - 120px); overflow-y: auto;
-        padding: 22px 24px 18px; text-align: center; border-radius: 3px;
+    #auth-screen.leaving { pointer-events: none; }
+    .auth-room {
+        position: absolute; inset: 0;
         background:
-            radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 60%),
-            linear-gradient(180deg, #fbf8f1, #f4efe4);
-        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 0 0 1px rgba(120, 100, 70, 0.18), 0 0 0 5px #fbf8f1, 0 0 0 6px rgba(155, 47, 53, 0.35), 0 8px 18px rgba(0, 0, 0, 0.45);
-        transform: rotate(-0.6deg);
+            radial-gradient(80% 60% at 22% 8%, rgba(255, 248, 232, 0.75), rgba(255, 248, 232, 0) 65%),
+            linear-gradient(180deg, #e7ddcd 0%, #ddd1bf 78%, #b9a58a 78.2%, #a68f72 100%);
     }
-    .auth-box h2 { font-family: var(--serif-ko); font-weight: 400; font-size: 13px; letter-spacing: 4px; color: var(--accent); margin: 0 0 14px; }
+    .auth-room::after {   /* 벽지 결 */
+        content: ""; position: absolute; inset: 0 0 22% 0; opacity: 0.5; pointer-events: none;
+        background: repeating-linear-gradient(90deg, rgba(120, 100, 70, 0.035) 0 2px, rgba(0, 0, 0, 0) 2px 46px);
+    }
+    .cabinet {
+        position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%);
+        width: var(--cab-w, 520px); height: var(--cab-h, 600px); perspective: 1400px;
+        border-radius: 8px 8px 4px 4px; padding: 16px 16px 26px;
+        background:
+            repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.03) 0 3px, rgba(0, 0, 0, 0.05) 3px 7px, rgba(255, 255, 255, 0) 7px 15px),
+            linear-gradient(180deg, #6e472d, #573620 60%, #4a2c19);
+        box-shadow: 0 30px 40px -18px rgba(40, 24, 10, 0.6), 0 6px 0 #3a2213, inset 0 2px 0 rgba(255, 220, 180, 0.18), inset 0 0 0 3px rgba(40, 22, 10, 0.4);
+    }
+    .cabinet::before {   /* 위 장식 몰딩 */
+        content: ""; position: absolute; left: -10px; right: -10px; top: -14px; height: 18px; border-radius: 4px;
+        background: linear-gradient(180deg, #7b5134, #563520); box-shadow: 0 4px 6px rgba(30, 16, 6, 0.4);
+    }
+    .cab-inner {
+        position: absolute; inset: 16px 16px 26px; display: flex; flex-direction: column; border-radius: 3px; overflow: hidden;
+        background: linear-gradient(180deg, #2a1a10, #3b2416); box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.55);
+    }
+    .cab-shelf {
+        flex: 1; display: flex; align-items: flex-end; gap: 1px; padding: 0 10px; position: relative;
+        border-bottom: 9px solid #5e3a22; box-shadow: 0 2px 0 #3a2213;
+    }
+    .cab-shelf:last-child { border-bottom: none; }
+    .cab-book {
+        flex: none; border-radius: 2px 2px 0 0; position: relative;
+        box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.12), inset -2px 0 0 rgba(0, 0, 0, 0.25);
+    }
+    .cab-book::before, .cab-book::after { content: ""; position: absolute; left: 0; right: 0; height: 3px; background: rgba(214, 184, 112, 0.55); }
+    .cab-book::before { top: 12%; } .cab-book::after { bottom: 14%; }
+    .cab-book.plain::before, .cab-book.plain::after { display: none; }
+    #auth-spine {
+        background: linear-gradient(90deg, #0d0d0f, #2a2a2e 45%, #141416);
+        display: flex; align-items: center; justify-content: center;
+    }
+    #auth-spine::before, #auth-spine::after { background: rgba(255, 255, 255, 0.06); height: 2px; }
+    #auth-spine span { writing-mode: vertical-rl; font-family: var(--serif-ko); font-size: 9px; letter-spacing: 3px; color: #8d8a84; text-shadow: 0 -1px 0 #000; }
+    .cab-door {
+        position: absolute; top: 16px; bottom: 26px; width: calc(50% - 16px); transform-style: preserve-3d;
+        border: 9px solid #6a4329; border-radius: 3px;
+        box-shadow: inset 0 0 0 2px rgba(30, 16, 6, 0.45), 0 0 0 1px rgba(30, 16, 6, 0.4);
+        background:
+            linear-gradient(115deg, rgba(255, 255, 255, 0.20) 0 14%, rgba(255, 255, 255, 0.05) 14% 26%, rgba(255, 255, 255, 0.14) 26% 30%, rgba(255, 255, 255, 0.03) 30% 100%),
+            rgba(200, 220, 230, 0.06);
+    }
+    .cab-door.left { left: 16px; transform-origin: 0 50%; }
+    .cab-door.right { right: 16px; transform-origin: 100% 50%; }
+    .cab-lock {
+        position: absolute; left: -16px; top: 52%; width: 22px; height: 34px; transform: translateY(-50%); border-radius: 6px;
+        background: linear-gradient(90deg, #8a6a2e, #f0d48c 40%, #b8913f 60%, #7a5a22);
+        box-shadow: 0 2px 4px rgba(30, 16, 6, 0.5);
+    }
+    .cab-lock::before { content: ""; position: absolute; left: 50%; top: 9px; width: 6px; height: 10px; margin-left: -3px; border-radius: 3px 3px 1px 1px; background: #2a1d0c; }
+    .cab-key { position: absolute; left: 50%; top: 14px; width: 0; height: 0; }
+    .key-bow {
+        position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; border-radius: 50%;
+        border: 6px solid #d8b562; background: transparent;
+        box-shadow: 0 0 0 1px #8a6a2e, inset 0 0 0 1px #8a6a2e, 2px 4px 5px rgba(30, 16, 6, 0.5);
+    }
+    .key-bow::after { content: ""; position: absolute; left: 50%; top: 100%; width: 4px; height: 8px; margin-left: -2px; background: #c8a352; }
+    .tag-string { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+    .tag-string path { fill: none; stroke: #e9dcc0; stroke-width: 1.6; filter: drop-shadow(1px 2px 1px rgba(30, 16, 6, 0.35)); }
+    /* 열쇠 꼬리표 (로그인) */
+    .auth-box {
+        position: absolute; width: min(300px, calc(100vw - 32px)); max-height: calc(100dvh - 24px); overflow-y: auto;
+        padding: 30px 22px 16px; text-align: center; border-radius: 6px 6px 10px 10px;
+        clip-path: polygon(18% 0, 82% 0, 100% 9%, 100% 100%, 0 100%, 0 9%);
+        background:
+            radial-gradient(130% 80% at 30% 0%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 60%),
+            repeating-linear-gradient(0deg, rgba(120, 90, 40, 0.03) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
+            linear-gradient(180deg, #f2e3c2, #e8d5ac);
+        filter: drop-shadow(0 8px 10px rgba(30, 16, 6, 0.35));
+        transform: rotate(-2.5deg); transform-origin: 50% 8px;
+    }
+    .auth-box::before {   /* 꼬리표 구멍과 보강 고리 */
+        content: ""; position: absolute; left: 50%; top: 9px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%;
+        background: #6e5a3c; box-shadow: 0 0 0 4px #d9c49a, 0 0 0 5px rgba(110, 90, 60, 0.4);
+    }
+    .auth-box h2 { font-family: var(--serif-ko); font-weight: 600; font-size: 13px; letter-spacing: 3px; color: #6b3a2e; margin: 2px 0 12px; }
+    .auth-box.card {   /* 회원가입: 도서 대출 카드 */
+        clip-path: none; border-radius: 4px; transform: none; padding: 22px 20px 16px; width: min(380px, calc(100vw - 24px));
+        background:
+            repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 25px, rgba(70, 110, 160, 0.22) 25px 26px),
+            linear-gradient(90deg, rgba(0, 0, 0, 0) 0 34px, rgba(190, 60, 60, 0.35) 34px 35px, rgba(0, 0, 0, 0) 35px),
+            linear-gradient(180deg, #fbf7ec, #f3ecdc);
+    }
+    .auth-box.card::before { display: none; }
+    .tag-label { display: block; text-align: left; font-family: var(--print); font-size: 11.5px; font-weight: 700; color: #4f3f28; margin: 2px 0 0; }
     .auth-inp {
-        width: 100%; padding: 6px 2px 4px; margin-bottom: 12px; border: none; border-bottom: 1px solid rgba(51, 53, 61, 0.35); border-radius: 0;
+        width: 100%; padding: 2px 2px 3px; margin-bottom: 10px; border: none; border-bottom: 1px solid rgba(70, 50, 25, 0.5); border-radius: 0;
         background: transparent; font-family: var(--hand); font-size: 24px; color: var(--ink); outline: none;
     }
-    .auth-inp:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
-    .auth-inp::placeholder { font-family: var(--print); font-size: 13px; color: #a7a39a; }
+    .auth-inp:focus { border-bottom-color: #7a2a2f; box-shadow: 0 1px 0 #7a2a2f; }
+    .auth-inp::placeholder { font-family: var(--print); font-size: 12px; color: #77684f; }
     .auth-inp[type="password"] { font-family: var(--print); font-size: 16px; letter-spacing: 2px; }
     .btn-auth {
-        width: 100%; padding: 12px; margin-top: 6px; border: none; border-radius: 10px; cursor: pointer;
+        width: 100%; padding: 11px; margin-top: 6px; border: none; border-radius: 10px; cursor: pointer;
         font-family: var(--print); font-weight: 700; font-size: 14px; letter-spacing: 1px; color: #fdf8ef;
-        background: linear-gradient(180deg, #a8373e, #86252c); box-shadow: 0 2px 0 #5e171c, 0 4px 10px rgba(90, 20, 25, 0.3);
+        background: linear-gradient(180deg, #8a5a2c, #6b4220); box-shadow: 0 2px 0 #4a2c14, 0 4px 10px rgba(70, 40, 15, 0.3);
     }
-    .btn-auth:active { transform: translateY(1px); box-shadow: 0 1px 0 #5e171c; }
+    .btn-auth:active { transform: translateY(1px); box-shadow: 0 1px 0 #4a2c14; }
     .btn-auth.alt { background: linear-gradient(180deg, #3f6b4f, #2e533c); box-shadow: 0 2px 0 #1f3a29, 0 4px 10px rgba(30, 60, 40, 0.3); }
-    .save-login-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 12px; color: #5f5a50; margin: 4px 0 10px; text-align: left; }
-    .warning-text { color: #b3262d; font-weight: bold; font-size: 11px; line-height: 1.35; }
+    .save-login-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 12px; color: #4f3f28; margin: 2px 0 8px; text-align: left; }
+    .warning-text { color: #a3222a; font-weight: bold; font-size: 11px; line-height: 1.35; }
     .admin-entry { color: inherit; text-decoration: none; }
-    .toggle-auth { margin-top: 14px; font-size: 13px; color: #5f5a50; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-block; }
-    @media (max-width: 480px) {
-        .auth-book { padding: 16px 52px 16px 18px; }
-        .auth-emboss-ko { font-size: 24px; letter-spacing: 9px; }
-        .auth-band { right: 24px; }
-        .auth-box { padding: 18px 18px 14px; }
+    .toggle-auth { margin-top: 12px; font-size: 13px; color: #4f3f28; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-block; background: none; border: none; font-family: inherit; }
+    /* 책장에서 꺼낸 수첩 (펼칠 자리로 날아감) */
+    .auth-pull {
+        position: fixed; z-index: 3; transform-origin: 0 0; border-radius: 4px 14px 14px 4px;
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%), linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 6%);
+        box-shadow: 0 30px 60px -12px rgba(40, 30, 20, 0.45), 0 12px 24px -8px rgba(40, 30, 20, 0.35);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
     }
+    .auth-pull .emboss-ko { font-family: var(--serif-ko); font-weight: 300; font-size: 30px; letter-spacing: 12px; padding-left: 12px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16), 0 -1px 0 rgba(0, 0, 0, 0.7); }
+    .auth-pull .emboss-en { font-family: var(--serif); font-weight: 500; font-size: 12px; letter-spacing: 7px; padding-left: 7px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15); }
+    .auth-pull .band { position: absolute; top: -2px; bottom: -2px; right: 33px; width: 11px; border-radius: 2px; background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e); }
     .legal-text { text-align: left; font-size: 11.5px; margin: 12px 0; background: rgba(120, 100, 70, 0.06); padding: 10px 12px; border-radius: 4px; color: #4a463e; line-height: 1.55; word-break: keep-all; border: 1px dashed rgba(120, 100, 70, 0.3); }
 
     .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
@@ -696,14 +768,20 @@
 <body>
 
 <div id="auth-screen">
-    <div class="auth-book">
-    <div class="auth-band" aria-hidden="true"></div>
-    <div class="auth-emboss-ko" aria-hidden="true">기분기록지</div>
-    <div class="auth-emboss-en" aria-hidden="true">MOOD JOURNAL</div>
-    <div class="auth-box">
-        <h2>이 수첩의 주인</h2>
+    <div class="auth-room" aria-hidden="true">
+        <div class="cabinet">
+            <div class="cab-inner"><div class="cab-shelf"></div><div class="cab-shelf"></div><div class="cab-shelf"></div></div>
+            <div class="cab-door left"></div>
+            <div class="cab-door right"><div class="cab-lock"><div class="cab-key"><div class="key-bow"></div></div></div></div>
+        </div>
+    </div>
+    <svg class="tag-string" aria-hidden="true"><path d=""/></svg>
+    <div class="auth-box" role="form" aria-label="기분기록지 로그인">
+        <h2 id="auth-title">기분기록지</h2>
         <div id="login-form">
-            <input id="l-id" class="auth-inp" placeholder="아이디" autocomplete="username">
+            <label class="tag-label" for="l-id">아이디</label>
+            <input id="l-id" class="auth-inp" placeholder="아이디를 적어 주세요" autocomplete="username">
+            <label class="tag-label" for="l-pw">비밀번호</label>
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="current-password">
             <div class="save-login-wrap">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
@@ -711,12 +789,15 @@
                 </label>
                 <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="./admin-login.html">.</a></div>
             </div>
-            <button class="btn-auth" onclick="login()">로그인하고 수첩 펴기</button>
-            <span class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</span>
+            <button class="btn-auth" onclick="login()">열쇠로 열기 (로그인)</button>
+            <button type="button" class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</button>
         </div>
         <div id="join-form" class="hidden">
+            <label class="tag-label" for="j-id">희망 아이디</label>
             <input id="j-id" class="auth-inp" placeholder="희망 아이디" autocomplete="username">
+            <label class="tag-label" for="j-pw">비밀번호</label>
             <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="new-password">
+            <label class="tag-label" for="j-hosp">연결 번호</label>
             <input id="j-hosp" class="auth-inp" placeholder="명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열">
             <div style="font-size:11px; color:#d32f2f; text-align:left; margin-bottom:3px;">⚠️ 이 번호는 담당 의료진이 작성 내용을 확인할 수 있도록 연결하는 용도입니다.</div>
             <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305 (중복 가입 불가)</div>
@@ -727,10 +808,8 @@
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
             </label>
             <button class="btn-auth alt" onclick="join()">가입완료</button>
-            <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
+            <button type="button" class="toggle-auth" onclick="toggleAuth('login')">돌아가기</button>
         </div>
-    </div>
-    <div class="auth-emboss-foot" aria-hidden="true">분당서울대학교병원 기분장애클리닉</div>
     </div>
 </div>
 
@@ -1044,7 +1123,7 @@
         target = null;
         resetLogoutTimer();
 
-        document.getElementById('auth-screen').classList.add('hidden');
+        Notebook.leaveAuth();
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = 'Google 관리자';
         document.getElementById('doc-panel').classList.add('active');
@@ -1171,7 +1250,7 @@
     };
 
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
-    function toggleAuth(m) { document.getElementById('login-form').classList.toggle('hidden', m !== 'login'); document.getElementById('join-form').classList.toggle('hidden', m !== 'join'); }
+    function toggleAuth(m) { document.getElementById('login-form').classList.toggle('hidden', m !== 'login'); document.getElementById('join-form').classList.toggle('hidden', m !== 'join'); Notebook.authMode(m); }
 
     async function join() {
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
@@ -1203,7 +1282,7 @@
         resetLogoutTimer();
 
         target = id;
-        document.getElementById('auth-screen').classList.add('hidden');
+        Notebook.leaveAuth();
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-badge').innerText = id;
         document.getElementById('doc-panel').classList.remove('active');
@@ -3587,6 +3666,7 @@
             t.dispose = () => { scene.hide(); texes.forEach(x => gl.deleteTexture(x)); };
             // 넘기다 되돌리면 원래 달을 다시 그림 (그동안은 그림으로 덮어 둠)
             t.revert = async () => {
+                if (curDate.getTime() !== t.renderedAt) return;
                 suppressCascade = true;
                 const loaded = waitForLoad(1500);
                 curDate = oldDate; renderTable();
@@ -3595,6 +3675,7 @@
             };
             if (!g.spread && dir > 0) {
                 doRender();
+                t.renderedAt = curDate.getTime();
                 Object.assign(scene, { sgn: 1, fade: true, sheet: { front: oldTex, crop: CROP_FULL, paper: oldPaper } });
                 t.startF = { ...C }; t.endF = turnedF(C, g.W);
                 return t;
@@ -3604,6 +3685,7 @@
             suppressCascade = true;
             const loaded = waitForLoad(1500);
             doRender();
+            t.renderedAt = curDate.getTime();
             await loaded;
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
             const newTex = texFrom(snapshotPage(scale).canvas);
@@ -3627,13 +3709,33 @@
             return t;
         }
 
+        // 넘기는 동안: 편집 중인 값을 먼저 저장하고, 표·점수·머리말은 눌리지 않게 함 (다른 달에 저장되는 일 방지)
+        let queuedFlip = null;
+        const TURN_LOCK = ['#main-screen .header', '#main-screen .top-assessment-bar', '#grid-container'];
+        function beginTurn() {
+            flipping = true;
+            const a = document.activeElement;
+            if (a && a !== document.body && a.closest?.('#main-screen .container')) a.blur();
+            TURN_LOCK.forEach(q => { const el = document.querySelector(q); if (el) el.inert = true; });
+            document.body.classList.add('nb-turning');
+        }
+        function endTurn() {
+            if (GL.canvas) GL.canvas.style.display = 'none';
+            TURN_LOCK.forEach(q => { const el = document.querySelector(q); if (el) el.inert = false; });
+            document.body.classList.remove('nb-turning');
+            flipping = false;
+            scheduleMoodLine();
+            // 넘기는 동안 들어온 요청은 끝난 뒤 하나만 이어서 처리
+            if (queuedFlip) { const q = queuedFlip; queuedFlip = null; setTimeout(() => flip(q.dir, q.doRender), 0); }
+        }
+
         // 버튼·탭으로 넘길 때: 손이 와서 귀퉁이를 집어 넘김
         async function flip(dir, doRender) {
             animateNextLoad = true;
-            if (flipping) { doRender(); return; }
+            if (flipping) { queuedFlip = { dir, doRender }; return; }
             if (reduceMotion || !document.querySelector('#main-screen .container')) { doRender(); return; }
             if (!initGL()) { cssFlip(dir, doRender); return; }
-            flipping = true;
+            beginTurn();
             let t = null;
             try {
                 t = await prepareTurn(dir, doRender);
@@ -3650,9 +3752,7 @@
                 handRelease();
             } finally {
                 t?.dispose();
-                if (GL.canvas) GL.canvas.style.display = 'none';
-                flipping = false;
-                scheduleMoodLine();
+                endTurn();
             }
         }
 
@@ -3670,6 +3770,7 @@
 
         // ---------- 종이 끝을 잡아 끌어서 넘기기 ----------
         // 오른쪽 귀퉁이·가장자리 → 다음 달, 왼쪽 가장자리(펼친 수첩은 왼쪽 귀퉁이) → 이전 달
+        let grabOwner = null;   // 한 번에 한 손가락만 종이를 잡음
         function bindPageGrab(el, dir) {
             if (!el || el.dataset.grab) return;
             el.dataset.grab = '1';
@@ -3687,23 +3788,23 @@
             el.addEventListener('pointerdown', e => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 e.stopPropagation();
-                if (flipping || s) return;
+                if (flipping || s || grabOwner) return;
                 e.preventDefault();
                 try { el.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+                grabOwner = el;
                 s = { id: e.pointerId, x0: e.clientX, y0: e.clientY, last: e, moved: false, t: null, ready: null, vx: 0, lx: e.clientX, lt: performance.now() };
             });
             el.addEventListener('pointermove', e => {
-                if (!s || e.pointerId !== s.id) return;
+                if (!s || s.ending || e.pointerId !== s.id) return;
                 const now = performance.now(), dt = Math.max(1, now - s.lt);
                 s.vx = s.vx * 0.6 + ((e.clientX - s.lx) / dt) * 0.4; s.lx = e.clientX; s.lt = now;
                 s.last = e;
                 if (!s.moved) {
                     if (Math.hypot(e.clientX - s.x0, e.clientY - s.y0) < 6) return;
-                    if (reduceMotion || !initGL() || !document.querySelector('#main-screen .container')) return;
+                    if (flipping || reduceMotion || !initGL() || !document.querySelector('#main-screen .container')) return;
                     s.moved = true;
-                    flipping = true;
+                    beginTurn();
                     animateNextLoad = true;
-                    document.body.classList.add('nb-turning');
                     const g0 = turnGeom();
                     const grabY = s.y0 - g0.top;
                     s.ready = prepareTurn(dir, doRenderFor(dir), grabY).then(t => {
@@ -3718,10 +3819,15 @@
                 if (s.t && !raf) raf = requestAnimationFrame(redraw);
             });
             const end = async e => {
-                if (!s || e.pointerId !== s.id) return;
+                if (!s || s.ending || e.pointerId !== s.id) return;
                 const cur = s;
+                cur.ending = true;
                 try { el.releasePointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
-                if (!cur.moved) { s = null; moveMonth(dir); return; }
+                if (!cur.moved) {
+                    s = null; grabOwner = null;
+                    if (e.type === 'pointerup') moveMonth(dir);   // 누르기만 했으면 넘김, 취소면 아무것도 안 함
+                    return;
+                }
                 let t = null;
                 try {
                     t = await cur.ready;
@@ -3730,8 +3836,9 @@
                     sc.F = toF(t, cur.last);
                     const vLocal = sc.sgn * cur.vx;
                     let commit;
-                    if (!g.spread && dir < 0) commit = e.type !== 'pointercancel' && (sc.F.x > -g.W * 0.25 || vLocal > 0.35);
-                    else commit = e.type !== 'pointercancel' && ((g.W - sc.F.x) / (2 * g.W) > 0.38 || vLocal < -0.35);
+                    const ok = e.type === 'pointerup';
+                    if (!g.spread && dir < 0) commit = ok && (sc.F.x > -g.W * 0.25 || vLocal > 0.35);
+                    else commit = ok && ((g.W - sc.F.x) / (2 * g.W) > 0.38 || vLocal < -0.35);
                     const goal = commit ? t.endF : t.startF;
                     const dist = Math.hypot(goal.x - sc.F.x, goal.y - sc.F.y);
                     await sc.animate(goal, Math.max(220, Math.min(650, dist * 0.55)), { lift: commit ? g.H * 0.04 : 0 });
@@ -3740,17 +3847,18 @@
                     console.warn('페이지 넘김 오류(무시됨):', err?.message || err);
                 } finally {
                     t?.dispose();
-                    if (GL.canvas) GL.canvas.style.display = 'none';
                     if (raf) cancelAnimationFrame(raf), raf = 0;
-                    s = null;
-                    flipping = false;
-                    document.body.classList.remove('nb-turning');
-                    scheduleMoodLine();
+                    s = null; grabOwner = null;
+                    endTurn();
                 }
             };
             el.addEventListener('pointerup', end);
             el.addEventListener('pointercancel', end);
-            el.addEventListener('lostpointercapture', e => { if (s && e.pointerId === s.id && !s.moved) s = null; });
+            // 잡고 있던 손가락을 놓친 경우(창 전환 등)는 취소로 처리
+            el.addEventListener('lostpointercapture', e => {
+                if (!s || s.ending || e.pointerId !== s.id) return;
+                end({ type: 'pointercancel', pointerId: e.pointerId, clientX: s.last.clientX, clientY: s.last.clientY });
+            });
         }
 
         // ---------- 노트 꾸미기 (표지 · 스프링 · 리본 · 인덱스 탭 · 제목 · 펜) ----------
@@ -3890,6 +3998,110 @@
             applyPen();
         }
 
+        // ---------- 첫 화면: 잠긴 유리 책장과 열쇠 꼬리표 ----------
+        const BOOK_COLORS = ['#6b3a2e', '#2f4858', '#7a6a4f', '#3d5a45', '#8a5a44', '#4a4458', '#a08a5c', '#5c2f36', '#2c3a4a', '#6f7b5a', '#b59a6a', '#3a3a3a', '#7d4b3a', '#506b72'];
+        function buildShelf() {
+            const shelves = document.querySelectorAll('#auth-screen .cab-shelf');
+            if (!shelves.length || shelves[0].childElementCount) return;
+            const rnd = rng(20261028);
+            shelves.forEach((row, ri) => {
+                const n = 44;   // 넉넉히 채우고 넘치는 책은 책장 안쪽에서 가려짐
+                for (let i = 0; i < n; i++) {
+                    const b = document.createElement('div');
+                    const isMood = ri === 1 && i === 4;
+                    b.className = 'cab-book' + (rnd() < 0.35 ? ' plain' : '');
+                    if (isMood) {
+                        b.id = 'auth-spine';
+                        b.innerHTML = '<span>기분기록지</span>';
+                        Object.assign(b.style, { width: '24px', height: '88%' });
+                    } else {
+                        Object.assign(b.style, { width: `${9 + Math.floor(rnd() * 13)}px`, height: `${66 + Math.floor(rnd() * 26)}%`, background: `linear-gradient(90deg, ${shade(BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)], -0.25)}, ${BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)]} 40%, ${shade(BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)], -0.35)})` });
+                        if (rnd() < 0.05) Object.assign(b.style, { marginLeft: `${14 + Math.floor(rnd() * 20)}px` });   // 군데군데 빈자리
+                    }
+                    row.appendChild(b);
+                }
+            });
+        }
+        // 책장 크기, 꼬리표 자리, 열쇠와 꼬리표를 잇는 끈
+        function layoutAuth() {
+            const scr = document.getElementById('auth-screen');
+            if (!scr || scr.classList.contains('hidden')) return;
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const cab = scr.querySelector('.cabinet'), box = scr.querySelector('.auth-box');
+            const ch = Math.min(640, vh * 0.8), cw = Math.min(vw - 28, 560, ch * 0.92);
+            cab.style.setProperty('--cab-w', `${cw}px`); cab.style.setProperty('--cab-h', `${ch}px`);
+            const card = box.classList.contains('card');
+            const path = scr.querySelector('.tag-string path');
+            if (card) {
+                // 대출 카드는 책장 앞에 내려놓은 것처럼 가운데
+                Object.assign(box.style, { left: `${(vw - box.offsetWidth) / 2}px`, top: `${Math.max(12, (vh - box.offsetHeight) / 2)}px` });
+                path.setAttribute('d', '');
+                return;
+            }
+            const k = scr.querySelector('.key-bow').getBoundingClientRect();
+            const kx = k.left + k.width / 2, ky = k.top + k.height / 2;
+            const bw = box.offsetWidth, bh = box.offsetHeight;
+            let left = Math.min(vw - bw - 12, Math.max(12, kx - bw / 2 + 24));
+            let top = Math.min(ky + 56, vh - bh - 12);
+            top = Math.max(12, top);
+            Object.assign(box.style, { left: `${left}px`, top: `${top}px` });
+            const hx = left + bw / 2, hy = top + 15;
+            path.setAttribute('d', `M${kx},${ky + 10} Q${(kx + hx) / 2},${Math.max(ky, hy) + 26} ${hx},${hy}`);
+        }
+        function authMode(m) {
+            const box = document.querySelector('#auth-screen .auth-box');
+            if (!box) return;
+            box.classList.toggle('card', m === 'join');
+            const t = document.getElementById('auth-title');
+            if (t) t.textContent = m === 'join' ? '새 수첩 대출 카드 (회원가입)' : '기분기록지';
+            layoutAuth();
+        }
+
+        // 로그인되면: 열쇠가 돌고 → 유리문이 열리고 → 수첩을 꺼내 책상 위 펼칠 자리에 놓음
+        let authDone = Promise.resolve();
+        function finishAuth() {
+            const scr = document.getElementById('auth-screen');
+            if (!scr) return;
+            scr.classList.add('hidden');
+            scr.classList.remove('leaving');
+            scr.querySelector('.auth-pull')?.remove();
+            scr.getAnimations?.({ subtree: true }).forEach(a => a.cancel());
+        }
+        function leaveAuth() {
+            const scr = document.getElementById('auth-screen');
+            if (!scr || scr.classList.contains('hidden')) return;
+            if (reduceMotion || !scr.animate) { finishAuth(); return; }
+            scr.classList.add('leaving');
+            authDone = (async () => {
+                const opt = (ms, easing = 'ease', delay = 0) => ({ duration: ms, easing, delay, fill: 'forwards' });
+                const box = scr.querySelector('.auth-box'), str = scr.querySelector('.tag-string');
+                const key = scr.querySelector('.cab-key'), dl = scr.querySelector('.cab-door.left'), dr = scr.querySelector('.cab-door.right');
+                const room = scr.querySelector('.auth-room'), spine = document.getElementById('auth-spine');
+                box.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(26px) rotate(-9deg)' }], opt(340, 'ease-in'));
+                str.animate([{ opacity: 1 }, { opacity: 0 }], opt(260));
+                await key.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(100deg)', offset: 0.8 }, { transform: 'rotate(90deg)' }], opt(420, 'cubic-bezier(.4, 0, .3, 1)', 120)).finished;
+                dr.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(3deg)', offset: 0.12 }, { transform: 'rotateY(112deg)' }], opt(760, 'cubic-bezier(.4, .1, .3, 1)'));
+                dl.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-3deg)', offset: 0.12 }, { transform: 'rotateY(-112deg)' }], opt(760, 'cubic-bezier(.4, .1, .3, 1)', 60));
+                await wait(560);
+                // 수첩을 꺼냄: 책등 → 손에 든 수첩 → 책상 위
+                const from = spine.getBoundingClientRect();
+                const vw = window.innerWidth, vh = window.innerHeight;
+                const to = closedRect() || { left: vw * 0.2, top: vh * 0.1, width: vw * 0.6, height: vh * 0.75 };
+                const pull = document.createElement('div');
+                pull.className = 'auth-pull';
+                pull.innerHTML = '<div class="emboss-ko">기분기록지</div><div class="emboss-en">MOOD JOURNAL</div><div class="band"></div>';
+                Object.assign(pull.style, { left: `${to.left}px`, top: `${to.top}px`, width: `${to.width}px`, height: `${to.height}px` });
+                const T = (r, extra = '') => `translate(${r.left - to.left}px, ${r.top - to.top}px) scale(${r.width / to.width}, ${r.height / to.height})${extra}`;
+                const mid = { left: from.left - from.width * 1.5, top: from.top - from.height * 0.12, width: from.width * 4, height: from.height * 1.16 };
+                pull.style.transform = T(from);
+                scr.appendChild(pull);
+                spine.style.visibility = 'hidden';
+                room.animate([{ opacity: 1 }, { opacity: 0 }], opt(650, 'ease-in', 260));
+                await pull.animate([{ transform: T(from) }, { transform: T(mid), offset: 0.3 }, { transform: 'none' }], opt(980, 'cubic-bezier(.35, .6, .3, 1)')).finished;
+            })().catch(e => { console.warn('책장 열기 효과 오류(무시됨):', e?.message || e); });
+            return authDone;
+        }
+
         // ---------- 수첩 열기 · 닫기 ----------
         let opening = false, pendingCascade = false;
         function bookRect() {
@@ -3947,6 +4159,8 @@
         }
         // 첫 화면의 닫힌 수첩 자리 (이미 숨겨졌으면 잠깐 꺼내 재고 다시 숨김: 그려지지 않음)
         function authRect() {
+            const pulled = document.querySelector('#auth-screen .auth-pull');
+            if (pulled) return pulled.getBoundingClientRect();
             const scr = document.getElementById('auth-screen'), el = scr?.querySelector('.auth-book');
             if (!el) return null;
             const hidden = scr.classList.contains('hidden');
@@ -3956,15 +4170,18 @@
             return r.width ? r : null;
         }
         async function openBook() {
+            await authDone;   // 책장에서 수첩을 꺼내 올 때까지
             const r = closedRect();
-            if (reduceMotion || !r || !document.body.animate) { ribbonOut(false); return; }
+            if (reduceMotion || !r || !document.body.animate) { finishAuth(); ribbonOut(false); return; }
             opening = true;
             const ribbon = document.getElementById('nb-ribbon');
             if (ribbon) ribbon.style.opacity = '0';
             const { book, board, band, shadeEl, mask } = buildBook(r);
+            const fromRect = authRect();
+            finishAuth();
             try {
                 // 첫 화면의 닫힌 수첩 자리에서 이어서 펼칠 자리로 옮겨 감
-                const from = authRect() || r;
+                const from = fromRect || r;
                 const sx = from.width / r.width, sy = from.height / r.height;
                 const tx = from.left - r.left, ty = from.top - r.top - r.height / 2 + sy * r.height / 2;
                 band.style.opacity = '0';
@@ -4045,8 +4262,11 @@
             await closeBook();
         }
 
+        try { buildShelf(); layoutAuth(); } catch (e) { console.warn('책장 그리기 오류(무시됨):', e?.message || e); }
+        if (document.fonts?.ready) document.fonts.ready.then(() => { try { layoutAuth(); } catch (e) { /* 무시 */ } });
         let viewTimer = null;
-        window.addEventListener('resize', () => { scheduleMoodLine(); scheduleAge(); clearTimeout(viewTimer); viewTimer = setTimeout(layoutView, 120); });
+        window.addEventListener('resize', () => {
+            try { layoutAuth(); } catch (e) { /* 무시 */ } scheduleMoodLine(); scheduleAge(); clearTimeout(viewTimer); viewTimer = setTimeout(layoutView, 120); });
         if (document.fonts?.ready) document.fonts.ready.then(scheduleMoodLine);
 
         // 꾸미기 효과에서 오류가 나도 기록 저장·화면 전환은 계속되도록 감쌈
@@ -4057,7 +4277,7 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose,
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
