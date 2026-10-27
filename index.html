@@ -295,25 +295,49 @@
         transform-origin: 50% 0;
     }
 
-    /* 월 인덱스 탭 (넓은 화면) */
+    /* 월 인덱스 탭 (넓은 화면): 종이 뒤에 붙인 색지 인덱스, 글자는 바깥쪽에 맞춰 잘리지 않게 */
     #nb-tabs { display: none; }
     @media (min-width: 900px) {
         #nb-tabs {
-            display: flex; flex-direction: column; gap: 2px;
+            display: flex; flex-direction: column; gap: 3px;
             position: fixed; z-index: 0;
-            top: calc(var(--nb-top) + 70px); right: calc(var(--nb-right) - 42px);
-            width: 48px;
+            top: calc(var(--nb-top) + 64px); right: calc(var(--nb-right) - 54px);
+            width: 70px;
         }
         .nb-tab {
-            height: 34px; border: none; border-radius: 0 6px 6px 0; cursor: pointer;
-            padding-left: 15px; text-align: left;
-            font-family: var(--serif); font-size: 17px; font-weight: 600; color: #6f6a62;
-            background: linear-gradient(90deg, #e9e3d7, #f3eee4);
-            box-shadow: 2px 1px 3px rgba(40, 30, 20, 0.25);
-            transform: translateX(-10px); transition: transform .25s cubic-bezier(.2, .8, .3, 1);
+            --tab-h: clamp(22px, calc((100vh - var(--nb-top) - var(--nb-bottom) - 110px) / 12 - 3px), 36px);
+            height: var(--tab-h); border: none; border-radius: 0 7px 7px 0; cursor: pointer;
+            padding: 0 9px 0 0; text-align: right; white-space: nowrap; overflow: hidden;
+            font-family: var(--serif); font-size: clamp(12px, calc(var(--tab-h) * 0.46), 15.5px); font-weight: 600; letter-spacing: -0.2px; color: #6f6a62;
+            font-variant-numeric: lining-nums;
+            background:
+                linear-gradient(90deg, rgba(40, 30, 20, 0.10), rgba(40, 30, 20, 0) 30%),
+                linear-gradient(90deg, color-mix(in srgb, var(--tab, #e9e3d7) 26%, #ece6da), color-mix(in srgb, var(--tab, #f3eee4) 18%, #f6f2ea));
+            box-shadow: 2px 1px 3px rgba(40, 30, 20, 0.22), inset -1px 0 0 rgba(255, 255, 255, 0.5);
+            transform: translateX(-8px); transition: transform .3s cubic-bezier(.2, .8, .3, 1), color .2s;
         }
-        .nb-tab:hover { transform: translateX(-4px); }
-        .nb-tab.current { transform: translateX(0); background: linear-gradient(90deg, #fbf8f1, #fffdf8); color: var(--accent); }
+        .nb-tab:hover { transform: translateX(-3px); color: var(--print-ink); }
+        .nb-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .nb-tab.current {
+            transform: translateX(0); color: var(--accent);
+            background: linear-gradient(90deg, rgba(40, 30, 20, 0.06), rgba(40, 30, 20, 0) 30%), linear-gradient(90deg, #fbf8f1, #fffdf8);
+            box-shadow: 3px 2px 5px rgba(40, 30, 20, 0.28), inset -1px 0 0 rgba(255, 255, 255, 0.7);
+        }
+    }
+    /* 종이 오른쪽 아래 살짝 접힌 귀퉁이 (장식: 클릭을 가로채지 않음) */
+    #nb-corner {
+        position: absolute; right: 0; bottom: 0; z-index: 130; width: 18px; height: 18px; pointer-events: none;
+        background: linear-gradient(135deg, transparent 50%, #e9e2d3 50%, #fbf7ee 72%, #efe8da);
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        filter: drop-shadow(-1px -1px 1.5px rgba(40, 30, 20, 0.18));
+        border-radius: 0 0 5px 0;
+    }
+    @media (min-width: 900px) { #nb-corner { width: 24px; height: 24px; } }
+
+    /* 오래된 달일수록 누렇게 바래는 종이 (그림 한 장을 곱하기로 겹침) */
+    #nb-age {
+        position: absolute; inset: 0; z-index: 120; pointer-events: none;
+        width: 100%; height: 100%; border-radius: inherit; mix-blend-mode: multiply;
     }
 
     /* 머리말: 인쇄된 플래너 제목 */
@@ -2395,6 +2419,114 @@
             lineTimer = setTimeout(() => drawMoodLine(false), 80);
         }
 
+        // ---------- 낡아 가는 종이: 지난달일수록 누렇게 바래고 가장자리·얼룩이 생김 ----------
+        // 같은 달은 언제 열어도 같은 모양이 되도록 달(年·月)을 씨앗으로 씀
+        function pageAge(d = curDate) {
+            const now = new Date();
+            const months = (now.getFullYear() * 12 + now.getMonth()) - (d.getFullYear() * 12 + d.getMonth());
+            return months <= 0 ? 0 : Math.min(1, Math.pow(months / 18, 0.7));
+        }
+        const AGE_TINT = [236, 214, 170];
+        function paperRGB(age) {
+            return [0.984, 0.972, 0.945].map((v, i) => v * (1 - 0.55 * age * (1 - AGE_TINT[i] / 255)));
+        }
+        function rng(seed) {
+            let a = seed >>> 0;
+            return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        }
+        function paintAge(c, w, h, age, seed) {
+            const rnd = rng(seed);
+            const blob = (x, y, r, rgba0, rgba1 = 'rgba(0,0,0,0)') => {
+                const g = c.createRadialGradient(x, y, 0, x, y, r);
+                g.addColorStop(0, rgba0); g.addColorStop(1, rgba1);
+                c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+            };
+            // 종이 섬유 결 (새 종이에도 은은하게)
+            const grains = Math.round(w * h / 240);
+            for (let i = 0; i < grains; i++) {
+                c.fillStyle = `rgba(120, 100, 70, ${0.02 + rnd() * 0.04})`;
+                const long = rnd() < 0.12;
+                c.fillRect(rnd() * w, rnd() * h, long ? 2 + rnd() * 4 : 1, 1);
+            }
+            if (age <= 0) return;
+            // 전체가 고르게 바램 + 군데군데 더 바랜 얼룩
+            c.fillStyle = `rgba(${AGE_TINT.join(',')}, ${0.55 * age})`;
+            c.fillRect(0, 0, w, h);
+            for (let i = 0; i < 7; i++) blob(rnd() * w, rnd() * h, (0.18 + rnd() * 0.32) * Math.max(w, h), `rgba(222, 190, 135, ${0.10 * age})`);
+            // 가장자리 변색 (손이 닿고 빛을 받은 바깥쪽부터)
+            const ew = 22 + 46 * age;
+            const edge = (x0, y0, x1, y1, rx, ry, rw, rh) => {
+                const g = c.createLinearGradient(x0, y0, x1, y1);
+                g.addColorStop(0, `rgba(178, 132, 72, ${0.42 * age})`);
+                g.addColorStop(0.35, `rgba(196, 156, 98, ${0.14 * age})`);
+                g.addColorStop(1, 'rgba(196, 156, 98, 0)');
+                c.fillStyle = g; c.fillRect(rx, ry, rw, rh);
+            };
+            edge(0, 0, 0, ew, 0, 0, w, ew);
+            edge(0, h, 0, h - ew, 0, h - ew, w, ew);
+            edge(w, 0, w - ew * 1.3, 0, w - ew * 1.3, 0, ew * 1.3, h);
+            edge(0, 0, ew * 0.6, 0, 0, 0, ew * 0.6, h);
+            const along = Math.round(60 * age);
+            for (let i = 0; i < along; i++) {
+                const side = rnd(), t = rnd(), r = 8 + rnd() * 34 * age;
+                const x = side < 0.3 ? t * w : side < 0.6 ? t * w : side < 0.9 ? w : 0;
+                const y = side < 0.3 ? 0 : side < 0.6 ? h : t * h;
+                blob(x, y, r, `rgba(170, 120, 62, ${0.16 * age})`);
+            }
+            // 넘길 때마다 엄지가 닿는 오른쪽 아래 귀퉁이
+            blob(w, h, 90 + 90 * age, `rgba(140, 104, 66, ${0.30 * age})`);
+            blob(w, 0, 50 + 50 * age, `rgba(150, 112, 70, ${0.16 * age})`);
+            // 여우 얼룩(foxing): 작고 옅은 갈색 점, 대부분 가장자리에 (기록을 가리지 않게)
+            const spots = Math.round(age * age * 34);
+            const margin = Math.min(w, h) * 0.09;
+            for (let i = 0; i < spots; i++) {
+                let x = rnd() * w, y = rnd() * h;
+                if (rnd() < 0.85) { if (rnd() < 0.5) x = rnd() < 0.5 ? rnd() * margin : w - rnd() * margin; else y = rnd() < 0.5 ? rnd() * margin : h - rnd() * margin; }
+                const r = 0.6 + rnd() * 2.2;
+                blob(x, y, r * 2, `rgba(158, 102, 52, ${(0.10 + rnd() * 0.16) * age})`);
+                for (let k = rnd() * 3 | 0; k > 0; k--) blob(x + (rnd() - 0.5) * 12, y + (rnd() - 0.5) * 12, r * 0.7, `rgba(158, 102, 52, ${0.10 * age})`);
+            }
+            // 오래 넘긴 귀퉁이에 생긴 접힌 자국
+            if (age > 0.4) {
+                const ax = w - 50 - rnd() * 90, by = h - 50 - rnd() * 90;
+                c.save(); c.lineCap = 'round';
+                c.strokeStyle = `rgba(150, 118, 84, ${0.10 * age})`; c.lineWidth = 6;
+                c.beginPath(); c.moveTo(ax, h); c.lineTo(w, by); c.stroke();
+                c.strokeStyle = `rgba(120, 92, 62, ${0.30 * age})`; c.lineWidth = 0.8;
+                c.beginPath(); c.moveTo(ax, h); c.lineTo(w, by); c.stroke();
+                c.restore();
+            }
+            // 아주 오래된 장에는 컵 받침 자국 하나
+            if (age > 0.7 && rnd() < 0.6) {
+                const x = w * (0.55 + rnd() * 0.35), y = h * (0.15 + rnd() * 0.6), r = 34 + rnd() * 18;
+                c.save();
+                c.strokeStyle = `rgba(160, 118, 70, ${0.16 * age})`; c.lineWidth = 2.5;
+                c.beginPath(); c.ellipse(x, y, r, r * 0.96, rnd() * 3, 0.3, Math.PI * 1.85); c.stroke();
+                c.strokeStyle = `rgba(160, 118, 70, ${0.06 * age})`; c.lineWidth = 7;
+                c.beginPath(); c.ellipse(x, y, r - 3, r * 0.93, 0, 0, Math.PI * 2); c.stroke();
+                c.restore();
+            }
+        }
+        let ageKey = '', ageTimer = null;
+        function renderAge() {
+            const cv = document.getElementById('nb-age');
+            if (!cv) return;
+            const w = cv.parentElement.clientWidth, h = cv.parentElement.clientHeight;
+            if (!w || !h) return;
+            const age = pageAge();
+            const seed = hash(`${curDate.getFullYear()}-${curDate.getMonth()}|${owner()}`);
+            const key = `${w}x${h}|${age.toFixed(3)}|${seed}`;
+            if (key === ageKey) return;
+            ageKey = key;
+            const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+            cv.width = Math.round(w * scale); cv.height = Math.round(h * scale);
+            const c = cv.getContext('2d');
+            c.setTransform(scale, 0, 0, scale, 0, 0);
+            c.clearRect(0, 0, w, h);
+            paintAge(c, w, h, age, seed);
+        }
+        function scheduleAge() { clearTimeout(ageTimer); ageTimer = setTimeout(renderAge, 120); }
+
         // ---------- 페이지를 그림으로 옮기기 (WebGL 텍스처용) ----------
         function snapshotPage(scale) {
             const cont = document.querySelector('#main-screen .container');
@@ -2551,10 +2683,16 @@
             gw.querySelectorAll('thead th:not(.col-label)').forEach(el => drawCell(el, true));
             gw.querySelectorAll('thead th.col-label').forEach(el => drawCell(el, true));
             c.restore();
+            const ageCv = document.getElementById('nb-age');
+            if (ageCv && ageCv.width) {
+                c.save(); c.globalCompositeOperation = 'multiply';
+                c.drawImage(ageCv, cr.left, cr.top, cr.width, cr.height);
+                c.restore();
+            }
             return { canvas: cv, rect: cr };
         }
 
-        // ---------- WebGL 페이지 넘김 (왼쪽 제본선을 축으로 휘어지며 넘어감) ----------
+        // ---------- WebGL 페이지 넘김 (얇은 종이가 귀퉁이부터 말리며 넘어감) ----------
         const GL = { ok: null, canvas: null, gl: null, prog: null, flatProg: null, buf: {}, count: 0, u: {}, fu: {} };
         const PREC = `
             #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -2563,32 +2701,40 @@
             precision mediump float;
             #endif
         `;
+        // 얇은 종이 말림: 접힘선(기울어진 직선) 오른쪽은 반지름 R 의 원통을 따라 말려 올라가고,
+        // 원통을 지난 부분은 뒤집혀 접힘선 왼쪽 위로 겹침. 오른쪽 아래 귀퉁이가 먼저 들림.
         const VS = `
             attribute vec2 aUV;
             uniform vec2 uPage;      // 페이지 크기 (px)
             uniform vec2 uOrigin;    // 캔버스 안 페이지 왼쪽 위 (px)
             uniform vec2 uCanvas;    // 캔버스 크기 (px)
             uniform vec2 uCenter;    // 원근 중심 (px)
-            uniform float uPhi;      // 넘어간 각도 (0 = 제자리, PI = 완전히 넘어감)
-            uniform float uBend;     // 종이가 휘는 정도 (페이지 폭 전체에서 더해지는 각도)
-            uniform float uSkew;     // 위쪽이 먼저 넘어가는 정도
+            uniform float uFold;     // 접힘선이 페이지 가운데 높이를 지나는 x (px)
+            uniform float uTilt;     // 접힘선 기울기 (rad)
+            uniform float uR;        // 말린 종이 반지름 (px)
             uniform float uPersp;
             varying vec2 vUV;
-            varying float vShade;
-            varying float vBack;
+            varying vec3 vN;
+            varying float vD;
+            varying float vQx;
             void main() {
-                float u = aUV.x * uPage.x;
-                float y = aUV.y * uPage.y;
-                float c = uBend * (1.0 + uSkew * (0.5 - aUV.y)) / uPage.x;
-                float th = uPhi + c * u;
-                float x, z;
-                if (abs(c) < 1e-6) { x = u * cos(uPhi); z = u * sin(uPhi); }
-                else { x = (sin(th) - sin(uPhi)) / c; z = (cos(uPhi) - cos(th)) / c; }
-                vec3 n = vec3(-sin(th), 0.0, cos(th));
-                vec3 L = normalize(vec3(0.35, -0.3, 0.88));
-                vShade = clamp(0.74 + 0.30 * dot(n, L), 0.0, 1.06);
-                vBack = clamp(0.74 + 0.30 * dot(-n, L), 0.0, 1.06);
-                vec2 sc = uOrigin + vec2(x, y);
+                vec2 p = aUV * uPage;
+                vec2 n = vec2(cos(uTilt), sin(uTilt));
+                float d = dot(p - vec2(uFold, uPage.y * 0.5), n);
+                vec2 base = p - d * n;
+                vec2 q; float z; vec3 N;
+                float PI = 3.14159265;
+                if (d <= 0.0) { q = p; z = 0.0; N = vec3(0.0, 0.0, 1.0); }
+                else if (d < PI * uR) {
+                    float a = d / uR;
+                    q = base + n * (uR * sin(a)); z = uR * (1.0 - cos(a));
+                    N = vec3(-sin(a) * n, cos(a));
+                } else {
+                    q = base - n * (d - PI * uR); z = 2.0 * uR;
+                    N = vec3(0.0, 0.0, -1.0);
+                }
+                vN = N; vD = d; vQx = q.x;
+                vec2 sc = uOrigin + q;
                 float k = uPersp / (uPersp - z);
                 vec2 scr = uCenter + (sc - uCenter) * k;
                 vec2 clip = scr / uCanvas * 2.0 - 1.0;
@@ -2599,22 +2745,38 @@
         const FS = PREC + `
             uniform sampler2D uFront;
             uniform float uAlpha;
+            uniform vec3 uPaper;     // 뒷면 종이 색 (바랜 정도 반영)
+            uniform float uRf;       // uR 과 같은 값 (WebGL1 정밀도 불일치 링크 오류를 피하려고 따로 둠)
+            uniform float uCurl;     // 들린 정도 0..1
+            uniform float uW;
             varying vec2 vUV;
-            varying float vShade;
-            varying float vBack;
+            varying vec3 vN;
+            varying float vD;
+            varying float vQx;
             void main() {
+                vec3 L = normalize(vec3(-0.32, -0.42, 0.85));
+                vec3 N = normalize(gl_FrontFacing ? vN : -vN);
+                float diff = 0.80 + 0.24 * dot(N, L);
+                float spec = pow(max(dot(reflect(-L, N), vec3(0.0, 0.0, 1.0)), 0.0), 26.0) * 0.09 * uCurl;
+                // 말려 올라가는 골 안쪽에 드는 그늘
+                float a = vD / max(uRf, 1.0);
+                float crease = (vD > 0.0 && a < 3.2) ? 0.09 * exp(-a * 2.0) * uCurl : 0.0;
+                float sh = diff - crease;
+                vec3 c;
                 if (gl_FrontFacing) {
-                    vec4 c = texture2D(uFront, vUV);
-                    // 제본선 쪽이 살짝 어두움
+                    c = texture2D(uFront, vUV).rgb;
                     float gutter = 1.0 - 0.10 * exp(-vUV.x * 18.0);
-                    gl_FragColor = vec4(c.rgb * vShade * gutter, 1.0) * uAlpha;
+                    // 젖혀 올린 종이가 아직 평평한 쪽에 드리우는 그늘
+                    float flap = vD < 0.0 ? 0.22 * uCurl * exp(vD / (uRf * 0.9 + 6.0)) : 0.0;
+                    c = c * sh * gutter * (1.0 - flap) + spec;
                 } else {
-                    // 뒷면: 종이 + 앞면 글씨가 거울처럼 살짝 비침
-                    vec3 paper = vec3(0.984, 0.972, 0.945);
-                    vec3 show = texture2D(uFront, vec2(vUV.x, vUV.y)).rgb;
-                    vec3 c = mix(paper, paper * show, 0.10);
-                    gl_FragColor = vec4(c * vBack, 1.0) * uAlpha;
+                    // 얇은 종이라 앞면 글씨가 거울처럼 비침
+                    vec3 show = texture2D(uFront, vUV).rgb;
+                    c = mix(uPaper, uPaper * show, 0.14) * sh + spec;
                 }
+                // 제본선 너머(보이지 않는 왼쪽 면)로 넘어간 부분은 서서히 사라짐
+                float beyond = 1.0 - smoothstep(0.0, uW * 0.24, -vQx);
+                gl_FragColor = vec4(c, 1.0) * (uAlpha * beyond);
             }
         `;
         // 아래 페이지(그림 또는 실제 화면)에 드리우는 그림자
@@ -2632,16 +2794,18 @@
         const FLAT_FS = PREC + `
             uniform sampler2D uTex;
             uniform float uUseTex;
-            uniform vec2 uPage;
-            uniform float uFoot;     // 넘어가는 종이가 아래 페이지 위에 걸친 오른쪽 끝 (px)
+            uniform vec2 uPageF;     // uPage 와 같은 값 (정점·조각 셰이더 정밀도 분리)
+            uniform float uFold;
+            uniform float uTilt;
+            uniform float uR;
             uniform float uStrength;
             varying vec2 vUV;
             void main() {
-                float x = vUV.x * uPage.x;
-                float y = vUV.y * uPage.y;
-                float foot = uFoot + (0.5 - vUV.y) * 40.0 * uStrength;
-                float sh = (1.0 - smoothstep(foot - 10.0, foot + uPage.x * 0.28, x)) * uStrength;
-                sh += 0.10 * uStrength * exp(-x / 30.0);
+                vec2 p = vUV * uPageF;
+                vec2 n = vec2(cos(uTilt), sin(uTilt));
+                float d = dot(p - vec2(uFold, uPageF.y * 0.5), n);
+                float sh = d > 0.0 ? 0.40 * uStrength * exp(-max(d - uR * 0.55, 0.0) / (uR * 1.2 + 14.0)) : 0.0;
+                sh += 0.08 * uStrength * exp(-p.x / 30.0);
                 sh = clamp(sh, 0.0, 0.6);
                 if (uUseTex > 0.5) {
                     vec3 c = texture2D(uTex, vUV).rgb;
@@ -2671,7 +2835,7 @@
                 };
                 GL.prog = mk(VS, FS);
                 GL.flatProg = mk(FLAT_VS, FLAT_FS);
-                const NX = 64, NY = 24, uv = [], idx = [];
+                const NX = 160, NY = 40, uv = [], idx = [];
                 for (let j = 0; j <= NY; j++) for (let i = 0; i <= NX; i++) uv.push(i / NX, j / NY);
                 for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
                     const a = j * (NX + 1) + i, b = a + 1, c2 = a + NX + 1, d = c2 + 1;
@@ -2681,8 +2845,8 @@
                 GL.buf.idx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
                 GL.count = idx.length;
                 GL.buf.quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
-                ['uPage', 'uOrigin', 'uCanvas', 'uCenter', 'uPhi', 'uBend', 'uSkew', 'uPersp', 'uFront', 'uAlpha'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
-                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uFoot', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
+                ['uPage', 'uOrigin', 'uCanvas', 'uCenter', 'uFold', 'uTilt', 'uR', 'uPersp', 'uFront', 'uAlpha', 'uPaper', 'uCurl', 'uW', 'uRf'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
+                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uPageF', 'uFold', 'uTilt', 'uR', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
                 document.body.appendChild(cv);
                 GL.canvas = cv; GL.gl = gl; GL.ok = true;
             } catch (e) {
@@ -2704,8 +2868,8 @@
         }
 
         // turnTex: 넘어가는 종이, underTex: 그 아래 종이(없으면 실제 화면이 보임)
-        // phiFrom → phiTo 로 넘어감 (0 = 페이지 위에 놓임, PI = 왼쪽으로 완전히 넘어감)
-        function runTurn({ turnTex, underTex, rect, phiFrom, phiTo, duration }) {
+        // pFrom → pTo 로 넘어감 (0 = 페이지 위에 놓임, 1 = 제본선 너머로 완전히 넘어감)
+        function runTurn({ turnTex, underTex, rect, pFrom, pTo, duration, paper }) {
             const gl = GL.gl, cv = GL.canvas;
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const cw = window.innerWidth, ch = window.innerHeight;
@@ -2716,19 +2880,20 @@
             const origin = [rect.left, rect.top];
             const center = [rect.left + W / 2, rect.top + H * 0.45];
             const persp = Math.max(1700, W * 2.4);
-            const motion = Math.sign(phiTo - phiFrom) || 1;
+            const smooth = (a, b, x) => { const k = Math.max(0, Math.min(1, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
 
             return new Promise(resolve => {
                 const t0 = performance.now();
                 const frame = (now) => {
                     const t = duration <= 1 ? 1 : Math.min(1, (now - t0) / duration);
-                    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                    const phi = phiFrom + (phiTo - phiFrom) * e;
-                    const lift = Math.sin(Math.min(Math.PI, phi));
-                    // 손으로 모서리를 잡아 넘기듯 바깥쪽이 앞서 휘고, 위쪽이 먼저 넘어감
-                    const bend = motion * 0.62 * lift;
-                    const skew = 0.38;
-                    const foot = phi < Math.PI / 2 ? W * Math.cos(phi) : 0;
+                    // 손끝으로 귀퉁이를 집어 가볍게 들고, 미끄러지듯 넘긴 뒤 사뿐히 내려놓음
+                    const s = t * t * (3 - 2 * t);
+                    const e = pFrom + (pTo - pFrom) * s;
+                    const curl = Math.sin(Math.PI * Math.min(1, e));
+                    const tilt = 0.34 * Math.pow(1 - e, 0.85);
+                    const flutter = Math.sin(e * Math.PI * 3.2) * curl * 0.010;
+                    const R = Math.max(12, Math.min(130, W * (0.035 + 0.075 * curl + flutter)));
+                    const fold = (1 - e) * (W + (H / 2) * Math.tan(tilt));
 
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -2740,9 +2905,9 @@
                     const la = gl.getAttribLocation(GL.flatProg, 'aUV');
                     gl.enableVertexAttribArray(la);
                     gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
-                    gl.uniform2f(GL.fu.uPage, W, H); gl.uniform2f(GL.fu.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.fu.uCanvas, cw, ch);
-                    gl.uniform1f(GL.fu.uFoot, foot);
-                    gl.uniform1f(GL.fu.uStrength, 0.5 * lift);
+                    gl.uniform2f(GL.fu.uPage, W, H); gl.uniform2f(GL.fu.uPageF, W, H); gl.uniform2f(GL.fu.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.fu.uCanvas, cw, ch);
+                    gl.uniform1f(GL.fu.uFold, fold); gl.uniform1f(GL.fu.uTilt, tilt); gl.uniform1f(GL.fu.uR, R);
+                    gl.uniform1f(GL.fu.uStrength, 0.6 * curl);
                     gl.activeTexture(gl.TEXTURE0);
                     if (underTex) { gl.bindTexture(gl.TEXTURE_2D, underTex); gl.uniform1i(GL.fu.uTex, 0); gl.uniform1f(GL.fu.uUseTex, 1); }
                     else gl.uniform1f(GL.fu.uUseTex, 0);
@@ -2757,11 +2922,12 @@
                     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx);
                     gl.uniform2f(GL.u.uPage, W, H); gl.uniform2f(GL.u.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.u.uCanvas, cw, ch);
                     gl.uniform2f(GL.u.uCenter, center[0], center[1]);
-                    gl.uniform1f(GL.u.uPhi, phi); gl.uniform1f(GL.u.uBend, bend); gl.uniform1f(GL.u.uSkew, skew);
+                    gl.uniform1f(GL.u.uFold, fold); gl.uniform1f(GL.u.uTilt, tilt); gl.uniform1f(GL.u.uR, R);
                     gl.uniform1f(GL.u.uPersp, persp);
-                    // 다 넘어간 종이는 책상 밖으로 사라지듯 옅어짐
-                    const alpha = motion > 0 ? 1 - Math.max(0, (t - 0.72) / 0.28) : Math.min(1, t / 0.22);
-                    gl.uniform1f(GL.u.uAlpha, duration <= 1 ? 1 : alpha);
+                    gl.uniform1f(GL.u.uCurl, curl); gl.uniform1f(GL.u.uW, W); gl.uniform1f(GL.u.uRf, R);
+                    gl.uniform3f(GL.u.uPaper, paper[0], paper[1], paper[2]);
+                    // 거의 다 넘어가면 깨끗이 사라짐 (반대로 돌아올 때는 나타남)
+                    gl.uniform1f(GL.u.uAlpha, duration <= 1 ? 1 : 1 - smooth(0.86, 1.0, e));
                     gl.bindTexture(gl.TEXTURE_2D, turnTex); gl.uniform1i(GL.u.uFront, 0);
                     gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
                     gl.disable(gl.DEPTH_TEST);
@@ -2784,23 +2950,24 @@
                 const oldSnap = snapshotPage(scale);
                 const gl = GL.gl;
                 const oldTex = texFrom(oldSnap.canvas);
-                const END = Math.PI * 0.97;
+                const TURN_MS = 1150;
                 if (dir > 0) {
-                    // 다음 달: 지금 페이지가 제본선을 축으로 왼쪽으로 넘어가며 새 페이지가 드러남
+                    // 다음 달: 지금 페이지의 귀퉁이가 들리며 얇은 종이처럼 말려 왼쪽으로 넘어감
+                    const paper = paperRGB(pageAge());
                     doRender();
-                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, phiFrom: 0, phiTo: END, duration: 1250 });
+                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, pFrom: 0, pTo: 1, duration: TURN_MS, paper });
                     gl.deleteTexture(oldTex);
                 } else {
-                    // 이전 달: 왼쪽으로 넘겨 두었던 앞 장이 되돌아와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
+                    // 이전 달: 넘겨 두었던 앞 장이 말린 채 되돌아와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
                     suppressCascade = true;
-                    await runTurn({ turnTex: oldTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: 0, phiTo: 0, duration: 1 });
+                    await runTurn({ turnTex: oldTex, underTex: oldTex, rect: oldSnap.rect, pFrom: 0, pTo: 0, duration: 1, paper: paperRGB(0) });
                     const loaded = waitForLoad(1500);
                     doRender();
                     await loaded;
                     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
                     const newSnap = snapshotPage(scale);
                     const newTex = texFrom(newSnap.canvas);
-                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, phiFrom: END, phiTo: 0, duration: 1250 });
+                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, pFrom: 1, pTo: 0, duration: TURN_MS, paper: paperRGB(pageAge()) });
                     gl.deleteTexture(newTex); gl.deleteTexture(oldTex);
                 }
             } catch (e) {
@@ -2844,6 +3011,14 @@
                     tabs.appendChild(b);
                 }
                 main.appendChild(tabs);
+                const cont = main.querySelector('.container');
+                if (cont) {
+                    const ageCv = document.createElement('canvas');
+                    ageCv.id = 'nb-age'; ageCv.setAttribute('aria-hidden', 'true');
+                    const corner = document.createElement('div');
+                    corner.id = 'nb-corner'; corner.setAttribute('aria-hidden', 'true');
+                    cont.append(ageCv, corner);
+                }
                 const picker = document.getElementById('date-picker');
                 const title = document.createElement('span');
                 title.id = 'nb-title';
@@ -2872,6 +3047,7 @@
                 title.setAttribute('aria-label', `${y}년 ${m}월, 날짜 고르기`);
             }
             document.querySelectorAll('.nb-tab').forEach(b => b.classList.toggle('current', Number(b.dataset.m) === curDate.getMonth() + 1));
+            renderAge();
         }
 
         let toastTimer = null;
@@ -3027,6 +3203,7 @@
         function onLogin() {
             buildDecor();
             buildTray();
+            scheduleAge();
             document.getElementById('pen-tray').classList.toggle('hidden', isAdminUser());
             animateNextLoad = true;
             openBook();
@@ -3038,7 +3215,7 @@
             await closeBook();
         }
 
-        window.addEventListener('resize', scheduleMoodLine);
+        window.addEventListener('resize', () => { scheduleMoodLine(); scheduleAge(); });
         if (document.fonts?.ready) document.fonts.ready.then(scheduleMoodLine);
 
         // 꾸미기 효과에서 오류가 나도 기록 저장·화면 전환은 계속되도록 감쌈
