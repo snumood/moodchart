@@ -179,6 +179,16 @@
     .stats-card-value { color: var(--primary); font-size: 24px; font-weight: 800; line-height: 1.2; margin-top: 7px; }
     .stats-note { color: #64748b; font-size: 10px; line-height: 1.5; margin-top: 12px; }
     .stats-status { min-height: 18px; color: #d32f2f; font-size: 11px; margin-top: 10px; }
+    #doc-panel .patient-list-open { width: 100%; margin-bottom: 10px; background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+    .patient-search { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 10px; }
+    .patient-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .patient-table th { text-align: left; color: #64748b; font-weight: bold; padding: 6px 8px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: #fff; }
+    .patient-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; word-break: break-all; }
+    .patient-table tbody tr { cursor: pointer; }
+    .patient-table tbody tr:hover, .patient-table tbody tr:focus { background: #e3f2fd; outline: none; }
+    .patient-table tr.selected { background: #fff9c4; }
+    .patient-list-wrap { max-height: 52dvh; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .patient-more { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; }
     .modal-header { font-weight: bold; margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between; color: var(--primary); }
     .modal-textarea { width: 100%; height: 80px; border: 1px solid #ccc; padding: 10px; resize: none; border-radius: 6px; font-size: 13px; margin-top: 10px; }
     .modal-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
@@ -574,6 +584,7 @@
         
         <div id="doc-panel">
             <div style="font-weight:bold; margin-bottom:5px; color:#1565c0;">환자 조회</div>
+            <button class="patient-list-open" onclick="openPatientListModal()">👥 사용자 목록에서 선택</button>
             <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
                 <input id="search-id" placeholder="ID 또는 번호">
                 <button onclick="searchPatient()">검색</button>
@@ -707,6 +718,26 @@
         </div>
         <div class="stats-note">사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 아이템과 선물은 현재 DB에 남아 있는 사용자 보유 항목만 집계합니다. 사용자 아이디나 등록번호는 표시하지 않습니다.</div>
         <div class="stats-status" id="stats-status" role="status" aria-live="polite"></div>
+    </div>
+</div>
+
+<div id="patient-list-modal" class="modal-wrap">
+    <div class="stats-modal-content">
+        <div class="modal-header">
+            <span>사용자 목록</span>
+            <span style="cursor:pointer; font-size:20px;" onclick="closePatientListModal()">✕</span>
+        </div>
+        <input id="patient-list-search" class="patient-search" type="search" maxlength="100" autocomplete="off" placeholder="아이디 또는 병원 등록번호 일부로 검색" oninput="schedulePatientListSearch()">
+        <div class="stats-range" id="patient-list-summary"></div>
+        <div class="patient-list-wrap">
+            <table class="patient-table">
+                <thead><tr><th>아이디</th><th>등록번호</th><th>최근 기록일</th><th>기록일수</th></tr></thead>
+                <tbody id="patient-list-body"></tbody>
+            </table>
+        </div>
+        <button id="patient-list-more" class="patient-more hidden" onclick="loadPatientList(false)">더 보기</button>
+        <div class="stats-note">최근 기록일 순으로 표시합니다. 행을 누르면 해당 사용자의 기록지를 읽기 전용으로 엽니다. 목록 조회와 사용자 선택은 관리자 접근 기록에 남습니다.</div>
+        <div class="stats-status" id="patient-list-status" role="status" aria-live="polite"></div>
     </div>
 </div>
 
@@ -882,7 +913,7 @@
         { id: 'event', label: '생활사건기록 (클릭)', desc: '클릭하여 기록', section: 'event', type: 'event' }
     ];
 
-    let user = null, target = null, curDate = new Date();
+    let user = null, target = null, curDate = new Date(), loadDataSeq = 0;
     let modalTarget = { day: null, id: null };
     let currentGiftTab = 'my', selectedInventoryId = null, replyTargetItemId = null;
     let myChart = null; 
@@ -1043,14 +1074,114 @@
         if(!q) return alert("ID 또는 번호를 입력하세요.");
         
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
-        const { data, error } = await sb.rpc('moodchart_admin_resolve_patient', { p_query: q });
-        if(error) return alert("조회 권한 오류: " + error.message);
-        if(!data) return alert("해당 정보로 가입된 환자를 찾을 수 없습니다.");
-        
-        target = data; 
-        alert(`조회 대상: ${target} 님`); 
-        toggleSidebar(); 
-        renderTable(); 
+        if (await selectPatient(q)) toggleSidebar();
+    }
+
+    let selectPatientSeq = 0;
+    async function selectPatient(query, exactUsername = false) {
+        const seq = ++selectPatientSeq;
+        const { data, error } = exactUsername
+            ? await sb.rpc('moodchart_admin_select_patient', { p_username: query })
+            : await sb.rpc('moodchart_admin_resolve_patient', { p_query: query });
+        // 그 사이 다른 환자를 선택했으면 이 응답은 버린다.
+        if (seq !== selectPatientSeq) return false;
+        if(error) { alert("조회 권한 오류: " + error.message); return false; }
+        if(!data) { alert("해당 정보로 가입된 환자를 찾을 수 없습니다."); return false; }
+
+        target = data;
+        document.getElementById('user-badge').innerText = `Google 관리자 · 조회: ${safeText(target, 40)}`;
+        alert(`조회 대상: ${target} 님`);
+        renderTable();
+        return true;
+    }
+
+    const PATIENT_PAGE_SIZE = 50;
+    let patientListOffset = 0, patientListTimer = null, patientListSeq = 0, patientListQuery = '';
+
+    function openPatientListModal() {
+        if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
+        if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        document.getElementById('patient-list-search').value = '';
+        document.getElementById('patient-list-modal').style.display = 'flex';
+        loadPatientList(true);
+        document.getElementById('patient-list-search').focus();
+    }
+
+    function clearPatientList() {
+        patientListSeq++;
+        selectPatientSeq++;
+        clearTimeout(patientListTimer);
+        document.getElementById('patient-list-body').replaceChildren();
+        document.getElementById('patient-list-summary').textContent = '';
+        document.getElementById('patient-list-status').textContent = '';
+        document.getElementById('patient-list-more').classList.add('hidden');
+    }
+
+    function closePatientListModal() {
+        document.getElementById('patient-list-modal').style.display = 'none';
+        clearPatientList();
+    }
+
+    function schedulePatientListSearch() {
+        clearPatientList();
+        patientListTimer = setTimeout(() => loadPatientList(true), 300);
+    }
+
+    async function loadPatientList(reset) {
+        if (!isAdminUser()) return;
+        const body = document.getElementById('patient-list-body');
+        const status = document.getElementById('patient-list-status');
+        const more = document.getElementById('patient-list-more');
+        if (reset) {
+            patientListQuery = safeText(document.getElementById('patient-list-search').value.trim(), 100);
+            patientListOffset = 0;
+            body.replaceChildren();
+        }
+        const search = patientListQuery;
+        const seq = ++patientListSeq;
+        status.textContent = '목록을 불러오는 중입니다.';
+        more.disabled = true;
+
+        const { data, error } = await sb.rpc('moodchart_admin_list_patients', {
+            p_search: search, p_limit: PATIENT_PAGE_SIZE, p_offset: patientListOffset
+        });
+        if (seq !== patientListSeq) return;
+        more.disabled = false;
+        if (error || !Array.isArray(data)) {
+            status.textContent = '목록을 불러오지 못했습니다.';
+            more.classList.add('hidden');
+            return;
+        }
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.tabIndex = 0;
+            if (row.username === target) tr.classList.add('selected');
+            [
+                safeText(row.username, 60),
+                safeText(row.hospital_id || '-', 40),
+                isIsoDate(row.last_record_date) ? row.last_record_date : '-',
+                formatAdminStat(row.record_days)
+            ].forEach(text => {
+                const td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+            });
+            const pick = async () => {
+                if (!tr.isConnected) return;
+                if (await selectPatient(row.username, true)) closePatientListModal();
+            };
+            tr.addEventListener('click', pick);
+            tr.addEventListener('keydown', e => { if (e.key === 'Enter') pick(); });
+            body.appendChild(tr);
+        });
+
+        patientListOffset += data.length;
+        const total = data.length ? Number(data[0].total_count) || 0 : (reset ? 0 : patientListOffset);
+        document.getElementById('patient-list-summary').textContent =
+            `${formatAdminStat(total)}명 중 ${formatAdminStat(patientListOffset)}명 표시`;
+        more.classList.toggle('hidden', patientListOffset >= total);
+        status.textContent = total === 0 ? '검색 결과가 없습니다.' : '';
     }
 
     async function adminDownloadByHosp() {
@@ -1497,10 +1628,13 @@
         const start = `${y}-${String(m).padStart(2,'0')}-01`;
         const end = `${y}-${String(m).padStart(2,'0')}-${lastDay}`;
 
+        const reqTarget = target, reqSeq = ++loadDataSeq;
         const request = isAdminUser()
             ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: start, p_end: end })
             : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
         const { data, error } = await request;
+        // 더 늦게 시작된 조회(다른 환자·다른 달)가 있으면 이 응답은 버린다.
+        if (reqSeq !== loadDataSeq || reqTarget !== target) return;
         
         if(error) return alert("조회 오류: " + error.message);
         if(isAdminUser() && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
