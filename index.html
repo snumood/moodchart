@@ -5503,7 +5503,12 @@
         async function openBook() {
             await authDone;   // 책장에서 수첩을 꺼내 올 때까지
             const r = closedRect();
-            if (reduceMotion || !r || !document.body.animate) { finishAuth(); ribbonOut(false); return; }
+            if (reduceMotion || !r || !document.body.animate) {
+                finishAuth();
+                document.querySelectorAll('body > .auth-pull').forEach(x => x.remove());   // 책장에서 꺼낸 수첩 그림이 남지 않게
+                document.getElementById('nb-shelf')?.classList.add('hidden');
+                ribbonOut(false); return;
+            }
             opening = true;
             const ribbon = document.getElementById('nb-ribbon');
             if (ribbon) ribbon.style.opacity = '0';
