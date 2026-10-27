@@ -55,24 +55,70 @@
     a { text-decoration: none; color: inherit; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    #auth-screen { 
-        height: 100dvh; display: flex; justify-content: center; align-items: center; 
-        position: fixed; width: 100%; z-index: 9999; top: 0; left: 0;
-        background: url('./bg2.jpg') no-repeat center center fixed;
-        background-size: cover;
+    /* --- 첫 화면: 책상 위의 닫힌 수첩, 표지의 이름표에 로그인 --- */
+    #auth-screen {
+        position: fixed; inset: 0; z-index: 9999; height: 100dvh;
+        display: flex; justify-content: center; align-items: center; overflow: hidden;
     }
-    #auth-screen::before {
-        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.3); z-index: -1;
+    .auth-book {
+        position: absolute; border-radius: 4px 14px 14px 4px;
+        top: calc(var(--nb-top) - 12px); bottom: calc(var(--nb-bottom) - 16px); left: 50%; transform: translateX(-50%);
+        width: min(calc(100vw - 24px), calc((100dvh - var(--nb-top) - var(--nb-bottom) + 28px) * 0.76));
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%), linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 6%);
+        box-shadow: 0 30px 60px -12px rgba(40, 30, 20, 0.45), 0 12px 24px -8px rgba(40, 30, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.10), inset -1px 0 0 rgba(255, 255, 255, 0.05);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px 64px 20px 28px;
     }
-    .auth-box { width: 90%; max-width: 400px; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
-    .auth-inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-    .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-top: 10px; }
-    .save-login-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 12px; color: #666; margin: 10px 0; }
-    .warning-text { color: #d32f2f; font-weight: bold; font-size: 11px; line-height: 1.35; }
+    /* 닫힌 수첩 옆면으로 보이는 종이 */
+    .auth-book::before {
+        content: ""; position: absolute; top: 6px; bottom: 6px; right: -5px; width: 6px; border-radius: 0 3px 3px 0; z-index: -1;
+        background: repeating-linear-gradient(180deg, #f3eee4 0 1px, #ddd5c6 1px 2px);
+        box-shadow: 2px 2px 4px rgba(40, 30, 20, 0.3);
+    }
+    .auth-band {
+        position: absolute; top: -2px; bottom: -2px; right: 33px; width: 11px; border-radius: 2px;
+        background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e);
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.5), 2px 0 3px rgba(0, 0, 0, 0.4);
+    }
+    .auth-emboss-ko { font-family: var(--serif-ko); font-weight: 300; font-size: 30px; letter-spacing: 12px; padding-left: 12px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16), 0 -1px 0 rgba(0, 0, 0, 0.7); }
+    .auth-emboss-en { font-family: var(--serif); font-weight: 500; font-size: 12px; letter-spacing: 7px; padding-left: 7px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15); margin-bottom: 6px; }
+    .auth-emboss-foot { position: absolute; bottom: 22px; left: 28px; right: 64px; text-align: center; font-family: var(--serif-ko); font-size: 10px; letter-spacing: 2px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.13); }
+    /* 표지에 붙인 이름표 */
+    .auth-box {
+        position: relative; width: min(340px, 100%); max-height: calc(100% - 120px); overflow-y: auto;
+        padding: 22px 24px 18px; text-align: center; border-radius: 3px;
+        background:
+            radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 60%),
+            linear-gradient(180deg, #fbf8f1, #f4efe4);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 0 0 1px rgba(120, 100, 70, 0.18), 0 0 0 5px #fbf8f1, 0 0 0 6px rgba(155, 47, 53, 0.35), 0 8px 18px rgba(0, 0, 0, 0.45);
+        transform: rotate(-0.6deg);
+    }
+    .auth-box h2 { font-family: var(--serif-ko); font-weight: 400; font-size: 13px; letter-spacing: 4px; color: var(--accent); margin: 0 0 14px; }
+    .auth-inp {
+        width: 100%; padding: 6px 2px 4px; margin-bottom: 12px; border: none; border-bottom: 1px solid rgba(51, 53, 61, 0.35); border-radius: 0;
+        background: transparent; font-family: var(--hand); font-size: 24px; color: var(--ink); outline: none;
+    }
+    .auth-inp:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+    .auth-inp::placeholder { font-family: var(--print); font-size: 13px; color: #a7a39a; }
+    .auth-inp[type="password"] { font-family: var(--print); font-size: 16px; letter-spacing: 2px; }
+    .btn-auth {
+        width: 100%; padding: 12px; margin-top: 6px; border: none; border-radius: 10px; cursor: pointer;
+        font-family: var(--print); font-weight: 700; font-size: 14px; letter-spacing: 1px; color: #fdf8ef;
+        background: linear-gradient(180deg, #a8373e, #86252c); box-shadow: 0 2px 0 #5e171c, 0 4px 10px rgba(90, 20, 25, 0.3);
+    }
+    .btn-auth:active { transform: translateY(1px); box-shadow: 0 1px 0 #5e171c; }
+    .btn-auth.alt { background: linear-gradient(180deg, #3f6b4f, #2e533c); box-shadow: 0 2px 0 #1f3a29, 0 4px 10px rgba(30, 60, 40, 0.3); }
+    .save-login-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 12px; color: #5f5a50; margin: 4px 0 10px; text-align: left; }
+    .warning-text { color: #b3262d; font-weight: bold; font-size: 11px; line-height: 1.35; }
     .admin-entry { color: inherit; text-decoration: none; }
-    .toggle-auth { margin-top: 20px; font-size: 13px; color: #555; cursor: pointer; text-decoration: underline; display: inline-block; }
-    .legal-text { text-align: left; font-size: 12px; margin: 15px 0; background: #f1f3f5; padding: 12px; border-radius: 6px; color: #444; line-height: 1.5; word-break: keep-all; border: 1px solid #eee; }
+    .toggle-auth { margin-top: 14px; font-size: 13px; color: #5f5a50; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-block; }
+    @media (max-width: 480px) {
+        .auth-book { padding: 16px 52px 16px 18px; }
+        .auth-emboss-ko { font-size: 24px; letter-spacing: 9px; }
+        .auth-band { right: 24px; }
+        .auth-box { padding: 18px 18px 14px; }
+    }
+    .legal-text { text-align: left; font-size: 11.5px; margin: 12px 0; background: rgba(120, 100, 70, 0.06); padding: 10px 12px; border-radius: 4px; color: #4a463e; line-height: 1.55; word-break: keep-all; border: 1px dashed rgba(120, 100, 70, 0.3); }
 
     .container { height: 100dvh; display: flex; flex-direction: column; background: #fff; position: relative; }
     .header { height: var(--header-h); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -324,15 +370,13 @@
             box-shadow: 3px 2px 5px rgba(40, 30, 20, 0.28), inset -1px 0 0 rgba(255, 255, 255, 0.7);
         }
     }
-    /* 종이 오른쪽 아래 살짝 접힌 귀퉁이 (장식: 클릭을 가로채지 않음) */
+    /* 종이 오른쪽 아래 살짝 접힌 귀퉁이: 잡아서 넘김 */
     #nb-corner {
-        position: absolute; right: 0; bottom: 0; z-index: 130; width: 18px; height: 18px; pointer-events: none;
         background: linear-gradient(135deg, transparent 50%, #e9e2d3 50%, #fbf7ee 72%, #efe8da);
         clip-path: polygon(100% 0, 100% 100%, 0 100%);
         filter: drop-shadow(-1px -1px 1.5px rgba(40, 30, 20, 0.18));
         border-radius: 0 0 5px 0;
     }
-    @media (min-width: 900px) { #nb-corner { width: 24px; height: 24px; } }
 
     /* 오래된 달일수록 누렇게 바래는 종이 (그림 한 장을 곱하기로 겹침) */
     #nb-age {
@@ -496,6 +540,8 @@
 
     /* 수첩 열고 닫기 */
     #nb-book { position: fixed; inset: 0; z-index: 2500; perspective: 2200px; pointer-events: auto; }
+    /* 수첩을 여닫는 동안에도 책상 위 펜 트레이는 보이게 */
+    body.nb-book-anim #pen-tray, body.nb-book-anim #nb-zoom { z-index: 2600; }
     #nb-book .board {
         position: absolute; transform-origin: 0 50%; transform-style: preserve-3d;
     }
@@ -535,6 +581,72 @@
         #nb-book .front .emboss-ko { font-size: 24px; letter-spacing: 9px; }
         #nb-ribbon { right: calc(var(--nb-right) + 18px); }
     }
+
+    /* --- 종이 끝 잡기: 오른쪽 귀퉁이·가장자리는 다음 달, 왼쪽 가장자리는 이전 달 --- */
+    #nb-edge-r, #nb-edge-l { position: fixed; top: var(--nb-top); bottom: var(--nb-bottom); cursor: grab; touch-action: none; }
+    #nb-edge-r { z-index: 0; right: calc(var(--nb-right) - 18px); width: 18px; }
+    #nb-edge-l { z-index: 2; left: calc(var(--nb-x) - 12px); width: 24px; }
+    #nb-corner, #nb-corner-l {
+        position: absolute; bottom: 0; z-index: 130; pointer-events: auto; cursor: grab; touch-action: none;
+        width: calc(26px * var(--nb-inv, 1)); height: calc(26px * var(--nb-inv, 1));
+        transition: width .25s cubic-bezier(.2, .9, .3, 1.3), height .25s cubic-bezier(.2, .9, .3, 1.3);
+    }
+    #nb-corner { right: 0; }
+    #nb-corner:hover, #nb-corner-l:hover { width: calc(38px * var(--nb-inv, 1)); height: calc(38px * var(--nb-inv, 1)); }
+    #nb-corner-l {
+        display: none; left: 0; border-radius: 0 0 0 5px;
+        background: linear-gradient(225deg, transparent 50%, #e9e2d3 50%, #fbf7ee 72%, #efe8da);
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+        filter: drop-shadow(1px -1px 1.5px rgba(40, 30, 20, 0.18));
+    }
+    body.nb-turning, body.nb-turning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+
+    /* --- 수첩 모드: 펼친 양면 (가운데 접힘 · 종이 굴곡 · 쌓인 종이 두께) --- */
+    body.nb-notebook #nb-corner-l { display: block; }
+    body.nb-notebook #main-screen .container { box-shadow: none; border-radius: 0; }
+    body.nb-notebook #main-screen .container::after { display: none; }
+    body.nb-notebook #main-screen .grid-wrapper { padding-left: var(--nb-padl, 0); padding-right: var(--nb-padr, 0); }
+    body.nb-notebook .top-assessment-bar { justify-content: flex-end; padding-right: var(--nb-padr, 20px); }
+    body.nb-notebook #nb-cover { left: calc(var(--nb-x) - 14px); right: calc(var(--nb-right) - 14px); }
+    /* 표지 가운데로 보이는 책등 */
+    body.nb-notebook #nb-cover::before {
+        content: ""; position: absolute; top: -3px; bottom: -3px; left: calc(50% - 16px); width: 32px; border-radius: 8px;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), rgba(255, 255, 255, 0.07) 45%, rgba(255, 255, 255, 0.03) 55%, rgba(0, 0, 0, 0.55)), #141416;
+    }
+    #nb-pages { display: none; }
+    body.nb-notebook #nb-pages {
+        display: block; position: fixed; z-index: 0; pointer-events: none;
+        top: calc(var(--nb-top) + 1px); left: calc(var(--nb-x) - 6px); right: calc(var(--nb-right) - 6px); bottom: calc(var(--nb-bottom) - 6px);
+        filter: drop-shadow(0 3px 4px rgba(20, 12, 6, 0.45));
+    }
+    #nb-pages > div {
+        position: absolute; inset: 0;
+        background:
+            linear-gradient(90deg, #cfc6b5 0, #f7f2e8 1px, #ddd4c4 2px, #f8f4ec 3px, #d8cfbf 4px, #f5f0e6 5px, #e3dbcc 6px, transparent 7px),
+            linear-gradient(270deg, #cfc6b5 0, #f7f2e8 1px, #ddd4c4 2px, #f8f4ec 3px, #d8cfbf 4px, #f5f0e6 5px, #e3dbcc 6px, transparent 7px),
+            linear-gradient(0deg, #cfc6b5 0, #f5f0e6 1px, #ddd4c4 2px, #f8f4ec 3px, #d8cfbf 4px, #f3eee4 5px, transparent 6px),
+            #efe9dd;
+    }
+    #nb-gutter, #nb-curve { display: none; }
+    body.nb-notebook #nb-gutter, body.nb-notebook #nb-curve { display: block; position: absolute; top: 0; bottom: 0; pointer-events: none; }
+    /* 양쪽 종이가 제본선으로 말려 들어가는 굴곡 */
+    body.nb-notebook #nb-curve {
+        left: 0; right: 0; z-index: 118;
+        background:
+            linear-gradient(90deg,
+                rgba(70, 52, 30, 0.07) 0%, rgba(255, 255, 255, 0.07) 6%, rgba(255, 255, 255, 0) 22%,
+                rgba(70, 52, 30, 0.03) 38%, rgba(70, 52, 30, 0.10) 47%, rgba(70, 52, 30, 0.10) 53%, rgba(70, 52, 30, 0.03) 62%,
+                rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, 0.07) 94%, rgba(70, 52, 30, 0.08) 100%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 30%, rgba(70, 52, 30, 0.04) 100%);
+    }
+    /* 가운데 접힌 골 */
+    body.nb-notebook #nb-gutter {
+        z-index: 122;
+        background: linear-gradient(90deg,
+            rgba(60, 42, 24, 0) 0%, rgba(60, 42, 24, 0.06) 30%, rgba(60, 42, 24, 0.20) 44%, rgba(40, 26, 12, 0.42) 49.2%,
+            rgba(255, 250, 240, 0.30) 50%, rgba(40, 26, 12, 0.36) 50.8%, rgba(60, 42, 24, 0.18) 56%, rgba(60, 42, 24, 0.05) 70%, rgba(60, 42, 24, 0) 100%);
+    }
+    body.nb-notebook #nb-ribbon { right: auto; left: calc(var(--nb-x) + var(--nb-half, 0px) + 22px); }
 
     /* --- 수첩 모드: 한 장을 통째로 보고, 넘치면 수첩을 끌어서 옮김 --- */
     body.nb-notebook #main-screen .container {
@@ -584,8 +696,12 @@
 <body>
 
 <div id="auth-screen">
+    <div class="auth-book">
+    <div class="auth-band" aria-hidden="true"></div>
+    <div class="auth-emboss-ko" aria-hidden="true">기분기록지</div>
+    <div class="auth-emboss-en" aria-hidden="true">MOOD JOURNAL</div>
     <div class="auth-box">
-        <h2 style="color:var(--primary); margin:0 0 20px 0;">기분기록지</h2>
+        <h2>이 수첩의 주인</h2>
         <div id="login-form">
             <input id="l-id" class="auth-inp" placeholder="아이디" autocomplete="username">
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="current-password">
@@ -595,8 +711,8 @@
                 </label>
                 <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="./admin-login.html">.</a></div>
             </div>
-            <button class="btn-auth" onclick="login()">로그인</button>
-            <span class="toggle-auth" onclick="toggleAuth('join')">회원가입</span>
+            <button class="btn-auth" onclick="login()">로그인하고 수첩 펴기</button>
+            <span class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</span>
         </div>
         <div id="join-form" class="hidden">
             <input id="j-id" class="auth-inp" placeholder="희망 아이디" autocomplete="username">
@@ -610,9 +726,11 @@
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
             </label>
-            <button class="btn-auth" style="background:#28a745;" onclick="join()">가입완료</button>
+            <button class="btn-auth alt" onclick="join()">가입완료</button>
             <span class="toggle-auth" onclick="toggleAuth('login')">돌아가기</span>
         </div>
+    </div>
+    <div class="auth-emboss-foot" aria-hidden="true">분당서울대학교병원 기분장애클리닉</div>
     </div>
 </div>
 
@@ -2229,9 +2347,9 @@
         // 손 그림의 좌표계에서 펜촉 위치 (300×300, 손목은 오른쪽 아래 화면 밖으로 이어짐)
         const HAND_TIP = [40, 250];
         const HAND_BOX = 300;
-        function handSvg(color) {
+        function handSvg(color, penless = false) {
             const id = `hd${++svgSeq}`;
-            const pen = penSvg(color).replace(/^<svg[^>]*>|<\/svg>$/g, '');
+            const pen = penless ? '' : penSvg(color).replace(/^<svg[^>]*>|<\/svg>$/g, '');
             return `<svg viewBox="0 0 300 300" aria-hidden="true">
                 <defs>
                     <linearGradient id="${id}s" x1="0.1" y1="0.1" x2="0.8" y2="0.9"><stop offset="0" stop-color="#f6d6c2"/><stop offset="0.55" stop-color="#ebbd9f"/><stop offset="1" stop-color="#d59c7c"/></linearGradient>
@@ -2276,67 +2394,138 @@
             </svg>`;
         }
 
-        let hand = null, handAnim = null;
-        function ensureHand() {
+        // 손은 화면 (0,0)에 펜촉이 오도록 두고 transform 으로만 움직임 → 칸 사이를 자연스럽게 옮겨 다님
+        let hand = null, handAnim = null, handPos = null, handIdle = null, handSize = 0, handPenless = false;
+        const PINCH = [81, 212];   // 엄지와 검지가 맞닿는 곳 (종이를 집는 점)
+        const LIFTED = 'drop-shadow(24px 32px 16px rgba(40, 28, 16, 0.22))';
+        const TOUCHING = 'drop-shadow(9px 11px 6px rgba(40, 28, 16, 0.34))';
+        const HT = (x, y, r = 0) => `translate(${x}px, ${y}px) rotate(${r}deg)`;
+        function ensureHand(color = pen, { penless = false } = {}) {
             if (!hand) {
                 hand = document.createElement('div');
                 hand.id = 'nb-hand';
                 document.body.appendChild(hand);
             }
-            const size = Math.max(190, Math.min(270, window.innerWidth * 0.55));
-            hand.style.width = `${size}px`;
-            hand.style.height = `${size}px`;
-            hand.style.transformOrigin = `${HAND_TIP[0] / HAND_BOX * 100}% ${HAND_TIP[1] / HAND_BOX * 100}%`;
-            return size;
+            const base = Math.max(190, Math.min(270, window.innerWidth * 0.55));
+            handSize = Math.round(base * (isNotebook() ? 0.62 + 0.38 * nbView.s : 1));
+            Object.assign(hand.style, {
+                width: `${handSize}px`, height: `${handSize}px`,
+                left: `${-handSize * HAND_TIP[0] / HAND_BOX}px`, top: `${-handSize * HAND_TIP[1] / HAND_BOX}px`,
+                transformOrigin: `${HAND_TIP[0] / HAND_BOX * 100}% ${HAND_TIP[1] / HAND_BOX * 100}%`
+            });
+            if (hand.dataset.color !== color || handPenless !== penless || hand.dataset.size !== String(handSize)) {
+                hand.innerHTML = handSvg(color, penless);
+                hand.dataset.color = color; hand.dataset.size = String(handSize); handPenless = penless;
+            }
+            return handSize;
         }
-        function placeHand(size, x, y) {
-            hand.style.left = `${x - size * HAND_TIP[0] / HAND_BOX}px`;
-            hand.style.top = `${y - size * HAND_TIP[1] / HAND_BOX}px`;
+        // 집는 점이 (x, y)에 오도록 할 때의 펜촉 위치
+        function pinchToTip(x, y, r) {
+            const k = handSize / HAND_BOX, vx = (PINCH[0] - HAND_TIP[0]) * k, vy = (PINCH[1] - HAND_TIP[1]) * k;
+            const c = Math.cos(r * Math.PI / 180), s = Math.sin(r * Math.PI / 180);
+            return { x: x - (vx * c - vy * s), y: y - (vx * s + vy * c) };
+        }
+        function handOff() { return { x: window.innerWidth * 0.82 + handSize * 0.45, y: window.innerHeight + handSize * 0.5, r: 16 }; }
+        // 키프레임: { x, y, r, touch, o, offset }
+        function moveHand(frames, ms, easing = 'cubic-bezier(.4, .1, .3, 1)') {
+            if (handAnim) handAnim.cancel();
+            handAnim = hand.animate(frames.map(f => ({
+                transform: HT(f.x, f.y, f.r ?? 0), opacity: f.o ?? 1, filter: f.touch ? TOUCHING : LIFTED,
+                ...(f.offset !== undefined ? { offset: f.offset } : {})
+            })), { duration: ms, easing, fill: 'forwards' });
+            const last = frames[frames.length - 1];
+            handPos = (last.o ?? 1) > 0 ? { x: last.x, y: last.y, r: last.r ?? 0 } : null;
+            return handAnim;
+        }
+        const fromNow = () => handPos ? { ...handPos } : { ...handOff(), o: 0 };
+        function restHand(ms = 1700) {
+            clearTimeout(handIdle);
+            handIdle = setTimeout(() => {
+                if (!handPos || !hand) return;
+                const off = handOff();
+                moveHand([{ ...handPos }, { x: (handPos.x + off.x) / 2, y: (handPos.y + off.y) / 2 + 10, r: 10, o: 0.9 }, { ...off, o: 0 }], 700, 'cubic-bezier(.5, 0, .7, .3)');
+                handPos = null;
+            }, ms);
         }
 
-        // 칸에 펜촉을 대고 쓰는 손
+        // 칸에 펜촉을 대고 체크 모양으로 긋는 손. 반환값: 잉크가 나오기 시작하는 시각(초)
         function writeWithHand(td) {
             if (reduceMotion || !td) return 0;
-            const size = ensureHand();
-            hand.innerHTML = handSvg(pen);
+            clearTimeout(handIdle);
+            ensureHand(pen);
             const r = td.getBoundingClientRect();
-            placeHand(size, r.left + r.width / 2 - 6, r.top + r.height / 2 + 4);
-            const off = `translate(${window.innerWidth * 0.5}px, ${window.innerHeight * 0.45}px) rotate(8deg)`;
-            if (handAnim) handAnim.cancel();
-            handAnim = hand.animate([
-                { opacity: 0, transform: off },
-                { opacity: 1, transform: 'translate(10px, 8px) rotate(2deg)', offset: 0.3 },
-                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.38 },
-                { opacity: 1, transform: 'translate(4px, 5px) rotate(-1deg)', offset: 0.46 },
-                { opacity: 1, transform: 'translate(8px, -2px) rotate(0.5deg)', offset: 0.55 },
-                { opacity: 1, transform: 'translate(14px, -9px) rotate(1deg)', offset: 0.64 },
-                { opacity: 1, transform: 'translate(20px, -18px) rotate(3deg)', offset: 0.74 },
-                { opacity: 0, transform: off }
-            ], { duration: 1250, easing: 'cubic-bezier(.45, .05, .35, 1)' });
-            return 0.44;
+            const cx = r.left + r.width / 2 - 4, cy = r.top + r.height / 2 + 2;
+            const k = Math.max(0.6, Math.min(1, r.height / 30));
+            const stroke = [
+                { x: cx - 6 * k, y: cy - 1 * k, r: 0, touch: true },
+                { x: cx - 2 * k, y: cy + 4 * k, r: 0.5, touch: true },
+                { x: cx + 8 * k, y: cy - 7 * k, r: 1.5, touch: true },
+                { x: cx + 18 * k, y: cy - 12 * k, r: 3 }
+            ];
+            const start = fromNow();
+            if (handPos) {
+                // 이미 들고 있는 손: 살짝 들어 옆 칸으로 옮겨 감
+                const hop = { x: (start.x + cx) / 2 + 6, y: Math.min(start.y, cy) - 16, r: 2 };
+                moveHand([start, { ...hop, offset: 0.34 }, { ...stroke[0], offset: 0.55 }, { ...stroke[1], offset: 0.66 }, { ...stroke[2], offset: 0.82 }, { ...stroke[3], offset: 1 }], 620);
+                restHand();
+                return 0.34;
+            }
+            const off = handOff();
+            moveHand([
+                { ...off, o: 0 },
+                { x: cx + 60, y: cy + 70, r: 8, o: 1, offset: 0.36 },
+                { x: cx + 14, y: cy + 10, r: 3, offset: 0.56 },
+                { ...stroke[0], offset: 0.66 }, { ...stroke[1], offset: 0.74 }, { ...stroke[2], offset: 0.86 }, { ...stroke[3], offset: 1 }
+            ], 1000, 'cubic-bezier(.35, .1, .3, 1)');
+            restHand();
+            return 0.66;
         }
 
-        // 책상 위 펜을 집어 드는 손
+        // 책상 위 펜을 집어 드는 손: 빈손으로 와서 집고, 들어 올림
         function pickUpWithHand(btn, done) {
             if (reduceMotion || !btn) { done(); return; }
-            const size = ensureHand();
-            const prev = pen;
-            hand.innerHTML = handSvg(btn.dataset.color);
-            const r = btn.getBoundingClientRect();
-            placeHand(size, r.left + r.width * 0.3, r.top + r.height * 0.8);
-            const off = `translate(${window.innerWidth * 0.5}px, ${window.innerHeight * 0.3}px) rotate(10deg)`;
-            if (handAnim) handAnim.cancel();
-            // 손이 오는 동안에는 새 펜이 아직 책상 위에 있음
-            btn.style.opacity = '1';
-            handAnim = hand.animate([
-                { opacity: 0, transform: off },
-                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.42 },
-                { opacity: 1, transform: 'translate(0, 0) rotate(0deg)', offset: 0.5 },
-                { opacity: 1, transform: 'translate(40px, -60px) rotate(6deg)', offset: 0.72 },
-                { opacity: 0, transform: off }
-            ], { duration: 1100, easing: 'cubic-bezier(.45, .05, .35, 1)' });
-            setTimeout(() => { btn.style.opacity = ''; done(); }, 520);
-            void prev;
+            clearTimeout(handIdle);
+            const color = btn.dataset.color || pen;
+            ensureHand(color, { penless: true });
+            const b = btn.getBoundingClientRect();
+            const px = b.left + b.width / 2, py = b.top + b.height / 2;
+            const at = pinchToTip(px, py, 0);
+            const start = fromNow();
+            moveHand([start, { x: at.x + 30, y: at.y - 40, r: 6, offset: 0.55 }, { x: at.x, y: at.y, r: 0, touch: true, offset: 1 }], 520);
+            setTimeout(() => {
+                ensureHand(color);   // 펜을 쥠
+                done();
+                const up = { x: at.x - 40, y: at.y - Math.min(220, window.innerHeight * 0.3), r: -4 };
+                moveHand([{ x: at.x, y: at.y, r: 0, touch: true }, { ...up, offset: 1 }], 520, 'cubic-bezier(.3, .6, .3, 1)');
+                restHand(900);
+            }, 540);
+        }
+
+        // 귀퉁이 넘기기: 손이 와서 엄지·검지로 귀퉁이를 집음 → 넘기는 동안 손끝을 따라감 → 놓고 물러남
+        function handGrabStart(p) {
+            if (reduceMotion) return Promise.resolve();
+            clearTimeout(handIdle);
+            ensureHand(pen);
+            const at = pinchToTip(p.x, p.y, -4);
+            const start = fromNow();
+            const a = moveHand([start, { x: at.x + 24, y: at.y + 30, r: 2, offset: 0.7 }, { x: at.x, y: at.y, r: -4, touch: true, offset: 1 }], handPos && start.o !== 0 ? 360 : 520);
+            return a.finished.catch(() => {});
+        }
+        function handFollow(p, r) {
+            if (reduceMotion || !hand) return;
+            if (handAnim) { handAnim.cancel(); handAnim = null; }
+            const at = pinchToTip(p.x, p.y, r);
+            hand.style.opacity = '1';
+            hand.style.filter = LIFTED;
+            hand.style.transform = HT(at.x, at.y, r);
+            handPos = { x: at.x, y: at.y, r };
+        }
+        function handRelease() {
+            if (!hand || !handPos) return;
+            hand.style.transform = ''; hand.style.filter = ''; hand.style.opacity = '';
+            const p = { ...handPos };
+            moveHand([p, { x: p.x + 20, y: p.y - 26, r: p.r + 4, offset: 1 }], 260);
+            restHand(500);
         }
 
         // 사용자가 칸에 쓰거나 지웠을 때
@@ -2631,7 +2820,7 @@
         const nbView = { s: 1, sFit: 1, zoom: false, dx: 0, dy: 0, minDx: 0, minDy: 0, x0: 0 };
         let panAnim = 0, inertia = 0;
         const isNotebook = () => viewMode === 'notebook';
-        const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs'];
+        const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs', 'nb-pages', 'nb-edge-r', 'nb-edge-l'];
         const clampX = x => Math.max(nbView.minDx, Math.min(0, x));
         const clampY = y => Math.max(nbView.minDy, Math.min(0, y));
 
@@ -2644,9 +2833,14 @@
         }
         function clearView() {
             const main = document.getElementById('main-screen');
-            ['--nb-x', '--nb-right', '--nb-bottom', '--nb-w', '--nb-h'].forEach(v => main?.style.removeProperty(v));
+            ['--nb-x', '--nb-right', '--nb-bottom', '--nb-w', '--nb-h', '--nb-half'].forEach(v => main?.style.removeProperty(v));
             const cont = document.querySelector('#main-screen .container');
-            if (cont) cont.style.transform = '';
+            if (cont) {
+                cont.style.transform = ''; cont.style.clipPath = '';
+                ['--nb-padl', '--nb-padr', '--nb-inv'].forEach(v => cont.style.removeProperty(v));
+            }
+            const pages = document.querySelector('#nb-pages > div');
+            if (pages) pages.style.clipPath = '';
             NB_MOVERS.forEach(id => { const el = document.getElementById(id); if (el) el.style.transform = ''; });
             Object.assign(nbView, { dx: 0, dy: 0, minDx: 0, minDy: 0, s: 1, zoom: false });
         }
@@ -2668,7 +2862,16 @@
             if (!table || !header || !bar) return;
             const { top, bottom, mx, mr } = rootVars();
             const vw = window.innerWidth, vh = window.innerHeight;
-            const Wn = Math.max(table.offsetWidth, 560);
+            // 펼친 양면: 날짜 칸 경계 하나가 정확히 가운데 접힘에 오도록 양쪽 여백을 맞춤
+            const Tw = table.offsetWidth, margin = 26;
+            let b = Tw / 2;
+            const ths = [...document.querySelectorAll('#header-row th')];
+            let best = Infinity;
+            ths.forEach(th => { const e = th.offsetLeft + th.offsetWidth; const m = Math.max(e, Tw - e); if (e > 0 && e < Tw && m < best) { best = m; b = e; } });
+            const F = Math.max(margin + Math.max(b, Tw - b), 300);
+            cont.style.setProperty('--nb-padl', `${F - b}px`);
+            cont.style.setProperty('--nb-padr', `${F - (Tw - b)}px`);
+            const Wn = 2 * F;
             const Hn = header.offsetHeight + bar.offsetHeight + table.offsetHeight + 2;
             const roomH = vh - top - bottom, roomW = vw - mx - mr;
             nbView.sFit = Math.min(1, roomH / Hn);
@@ -2681,6 +2884,18 @@
             main.style.setProperty('--nb-bottom', `${vh - top - Hv}px`);
             main.style.setProperty('--nb-w', `${Wn}px`);
             main.style.setProperty('--nb-h', `${Hn}px`);
+            main.style.setProperty('--nb-half', `${Wv / 2}px`);
+            cont.style.setProperty('--nb-inv', String(1 / s));
+            // 가운데로 갈수록 종이 위·아래 가장자리가 제본선 쪽으로 말려 들어감
+            const dip = 6 / s, c = F;
+            cont.style.clipPath = `path("M0,0 C${c * 0.55},0 ${c * 0.9},${dip * 0.3} ${c},${dip} C${c * 1.1},${dip * 0.3} ${c * 1.45},0 ${Wn},0 L${Wn},${Hn} C${c * 1.45},${Hn} ${c * 1.1},${Hn - dip * 0.3} ${c},${Hn - dip} C${c * 0.9},${Hn - dip * 0.3} ${c * 0.55},${Hn} 0,${Hn} Z")`;
+            const pages = document.querySelector('#nb-pages > div');
+            if (pages) {
+                const pw = Wv + 12, ph = Hv + 5, pc = pw / 2, pd = 4;
+                pages.style.clipPath = `path("M0,0 C${pc * 0.55},0 ${pc * 0.9},${pd * 0.3} ${pc},${pd} C${pc * 1.1},${pd * 0.3} ${pc * 1.45},0 ${pw},0 L${pw},${ph} C${pc * 1.45},${ph} ${pc * 1.1},${ph - pd * 0.4} ${pc},${ph - pd} C${pc * 0.9},${ph - pd * 0.4} ${pc * 0.55},${ph} 0,${ph} Z")`;
+            }
+            const gut = document.getElementById('nb-gutter');
+            if (gut) { const gw = 120 / s; gut.style.left = `${F - gw / 2}px`; gut.style.width = `${gw}px`; }
             nbView.s = s; nbView.x0 = x0;
             nbView.minDx = Math.min(0, roomW - Wv);
             nbView.minDy = Math.min(0, roomH - Hv);
@@ -2710,7 +2925,7 @@
             if (!isNotebook() || nbView.minDx >= 0) return;
             const th = document.querySelector('.today-header');
             if (!th) return;
-            const cx = nbView.x0 + (th.offsetLeft + th.offsetWidth / 2) * nbView.s;
+            const cx = nbView.x0 + (document.getElementById('mood-table').offsetLeft + th.offsetLeft + th.offsetWidth / 2) * nbView.s;
             animatePan(window.innerWidth / 2 - cx);
         }
         // 가까이 보기 ↔ 한 장 전체: 화면의 한 점(기본은 가운데)을 기준으로 커지거나 작아짐
@@ -3050,15 +3265,18 @@
             precision mediump float;
             #endif
         `;
-        // 얇은 종이 말림: 접힘선(기울어진 직선) 오른쪽은 반지름 R 의 원통을 따라 말려 올라가고,
-        // 원통을 지난 부분은 뒤집혀 접힘선 왼쪽 위로 겹침. 오른쪽 아래 귀퉁이가 먼저 들림.
+        // 종이 좌표: 제본선에서 바깥쪽으로 x (0..W), 위에서 아래로 y (0..H).
+        // 잡은 귀퉁이 C 가 손끝 F 에 오도록 접힘선을 정하고(C·F 의 수직이등분선을 말린 반지름만큼 보정),
+        // 접힘선 바깥쪽은 반지름 R 의 원통을 따라 말려 올라가 뒤집혀 겹침.
         const VS = `
             attribute vec2 aUV;
-            uniform vec2 uPage;      // 페이지 크기 (px)
-            uniform vec2 uOrigin;    // 캔버스 안 페이지 왼쪽 위 (px)
-            uniform vec2 uCanvas;    // 캔버스 크기 (px)
+            uniform vec2 uPage;      // 한 장의 크기 W, H (px)
+            uniform float uSpine;    // 제본선의 화면 x
+            uniform float uTop;      // 종이 위쪽 화면 y
+            uniform float uSgn;      // 오른쪽 장 +1, 왼쪽 장 -1
+            uniform vec2 uCanvas;
             uniform vec2 uCenter;    // 원근 중심 (px)
-            uniform float uFold;     // 접힘선이 페이지 가운데 높이를 지나는 x (px)
+            uniform float uFold;     // 접힘선이 종이 가운데 높이를 지나는 x
             uniform float uTilt;     // 접힘선 기울기 (rad)
             uniform float uR;        // 말린 종이 반지름 (px)
             uniform float uPersp;
@@ -3082,8 +3300,8 @@
                     q = base - n * (d - PI * uR); z = 2.0 * uR;
                     N = vec3(0.0, 0.0, -1.0);
                 }
-                vN = N; vD = d; vQx = q.x;
-                vec2 sc = uOrigin + q;
+                vN = vec3(N.x * uSgn, N.y, N.z); vD = d; vQx = q.x;
+                vec2 sc = vec2(uSpine + uSgn * q.x, uTop + q.y);
                 float k = uPersp / (uPersp - z);
                 vec2 scr = uCenter + (sc - uCenter) * k;
                 vec2 clip = scr / uCanvas * 2.0 - 1.0;
@@ -3093,75 +3311,92 @@
         `;
         const FS = PREC + `
             uniform sampler2D uFront;
+            uniform sampler2D uBack;
+            uniform vec4 uFrontCrop;  // 앞면 그림에서 이 장이 차지하는 영역 (u0, v0, du, dv)
+            uniform vec4 uBackCrop;
+            uniform float uUseBack;   // 1: 뒷면에 다음 쪽 그림, 0: 얇은 종이라 앞면이 비침
+            uniform float uMirror;    // 왼쪽 장(오른쪽으로 넘어감)
             uniform float uAlpha;
-            uniform vec3 uPaper;     // 뒷면 종이 색 (바랜 정도 반영)
-            uniform float uRf;       // uR 과 같은 값 (WebGL1 정밀도 불일치 링크 오류를 피하려고 따로 둠)
-            uniform float uCurl;     // 들린 정도 0..1
+            uniform vec3 uPaper;
+            uniform float uRf;
+            uniform float uCurl;
             uniform float uW;
+            uniform float uFade;      // 1: 제본선 너머(보이지 않는 면)로 가면 사라짐
             varying vec2 vUV;
             varying vec3 vN;
             varying float vD;
             varying float vQx;
             void main() {
+                bool front = uMirror > 0.5 ? !gl_FrontFacing : gl_FrontFacing;
                 vec3 L = normalize(vec3(-0.32, -0.42, 0.85));
-                vec3 N = normalize(gl_FrontFacing ? vN : -vN);
+                vec3 N = normalize(front ? vN : -vN);
                 float diff = 0.80 + 0.24 * dot(N, L);
                 float spec = pow(max(dot(reflect(-L, N), vec3(0.0, 0.0, 1.0)), 0.0), 26.0) * 0.09 * uCurl;
-                // 말려 올라가는 골 안쪽에 드는 그늘
                 float a = vD / max(uRf, 1.0);
                 float crease = (vD > 0.0 && a < 3.2) ? 0.09 * exp(-a * 2.0) * uCurl : 0.0;
                 float sh = diff - crease;
+                float gutter = 1.0 - 0.10 * exp(-vUV.x * 18.0);
+                float fu = uMirror > 0.5 ? 1.0 - vUV.x : vUV.x;
+                vec2 fuv = uFrontCrop.xy + vec2(fu, vUV.y) * uFrontCrop.zw;
                 vec3 c;
-                if (gl_FrontFacing) {
-                    c = texture2D(uFront, vUV).rgb;
-                    float gutter = 1.0 - 0.10 * exp(-vUV.x * 18.0);
-                    // 젖혀 올린 종이가 아직 평평한 쪽에 드리우는 그늘
+                if (front) {
+                    c = texture2D(uFront, fuv).rgb;
                     float flap = vD < 0.0 ? 0.22 * uCurl * exp(vD / (uRf * 0.9 + 6.0)) : 0.0;
                     c = c * sh * gutter * (1.0 - flap) + spec;
+                } else if (uUseBack > 0.5) {
+                    float bu = uMirror > 0.5 ? vUV.x : 1.0 - vUV.x;
+                    c = texture2D(uBack, uBackCrop.xy + vec2(bu, vUV.y) * uBackCrop.zw).rgb * sh * gutter + spec;
                 } else {
-                    // 얇은 종이라 앞면 글씨가 거울처럼 비침
-                    vec3 show = texture2D(uFront, vUV).rgb;
+                    vec3 show = texture2D(uFront, fuv).rgb;
                     c = mix(uPaper, uPaper * show, 0.14) * sh + spec;
                 }
-                // 제본선 너머(보이지 않는 왼쪽 면)로 넘어간 부분은 서서히 사라짐
-                float beyond = 1.0 - smoothstep(0.0, uW * 0.24, -vQx);
+                float beyond = uFade > 0.5 ? 1.0 - smoothstep(0.0, uW * 0.24, -vQx) : 1.0;
                 gl_FragColor = vec4(c, 1.0) * (uAlpha * beyond);
             }
         `;
-        // 아래 페이지(그림 또는 실제 화면)에 드리우는 그림자
+        // 깔아 둔 그림(넘기는 동안 그대로 있어야 할 쪽)과, 넘어가는 종이가 드리우는 그림자
         const FLAT_VS = `
             attribute vec2 aUV;
-            uniform vec2 uPage; uniform vec2 uOrigin; uniform vec2 uCanvas;
+            uniform vec4 uRect;      // 화면 영역 (x, y, w, h)
+            uniform vec2 uCanvas;
             varying vec2 vUV;
+            varying vec2 vScr;
             void main() {
-                vec2 sc = uOrigin + aUV * uPage;
+                vec2 sc = uRect.xy + aUV * uRect.zw;
                 vec2 clip = sc / uCanvas * 2.0 - 1.0;
                 gl_Position = vec4(clip.x, -clip.y, 0.999, 1.0);
-                vUV = aUV;
+                vUV = aUV; vScr = sc;
             }
         `;
         const FLAT_FS = PREC + `
             uniform sampler2D uTex;
-            uniform float uUseTex;
-            uniform vec2 uPageF;     // uPage 와 같은 값 (정점·조각 셰이더 정밀도 분리)
+            uniform vec4 uCrop;
+            uniform float uMode;     // 0: 그림, 1: 그림자
+            uniform float uSpineF;
+            uniform float uTopF;
+            uniform float uSgnF;
+            uniform vec2 uPageF;
             uniform float uFold;
             uniform float uTilt;
-            uniform float uR;
+            uniform float uRs;
             uniform float uStrength;
+            uniform float uGutter;
             varying vec2 vUV;
+            varying vec2 vScr;
             void main() {
-                vec2 p = vUV * uPageF;
+                if (uMode < 0.5) {
+                    vec3 c = texture2D(uTex, uCrop.xy + vUV * uCrop.zw).rgb;
+                    c *= 1.0 - uGutter * 0.16 * exp(-abs(vScr.x - uSpineF) / 18.0);
+                    gl_FragColor = vec4(c, 1.0);
+                    return;
+                }
+                vec2 p = vec2(uSgnF * (vScr.x - uSpineF), vScr.y - uTopF);
                 vec2 n = vec2(cos(uTilt), sin(uTilt));
                 float d = dot(p - vec2(uFold, uPageF.y * 0.5), n);
-                float sh = d > 0.0 ? 0.40 * uStrength * exp(-max(d - uR * 0.55, 0.0) / (uR * 1.2 + 14.0)) : 0.0;
+                float sh = d > 0.0 ? 0.40 * uStrength * exp(-max(d - uRs * 0.55, 0.0) / (uRs * 1.2 + 14.0)) : 0.0;
                 sh += 0.08 * uStrength * exp(-p.x / 30.0);
                 sh = clamp(sh, 0.0, 0.6);
-                if (uUseTex > 0.5) {
-                    vec3 c = texture2D(uTex, vUV).rgb;
-                    gl_FragColor = vec4(c * (1.0 - sh), 1.0);
-                } else {
-                    gl_FragColor = vec4(vec3(0.16, 0.10, 0.04) * sh, sh);
-                }
+                gl_FragColor = vec4(vec3(0.16, 0.10, 0.04) * sh, sh);
             }
         `;
 
@@ -3194,8 +3429,9 @@
                 GL.buf.idx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
                 GL.count = idx.length;
                 GL.buf.quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
-                ['uPage', 'uOrigin', 'uCanvas', 'uCenter', 'uFold', 'uTilt', 'uR', 'uPersp', 'uFront', 'uAlpha', 'uPaper', 'uCurl', 'uW', 'uRf'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
-                ['uPage', 'uOrigin', 'uCanvas', 'uTex', 'uUseTex', 'uPageF', 'uFold', 'uTilt', 'uR', 'uStrength'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
+                ['uPage', 'uSpine', 'uTop', 'uSgn', 'uCanvas', 'uCenter', 'uFold', 'uTilt', 'uR', 'uPersp',
+                    'uFront', 'uBack', 'uFrontCrop', 'uBackCrop', 'uUseBack', 'uMirror', 'uAlpha', 'uPaper', 'uRf', 'uCurl', 'uW', 'uFade'].forEach(n => GL.u[n] = gl.getUniformLocation(GL.prog, n));
+                ['uRect', 'uCanvas', 'uTex', 'uCrop', 'uMode', 'uSpineF', 'uTopF', 'uSgnF', 'uPageF', 'uFold', 'uTilt', 'uRs', 'uStrength', 'uGutter'].forEach(n => GL.fu[n] = gl.getUniformLocation(GL.flatProg, n));
                 document.body.appendChild(cv);
                 GL.canvas = cv; GL.gl = gl; GL.ok = true;
             } catch (e) {
@@ -3216,112 +3452,204 @@
             return t;
         }
 
-        // turnTex: 넘어가는 종이, underTex: 그 아래 종이(없으면 실제 화면이 보임)
-        // pFrom → pTo 로 넘어감 (0 = 페이지 위에 놓임, 1 = 제본선 너머로 완전히 넘어감)
-        function runTurn({ turnTex, underTex, rect, pFrom, pTo, duration, paper }) {
+        // 한 장의 모양: 손끝 F 와 잡은 귀퉁이 C (종이 좌표)로부터 접힘선·반지름을 정함
+        function curlOf(F, C, W, H) {
+            // 제본선에 붙어 있으니 귀퉁이가 원래보다 제본선에서 멀어질 수는 없음
+            for (const sy of [0, H]) {
+                const max = Math.hypot(C.x, C.y - sy), dx = F.x, dy = F.y - sy, len = Math.hypot(dx, dy);
+                if (len > max && len > 0) F = { x: dx * max / len, y: sy + dy * max / len };
+            }
+            const p = Math.max(0, Math.min(1, (W - F.x) / (2 * W)));
+            const curl = Math.sin(Math.PI * p);
+            const vx = C.x - F.x, vy = C.y - F.y, L = Math.hypot(vx, vy);
+            if (L < 0.5) return { fold: W * 3, tilt: 0, R: 10, curl: 0, p: 0 };
+            let nx = vx / L, ny = vy / L;
+            if (nx < 0.3) { nx = 0.3; ny = Math.sign(ny || 1) * Math.sqrt(1 - 0.09); }
+            const R = Math.max(10, Math.min(140, W * (0.028 + 0.075 * curl)));
+            const dC = (L + Math.PI * R) / 2;
+            const px = C.x - nx * dC, py = C.y - ny * dC;
+            return { fold: px - (H / 2 - py) * ny / nx, tilt: Math.atan2(ny, nx), R, curl, p };
+        }
+        const turnedF = (C, W) => ({ x: -(W + Math.PI * Math.max(10, W * 0.028)), y: C.y });
+
+        // 넘김 장면: 깔아 둔 그림 + 넘어가는 종이 한 장
+        function turnGeom() {
+            const cont = document.querySelector('#main-screen .container');
+            const cr = cont.getBoundingClientRect();
+            return isNotebook()
+                ? { cr, spread: true, spine: cr.left + cr.width / 2, top: cr.top, W: cr.width / 2, H: cr.height }
+                : { cr, spread: false, spine: cr.left, top: cr.top, W: cr.width, H: cr.height };
+        }
+        const CROP_FULL = [0, 0, 1, 1], CROP_L = [0, 0, 0.5, 1], CROP_R = [0.5, 0, 0.5, 1];
+        function makeScene(g) {
             const gl = GL.gl, cv = GL.canvas;
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const cw = window.innerWidth, ch = window.innerHeight;
             cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
             Object.assign(cv.style, { width: `${cw}px`, height: `${ch}px`, display: 'block' });
             gl.viewport(0, 0, cv.width, cv.height);
-            const W = rect.width, H = rect.height;
-            const origin = [rect.left, rect.top];
-            const center = [rect.left + W / 2, rect.top + H * 0.45];
-            const persp = Math.max(1700, W * 2.4);
-            const smooth = (a, b, x) => { const k = Math.max(0, Math.min(1, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
-
-            return new Promise(resolve => {
-                const t0 = performance.now();
-                const frame = (now) => {
-                    const t = duration <= 1 ? 1 : Math.min(1, (now - t0) / duration);
-                    // 손끝으로 귀퉁이를 집어 가볍게 들고, 미끄러지듯 넘긴 뒤 사뿐히 내려놓음
-                    const s = t * t * (3 - 2 * t);
-                    const e = pFrom + (pTo - pFrom) * s;
-                    const curl = Math.sin(Math.PI * Math.min(1, e));
-                    const tilt = 0.34 * Math.pow(1 - e, 0.85);
-                    const flutter = Math.sin(e * Math.PI * 3.2) * curl * 0.010;
-                    const R = Math.max(12, Math.min(130, W * (0.035 + 0.075 * curl + flutter)));
-                    const fold = (1 - e) * (W + (H / 2) * Math.tan(tilt));
-
-                    gl.clearColor(0, 0, 0, 0);
-                    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-                    gl.enable(gl.BLEND);
-                    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-                    gl.useProgram(GL.flatProg);
-                    gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad);
-                    const la = gl.getAttribLocation(GL.flatProg, 'aUV');
-                    gl.enableVertexAttribArray(la);
-                    gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
-                    gl.uniform2f(GL.fu.uPage, W, H); gl.uniform2f(GL.fu.uPageF, W, H); gl.uniform2f(GL.fu.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.fu.uCanvas, cw, ch);
-                    gl.uniform1f(GL.fu.uFold, fold); gl.uniform1f(GL.fu.uTilt, tilt); gl.uniform1f(GL.fu.uR, R);
-                    gl.uniform1f(GL.fu.uStrength, 0.6 * curl);
-                    gl.activeTexture(gl.TEXTURE0);
-                    if (underTex) { gl.bindTexture(gl.TEXTURE_2D, underTex); gl.uniform1i(GL.fu.uTex, 0); gl.uniform1f(GL.fu.uUseTex, 1); }
-                    else gl.uniform1f(GL.fu.uUseTex, 0);
+            const persp = Math.max(1700, g.W * 2.4);
+            const scene = { g, flats: [], sheet: null, sgn: 1, fade: false, C: null, F: null, alpha: 1 };
+            const rectOfSide = sgn => sgn > 0 ? [g.spine, g.top, g.W, g.H] : [g.spine - g.W, g.top, g.W, g.H];
+            scene.halfRect = rectOfSide;
+            scene.fullRect = [g.cr.left, g.top, g.cr.width, g.H];
+            scene.screen = F => ({ x: g.spine + scene.sgn * F.x, y: g.top + F.y });
+            scene.draw = () => {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                gl.disable(gl.DEPTH_TEST);
+                gl.useProgram(GL.flatProg);
+                gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.quad);
+                const la = gl.getAttribLocation(GL.flatProg, 'aUV');
+                gl.enableVertexAttribArray(la);
+                gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
+                gl.uniform2f(GL.fu.uCanvas, cw, ch);
+                gl.uniform1f(GL.fu.uSpineF, g.spine); gl.uniform1f(GL.fu.uTopF, g.top); gl.uniform2f(GL.fu.uPageF, g.W, g.H);
+                gl.uniform1f(GL.fu.uGutter, g.spread ? 1 : 0);
+                gl.activeTexture(gl.TEXTURE0); gl.uniform1i(GL.fu.uTex, 0);
+                scene.flats.forEach(f => {
+                    gl.uniform1f(GL.fu.uMode, 0);
+                    gl.uniform4f(GL.fu.uRect, ...f.rect); gl.uniform4f(GL.fu.uCrop, ...f.crop);
+                    gl.bindTexture(gl.TEXTURE_2D, f.tex);
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                });
+                const s = scene.sheet;
+                if (!s || !scene.F) return;
+                const k = curlOf(scene.F, scene.C, g.W, g.H);
+                gl.uniform1f(GL.fu.uMode, 1);
+                gl.uniform4f(GL.fu.uRect, ...rectOfSide(scene.sgn));
+                gl.uniform1f(GL.fu.uSgnF, scene.sgn);
+                gl.uniform1f(GL.fu.uFold, k.fold); gl.uniform1f(GL.fu.uTilt, k.tilt); gl.uniform1f(GL.fu.uRs, k.R);
+                gl.uniform1f(GL.fu.uStrength, 0.6 * k.curl);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-                    gl.enable(gl.DEPTH_TEST);
-                    gl.useProgram(GL.prog);
-                    gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.uv);
-                    const a = gl.getAttribLocation(GL.prog, 'aUV');
-                    gl.enableVertexAttribArray(a);
-                    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx);
-                    gl.uniform2f(GL.u.uPage, W, H); gl.uniform2f(GL.u.uOrigin, origin[0], origin[1]); gl.uniform2f(GL.u.uCanvas, cw, ch);
-                    gl.uniform2f(GL.u.uCenter, center[0], center[1]);
-                    gl.uniform1f(GL.u.uFold, fold); gl.uniform1f(GL.u.uTilt, tilt); gl.uniform1f(GL.u.uR, R);
-                    gl.uniform1f(GL.u.uPersp, persp);
-                    gl.uniform1f(GL.u.uCurl, curl); gl.uniform1f(GL.u.uW, W); gl.uniform1f(GL.u.uRf, R);
-                    gl.uniform3f(GL.u.uPaper, paper[0], paper[1], paper[2]);
-                    // 거의 다 넘어가면 깨끗이 사라짐 (반대로 돌아올 때는 나타남)
-                    gl.uniform1f(GL.u.uAlpha, duration <= 1 ? 1 : 1 - smooth(0.86, 1.0, e));
-                    gl.bindTexture(gl.TEXTURE_2D, turnTex); gl.uniform1i(GL.u.uFront, 0);
-                    gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
-                    gl.disable(gl.DEPTH_TEST);
-
-                    if (t < 1) requestAnimationFrame(frame);
-                    else resolve();
+                gl.clear(gl.DEPTH_BUFFER_BIT);
+                gl.enable(gl.DEPTH_TEST);
+                gl.useProgram(GL.prog);
+                gl.bindBuffer(gl.ARRAY_BUFFER, GL.buf.uv);
+                const a = gl.getAttribLocation(GL.prog, 'aUV');
+                gl.enableVertexAttribArray(a);
+                gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GL.buf.idx);
+                const u = GL.u;
+                gl.uniform2f(u.uPage, g.W, g.H); gl.uniform1f(u.uSpine, g.spine); gl.uniform1f(u.uTop, g.top); gl.uniform1f(u.uSgn, scene.sgn);
+                gl.uniform2f(u.uCanvas, cw, ch);
+                gl.uniform2f(u.uCenter, g.spread ? g.spine : g.spine + g.W / 2, g.top + g.H * 0.45);
+                gl.uniform1f(u.uFold, k.fold); gl.uniform1f(u.uTilt, k.tilt); gl.uniform1f(u.uR, k.R); gl.uniform1f(u.uRf, k.R);
+                gl.uniform1f(u.uPersp, persp);
+                gl.uniform1f(u.uCurl, k.curl); gl.uniform1f(u.uW, g.W);
+                gl.uniform1f(u.uFade, scene.fade ? 1 : 0);
+                gl.uniform1f(u.uMirror, scene.sgn < 0 ? 1 : 0);
+                gl.uniform3f(u.uPaper, ...s.paper);
+                gl.uniform1f(u.uAlpha, scene.fade ? 1 - Math.max(0, Math.min(1, (k.p - 0.9) / 0.1)) : 1);
+                gl.uniform4f(u.uFrontCrop, ...s.crop);
+                gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, s.front); gl.uniform1i(u.uFront, 0);
+                gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, s.back || s.front); gl.uniform1i(u.uBack, 1);
+                gl.uniform1f(u.uUseBack, s.back ? 1 : 0);
+                gl.uniform4f(u.uBackCrop, ...(s.backCrop || CROP_FULL));
+                gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
+                gl.disable(gl.DEPTH_TEST);
+                gl.activeTexture(gl.TEXTURE0);
+            };
+            // 손끝을 목표 위치로 옮김 (lift: 옮기는 동안 위로 들리는 정도, onFrame: 손 그림 따라가기)
+            scene.animate = (to, ms, { lift = 0, onFrame } = {}) => new Promise(resolve => {
+                const from = { ...scene.F }, t0 = performance.now();
+                const frame = now => {
+                    const t = ms <= 1 ? 1 : Math.min(1, (now - t0) / ms);
+                    const e = t * t * (3 - 2 * t);
+                    scene.F = { x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e - lift * Math.sin(Math.PI * e) };
+                    scene.draw();
+                    onFrame?.(scene.screen(scene.F), t);
+                    if (t < 1) requestAnimationFrame(frame); else resolve();
                 };
                 requestAnimationFrame(frame);
             });
+            scene.hide = () => { cv.style.display = 'none'; };
+            return scene;
         }
 
+        // 넘김 준비: 지금 쪽을 그림으로 옮기고, 필요하면 새 달을 먼저 불러와 뒷면 그림까지 만듦
+        // C: 잡은 귀퉁이(종이 좌표, 생략하면 아래 귀퉁이)
+        async function prepareTurn(dir, doRender, grabY) {
+            const g = turnGeom();
+            const gl = GL.gl;
+            const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+            const oldTex = texFrom(snapshotPage(scale).canvas);
+            const texes = [oldTex];
+            const oldPaper = paperRGB(pageAge());
+            const oldDate = new Date(curDate);
+            const scene = makeScene(g);
+            const C = { x: g.W, y: Math.max(0, Math.min(g.H, grabY ?? g.H * 0.94)) };
+            scene.C = C;
+            const t = { g, scene, dir, C, oldDate };
+            t.dispose = () => { scene.hide(); texes.forEach(x => gl.deleteTexture(x)); };
+            // 넘기다 되돌리면 원래 달을 다시 그림 (그동안은 그림으로 덮어 둠)
+            t.revert = async () => {
+                suppressCascade = true;
+                const loaded = waitForLoad(1500);
+                curDate = oldDate; renderTable();
+                await loaded;
+                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+            };
+            if (!g.spread && dir > 0) {
+                doRender();
+                Object.assign(scene, { sgn: 1, fade: true, sheet: { front: oldTex, crop: CROP_FULL, paper: oldPaper } });
+                t.startF = { ...C }; t.endF = turnedF(C, g.W);
+                return t;
+            }
+            scene.flats = [{ tex: oldTex, crop: CROP_FULL, rect: scene.fullRect }];
+            scene.draw();
+            suppressCascade = true;
+            const loaded = waitForLoad(1500);
+            doRender();
+            await loaded;
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+            const newTex = texFrom(snapshotPage(scale).canvas);
+            texes.push(newTex);
+            const newPaper = paperRGB(pageAge());
+            if (!g.spread) {
+                // 가독성 모드의 이전 달: 넘겨 두었던 앞 장이 돌아와 덮음
+                Object.assign(scene, { sgn: 1, fade: true, sheet: { front: newTex, crop: CROP_FULL, paper: newPaper } });
+                t.startF = turnedF(C, g.W); t.endF = { ...C };
+            } else if (dir > 0) {
+                // 펼친 수첩의 다음 달: 오른쪽 장이 넘어가며 뒷면이 새 왼쪽 쪽이 됨
+                scene.flats = [{ tex: oldTex, crop: CROP_L, rect: scene.halfRect(-1) }];
+                Object.assign(scene, { sgn: 1, fade: false, sheet: { front: oldTex, crop: CROP_R, back: newTex, backCrop: CROP_L, paper: oldPaper } });
+                t.startF = { ...C }; t.endF = turnedF(C, g.W);
+            } else {
+                // 펼친 수첩의 이전 달: 왼쪽 장이 오른쪽으로 넘어옴
+                scene.flats = [{ tex: oldTex, crop: CROP_R, rect: scene.halfRect(1) }];
+                Object.assign(scene, { sgn: -1, fade: false, sheet: { front: oldTex, crop: CROP_L, back: newTex, backCrop: CROP_R, paper: oldPaper } });
+                t.startF = { ...C }; t.endF = turnedF(C, g.W);
+            }
+            return t;
+        }
+
+        // 버튼·탭으로 넘길 때: 손이 와서 귀퉁이를 집어 넘김
         async function flip(dir, doRender) {
             animateNextLoad = true;
             if (flipping) { doRender(); return; }
             if (reduceMotion || !document.querySelector('#main-screen .container')) { doRender(); return; }
             if (!initGL()) { cssFlip(dir, doRender); return; }
             flipping = true;
+            let t = null;
             try {
-                const scale = Math.min(window.devicePixelRatio || 1, 1.5);
-                const oldSnap = snapshotPage(scale);
-                const gl = GL.gl;
-                const oldTex = texFrom(oldSnap.canvas);
-                const TURN_MS = 1150;
-                if (dir > 0) {
-                    // 다음 달: 지금 페이지의 귀퉁이가 들리며 얇은 종이처럼 말려 왼쪽으로 넘어감
-                    const paper = paperRGB(pageAge());
-                    doRender();
-                    await runTurn({ turnTex: oldTex, underTex: null, rect: oldSnap.rect, pFrom: 0, pTo: 1, duration: TURN_MS, paper });
-                    gl.deleteTexture(oldTex);
-                } else {
-                    // 이전 달: 넘겨 두었던 앞 장이 말린 채 되돌아와 덮음 (새 페이지를 불러온 뒤 그림으로 옮김)
-                    suppressCascade = true;
-                    await runTurn({ turnTex: oldTex, underTex: oldTex, rect: oldSnap.rect, pFrom: 0, pTo: 0, duration: 1, paper: paperRGB(0) });
-                    const loaded = waitForLoad(1500);
-                    doRender();
-                    await loaded;
-                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-                    const newSnap = snapshotPage(scale);
-                    const newTex = texFrom(newSnap.canvas);
-                    await runTurn({ turnTex: newTex, underTex: oldTex, rect: oldSnap.rect, pFrom: 1, pTo: 0, duration: TURN_MS, paper: paperRGB(pageAge()) });
-                    gl.deleteTexture(newTex); gl.deleteTexture(oldTex);
-                }
+                t = await prepareTurn(dir, doRender);
+                const sc = t.scene;
+                sc.F = { ...t.startF };
+                sc.draw();
+                const lift = t.g.H * 0.10;
+                const grab = handGrabStart(sc.screen(sc.F));
+                await grab;
+                await sc.animate(t.endF, 1150, { lift, onFrame: (p, k) => handFollow(p, -4 - 10 * k) });
+                handRelease();
             } catch (e) {
                 console.warn('페이지 넘김 효과 오류(무시됨):', e?.message || e);
+                handRelease();
             } finally {
+                t?.dispose();
                 if (GL.canvas) GL.canvas.style.display = 'none';
                 flipping = false;
                 scheduleMoodLine();
@@ -3338,6 +3666,91 @@
                 { transform: `perspective(1600px) rotateY(${dir > 0 ? 25 : -25}deg)`, opacity: 0.4 },
                 { transform: 'perspective(1600px) rotateY(0deg)', opacity: 1 }
             ], { duration: 450, easing: 'ease-out' });
+        }
+
+        // ---------- 종이 끝을 잡아 끌어서 넘기기 ----------
+        // 오른쪽 귀퉁이·가장자리 → 다음 달, 왼쪽 가장자리(펼친 수첩은 왼쪽 귀퉁이) → 이전 달
+        function bindPageGrab(el, dir) {
+            if (!el || el.dataset.grab) return;
+            el.dataset.grab = '1';
+            let s = null;
+            const doRenderFor = d => () => { curDate.setMonth(curDate.getMonth() + d); renderTable(); };
+            const toF = (t, ev) => {
+                const g = t.g, sgn = t.scene.sgn;
+                const lx = sgn * (ev.clientX - g.spine), ly = ev.clientY - g.top;
+                // 가독성 모드의 이전 달은 제본선 너머의 장을 끌어오므로 손 움직임의 두 배로 따라옴
+                if (!g.spread && t.dir < 0) return { x: 2 * lx - g.W, y: ly };
+                return { x: lx, y: ly };
+            };
+            let raf = 0;
+            const redraw = () => { raf = 0; if (s?.t && s.last) { s.t.scene.F = toF(s.t, s.last); s.t.scene.draw(); } };
+            el.addEventListener('pointerdown', e => {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                e.stopPropagation();
+                if (flipping || s) return;
+                e.preventDefault();
+                try { el.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+                s = { id: e.pointerId, x0: e.clientX, y0: e.clientY, last: e, moved: false, t: null, ready: null, vx: 0, lx: e.clientX, lt: performance.now() };
+            });
+            el.addEventListener('pointermove', e => {
+                if (!s || e.pointerId !== s.id) return;
+                const now = performance.now(), dt = Math.max(1, now - s.lt);
+                s.vx = s.vx * 0.6 + ((e.clientX - s.lx) / dt) * 0.4; s.lx = e.clientX; s.lt = now;
+                s.last = e;
+                if (!s.moved) {
+                    if (Math.hypot(e.clientX - s.x0, e.clientY - s.y0) < 6) return;
+                    if (reduceMotion || !initGL() || !document.querySelector('#main-screen .container')) return;
+                    s.moved = true;
+                    flipping = true;
+                    animateNextLoad = true;
+                    document.body.classList.add('nb-turning');
+                    const g0 = turnGeom();
+                    const grabY = s.y0 - g0.top;
+                    s.ready = prepareTurn(dir, doRenderFor(dir), grabY).then(t => {
+                        if (!s) { t.dispose(); return null; }
+                        s.t = t;
+                        t.scene.F = toF(t, s.last);
+                        t.scene.draw();
+                        return t;
+                    });
+                    return;
+                }
+                if (s.t && !raf) raf = requestAnimationFrame(redraw);
+            });
+            const end = async e => {
+                if (!s || e.pointerId !== s.id) return;
+                const cur = s;
+                try { el.releasePointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+                if (!cur.moved) { s = null; moveMonth(dir); return; }
+                let t = null;
+                try {
+                    t = await cur.ready;
+                    if (!t) return;
+                    const sc = t.scene, g = t.g;
+                    sc.F = toF(t, cur.last);
+                    const vLocal = sc.sgn * cur.vx;
+                    let commit;
+                    if (!g.spread && dir < 0) commit = e.type !== 'pointercancel' && (sc.F.x > -g.W * 0.25 || vLocal > 0.35);
+                    else commit = e.type !== 'pointercancel' && ((g.W - sc.F.x) / (2 * g.W) > 0.38 || vLocal < -0.35);
+                    const goal = commit ? t.endF : t.startF;
+                    const dist = Math.hypot(goal.x - sc.F.x, goal.y - sc.F.y);
+                    await sc.animate(goal, Math.max(220, Math.min(650, dist * 0.55)), { lift: commit ? g.H * 0.04 : 0 });
+                    if (!commit) await t.revert();
+                } catch (err) {
+                    console.warn('페이지 넘김 오류(무시됨):', err?.message || err);
+                } finally {
+                    t?.dispose();
+                    if (GL.canvas) GL.canvas.style.display = 'none';
+                    if (raf) cancelAnimationFrame(raf), raf = 0;
+                    s = null;
+                    flipping = false;
+                    document.body.classList.remove('nb-turning');
+                    scheduleMoodLine();
+                }
+            };
+            el.addEventListener('pointerup', end);
+            el.addEventListener('pointercancel', end);
+            el.addEventListener('lostpointercapture', e => { if (s && e.pointerId === s.id && !s.moved) s = null; });
         }
 
         // ---------- 노트 꾸미기 (표지 · 스프링 · 리본 · 인덱스 탭 · 제목 · 펜) ----------
@@ -3359,15 +3772,26 @@
                     b.onclick = () => jumpToDate(`${curDate.getFullYear()}-${String(m).padStart(2, '0')}-01`);
                     tabs.appendChild(b);
                 }
-                main.appendChild(tabs);
+                const pages = document.createElement('div');
+                pages.id = 'nb-pages'; pages.setAttribute('aria-hidden', 'true');
+                pages.appendChild(document.createElement('div'));
+                document.getElementById('nb-cover').after(pages);
+                const edgeR = document.createElement('div'), edgeL = document.createElement('div');
+                edgeR.id = 'nb-edge-r'; edgeL.id = 'nb-edge-l';
+                edgeR.title = '종이 끝을 잡고 왼쪽으로 끌면 다음 달'; edgeL.title = '종이 끝을 잡고 오른쪽으로 끌면 이전 달';
+                main.append(edgeR, edgeL, tabs);
                 const cont = main.querySelector('.container');
                 if (cont) {
                     const ageCv = document.createElement('canvas');
                     ageCv.id = 'nb-age'; ageCv.setAttribute('aria-hidden', 'true');
-                    const corner = document.createElement('div');
-                    corner.id = 'nb-corner'; corner.setAttribute('aria-hidden', 'true');
-                    cont.append(ageCv, corner);
+                    const mk = (id, cls) => { const d = document.createElement('div'); d.id = id; d.setAttribute('aria-hidden', 'true'); return d; };
+                    const corner = mk('nb-corner'), cornerL = mk('nb-corner-l');
+                    corner.title = '귀퉁이를 잡고 끌어 넘기기 (누르면 다음 달)';
+                    cornerL.title = '귀퉁이를 잡고 끌어 넘기기 (누르면 이전 달)';
+                    cont.append(ageCv, mk('nb-curve'), mk('nb-gutter'), corner, cornerL);
+                    bindPageGrab(corner, 1); bindPageGrab(cornerL, -1);
                 }
+                bindPageGrab(edgeR, 1); bindPageGrab(edgeL, -1);
                 const picker = document.getElementById('date-picker');
                 const title = document.createElement('span');
                 title.id = 'nb-title';
@@ -3493,27 +3917,68 @@
             shadeEl.className = 'shade';
             Object.assign(shadeEl.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
             book.append(shadeEl, board, band);
+            let mask = null;
+            if (r.spreadLeft !== undefined) {
+                // 펼친 수첩: 닫혀 있을 때 왼쪽 반은 비어 있는 책상
+                mask = document.createElement('div');
+                const bs = getComputedStyle(document.body);
+                const ml = r.spreadLeft - 60, mt = r.top - 40, vw = window.innerWidth, vh = window.innerHeight;
+                // 책상 그림을 화면 기준 그대로 이어 붙임 (원근 효과 안에서는 fixed 배경이 먹지 않음)
+                Object.assign(mask.style, {
+                    position: 'absolute', left: `${ml}px`, top: `${mt}px`, width: `${r.left - ml}px`, height: `${r.height + 130}px`,
+                    backgroundColor: bs.backgroundColor, backgroundImage: bs.backgroundImage,
+                    backgroundSize: `${vw}px ${vh}px, ${vw}px ${vh}px, auto`, backgroundPosition: `${-ml}px ${-mt}px`
+                });
+                book.insertBefore(mask, book.firstChild);
+            }
             document.body.appendChild(book);
-            return { book, board, band, shadeEl };
+            document.body.classList.add('nb-book-anim');
+            return { book, board, band, shadeEl, mask };
         }
         const wait = ms => new Promise(res => setTimeout(res, ms));
         const run = (el, frames, opts) => el.animate(frames, { fill: 'forwards', ...opts }).finished;
 
-        async function openBook() {
+        // 수첩 모드는 가운데 책등을 축으로 오른쪽 반이 닫힌 수첩
+        function closedRect() {
             const r = bookRect();
+            if (!r || !isNotebook()) return r;
+            const half = r.width / 2;
+            return { left: r.left + half, top: r.top, width: half, height: r.height, right: r.right, bottom: r.bottom, spreadLeft: r.left };
+        }
+        // 첫 화면의 닫힌 수첩 자리 (이미 숨겨졌으면 잠깐 꺼내 재고 다시 숨김: 그려지지 않음)
+        function authRect() {
+            const scr = document.getElementById('auth-screen'), el = scr?.querySelector('.auth-book');
+            if (!el) return null;
+            const hidden = scr.classList.contains('hidden');
+            if (hidden) scr.classList.remove('hidden');
+            const r = el.getBoundingClientRect();
+            if (hidden) scr.classList.add('hidden');
+            return r.width ? r : null;
+        }
+        async function openBook() {
+            const r = closedRect();
             if (reduceMotion || !r || !document.body.animate) { ribbonOut(false); return; }
             opening = true;
             const ribbon = document.getElementById('nb-ribbon');
             if (ribbon) ribbon.style.opacity = '0';
-            const { book, board, band, shadeEl } = buildBook(r);
+            const { book, board, band, shadeEl, mask } = buildBook(r);
             try {
-                await run(board, [{ transform: 'translateY(14px) scale(0.965)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.2, .8, .3, 1)' });
-                await wait(220);
+                // 첫 화면의 닫힌 수첩 자리에서 이어서 펼칠 자리로 옮겨 감
+                const from = authRect() || r;
+                const sx = from.width / r.width, sy = from.height / r.height;
+                const tx = from.left - r.left, ty = from.top - r.top - r.height / 2 + sy * r.height / 2;
+                band.style.opacity = '0';
+                if (Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1) {
+                    await run(board, [{ transform: `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})` }, { transform: 'none' }], { duration: 620, easing: 'cubic-bezier(.3, .7, .3, 1)' });
+                } else await wait(120);
+                band.style.opacity = '';
+                await wait(160);
                 // 고무 밴드를 옆으로 풀어냄
                 await run(band, [{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(26px) scaleY(1.02)', opacity: 0 }], { duration: 420, easing: 'cubic-bezier(.5, 0, .3, 1)' });
                 // 표지를 왼쪽으로 넘김
                 shadeEl.style.opacity = '1';
                 run(shadeEl, [{ opacity: 1 }, { opacity: 0 }], { duration: 1300, easing: 'ease-out' });
+                if (mask) run(mask, [{ opacity: 1 }, { opacity: 1, offset: 0.45 }, { opacity: 0 }], { duration: 1400, easing: 'ease-in' });
                 await run(board, [
                     { transform: 'rotateY(0deg)' },
                     { transform: 'rotateY(-100deg)', offset: 0.55 },
@@ -3522,6 +3987,7 @@
                 await run(book, [{ opacity: 1 }, { opacity: 0 }], { duration: 260 });
             } finally {
                 book.remove();
+                document.body.classList.remove('nb-book-anim');
                 opening = false;
             }
             ribbonOut(true);
@@ -3541,15 +4007,16 @@
         }
 
         async function closeBook() {
-            const r = bookRect();
+            const r = closedRect();
             if (reduceMotion || !r || !document.body.animate) return;
             const ribbon = document.getElementById('nb-ribbon');
             try {
                 if (ribbon) await run(ribbon, [{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-72px)', opacity: 0 }], { duration: 480, easing: 'cubic-bezier(.5, 0, .7, .4)' });
-                const { book, board, band, shadeEl } = buildBook(r);
+                const { book, board, band, shadeEl, mask } = buildBook(r);
                 band.style.opacity = '0';
                 book.style.pointerEvents = 'auto';
                 run(shadeEl, [{ opacity: 0 }, { opacity: 1 }], { duration: 1200, easing: 'ease-in' });
+                if (mask) run(mask, [{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1, offset: 0.7 }, { opacity: 1 }], { duration: 1250 });
                 await run(board, [
                     { transform: 'rotateY(-178deg)' },
                     { transform: 'rotateY(-80deg)', offset: 0.5 },
