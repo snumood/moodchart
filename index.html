@@ -900,6 +900,87 @@
         .rd-title { display: none; }
         .rd-btn { padding: 0 10px; font-size: 12.5px; }
     }
+    /* --- 메뉴에서 여는 창: 수첩에서 뽑아낸 종이 한 장 --- */
+    .modal-wrap { background: rgba(30, 22, 14, 0.36); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); padding: 12px; }
+    .modal-content, .stats-modal-content, .chart-modal-content {
+        position: relative; color: var(--print-ink); font-family: var(--print); border-radius: 3px;
+        background:
+            repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(60, 58, 70, 0.07) 27px 28px),
+            linear-gradient(180deg, #fbf8f1, #f6f1e6);
+        box-shadow: 0 2px 0 #ece6d9, 0 4px 0 #f7f3ea, 0 22px 50px -12px rgba(30, 20, 10, 0.55);
+    }
+    /* 수첩에서 뜯어낸 위쪽 절취선 */
+    .modal-content::before, .stats-modal-content::before, .chart-modal-content::before {
+        content: ""; position: absolute; left: 0; right: 0; top: -5px; height: 10px; pointer-events: none;
+        background: radial-gradient(circle at 5px 0, transparent 4px, #fbf8f1 4.5px) 0 0 / 10px 10px repeat-x;
+        filter: drop-shadow(0 -1px 0 rgba(60, 40, 20, 0.08));
+    }
+    .modal-header {
+        align-items: center; margin: -4px 0 14px; padding-bottom: 8px; border-bottom: 1px dashed rgba(155, 47, 53, 0.3);
+        font-family: var(--serif-ko); font-size: 16px; font-weight: 600; letter-spacing: 1px; color: var(--accent);
+    }
+    .modal-header > span:last-child {
+        display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+        font-size: 15px !important; color: #8d877b; background: rgba(60, 58, 70, 0.06);
+    }
+    .modal-header > span:last-child:hover { color: var(--accent); background: rgba(155, 47, 53, 0.1); }
+    .modal-input, .modal-textarea, .patient-search {
+        background: transparent; border: none; border-bottom: 1px solid rgba(51, 53, 61, 0.35); border-radius: 0; padding: 8px 2px;
+        font-family: var(--print); font-size: 14px; color: var(--ink); outline: none;
+    }
+    .modal-input:focus, .modal-textarea:focus, .patient-search:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+    .modal-textarea {
+        height: 112px; padding: 4px 6px; line-height: 28px; font-family: var(--hand); font-size: 22px;
+        background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(60, 58, 70, 0.16) 27px 28px); border-bottom: none;
+    }
+    .btn-modal { border-radius: 10px; padding: 9px 18px; font-family: var(--print); font-size: 13px; }
+    .btn-save { background: linear-gradient(180deg, #a8373e, #86252c); color: #fdf8ef; box-shadow: 0 2px 0 #5e171c; }
+    .btn-cancel { background: rgba(60, 58, 70, 0.07); color: var(--print-ink); }
+    .icon-grid { background: rgba(255, 255, 255, 0.5); border: 1px dashed rgba(60, 58, 70, 0.18); }
+
+    /* 비밀번호: 수첩 앞 면지의 "이 수첩의 주인" 카드 */
+    #pw-modal .modal-content { max-width: 340px; box-shadow: inset 0 0 0 1px rgba(155, 47, 53, 0.35), inset 0 0 0 5px #fbf8f1, inset 0 0 0 6px rgba(155, 47, 53, 0.2), 0 22px 50px -12px rgba(30, 20, 10, 0.55); padding: 30px 26px 22px; }
+    #pw-modal .modal-content::after { content: "이 수첩의 주인"; position: absolute; top: 9px; left: 0; right: 0; text-align: center; font-family: var(--serif-ko); font-size: 10px; letter-spacing: 4px; color: rgba(155, 47, 53, 0.6); }
+    /* 생활사건: 노란 붙임쪽지 */
+    #event-modal .modal-content { background: linear-gradient(180deg, #fdf3c4, #f9ea9f); transform-origin: 50% 0; box-shadow: 0 18px 30px -12px rgba(60, 40, 10, 0.5); }
+    #event-modal .modal-content::before { left: 50%; right: auto; top: -10px; width: 90px; height: 20px; margin-left: -45px; transform: rotate(-2deg); background: rgba(225, 212, 180, 0.8); filter: none; }
+    #event-modal .modal-textarea { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(120, 90, 20, 0.2) 27px 28px); }
+    /* 선물상자: 수첩 뒤쪽 주머니에서 꺼낸 크라프트 봉투 */
+    #gift-modal .modal-content { background: radial-gradient(120% 70% at 30% 0%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 60%), repeating-linear-gradient(90deg, rgba(120, 80, 30, 0.03) 0 2px, rgba(0, 0, 0, 0) 2px 5px), #e8d6b3; padding-top: 46px; }
+    #gift-modal .modal-content::before { top: 0; height: 34px; background: linear-gradient(170deg, #d7c098 50%, transparent 50.5%) left / 50% 100% no-repeat, linear-gradient(190deg, #d7c098 50%, transparent 50.5%) right / 50% 100% no-repeat; filter: drop-shadow(0 2px 2px rgba(80, 50, 20, 0.25)); }
+    #gift-modal .modal-content::after { content: ""; position: absolute; top: 20px; left: 50%; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #c2454c, #8a1f27 70%); box-shadow: 0 2px 3px rgba(60, 10, 10, 0.4); }
+    #gift-modal .gift-tab { border-bottom: none; gap: 6px; }
+    #gift-modal .gift-tab-item { border: none; border-radius: 8px 8px 0 0; background: rgba(255, 255, 255, 0.35); color: #6b5530; font-weight: 600; }
+    #gift-modal .gift-tab-item.active { background: #fbf8f1; color: var(--accent); border: none; }
+    #gift-modal .icon-grid { background: #fbf8f1; border: none; border-radius: 0 0 8px 8px; }
+    /* 추세보기: 수첩에서 뜯은 모눈종이 */
+    #chart-modal .chart-modal-content {
+        background:
+            linear-gradient(rgba(91, 123, 181, 0.12) 1px, transparent 1px) 0 0 / 20px 20px,
+            linear-gradient(90deg, rgba(91, 123, 181, 0.12) 1px, transparent 1px) 0 0 / 20px 20px,
+            #fbfaf5;
+        padding-left: 34px; border-radius: 2px;
+    }
+    #chart-modal .chart-modal-content::after {   /* 스프링 구멍 */
+        content: ""; position: absolute; top: 14px; bottom: 14px; left: 10px; width: 10px;
+        background: radial-gradient(circle, #d9d2c3 3px, rgba(0, 0, 0, 0.18) 3.6px, transparent 4.5px) 0 0 / 10px 24px repeat-y;
+    }
+    /* 관리자: 색인 카드 대장 */
+    .stats-modal-content { background: linear-gradient(90deg, transparent 0 38px, rgba(155, 47, 53, 0.25) 38px 39px, transparent 39px), repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(70, 110, 160, 0.13) 27px 28px), #fbf8f1; padding-left: 52px; }
+    .stats-card { background: rgba(255, 255, 255, 0.6); border-color: rgba(60, 58, 70, 0.14); border-radius: 4px; }
+    .stats-card-value { color: var(--accent); font-family: var(--serif); }
+    .stats-period-btn.active { background: var(--accent); border-color: var(--accent); }
+    .patient-table th { background: #fbf8f1; }
+    .patient-table tbody tr:hover, .patient-table tbody tr:focus { background: rgba(242, 208, 106, 0.25); }
+    /* 확인·안내 쪽지 (다운로드·업로드) */
+    #nb-dialog .modal-content { max-width: 360px; }
+    #nb-dialog .dlg-msg { font-size: 14px; line-height: 1.7; margin: 4px 0 6px; white-space: pre-line; }
+    #nb-dialog .dlg-warn { color: #b3262d; font-weight: 700; }
+    .nb-slip {   /* 사본이 수첩에서 빠져나가는 종이 */
+        position: fixed; z-index: 3500; left: 50%; top: 40%; width: 180px; height: 230px; margin: -115px 0 0 -90px; pointer-events: none; border-radius: 2px;
+        background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 15px, rgba(60, 58, 70, 0.1) 15px 16px), #fbf8f1;
+        box-shadow: 0 14px 30px -8px rgba(30, 20, 10, 0.5);
+    }
     @media (prefers-reduced-motion: reduce) {
         td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
     }
@@ -2374,7 +2455,7 @@
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         const targetCat = `score_${type}`;
         const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
-        drawDashboardChart(points, title, type === 'ls' ? '#10B981' : '#6366F1');
+        drawDashboardChart(points, title, type === 'ls' ? '#3d7a5a' : '#4a5f9a');
     }
     function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
     function drawDashboardChart(points, label, color) {
@@ -2386,12 +2467,12 @@
         const buffer = 28 * 24 * 3600 * 1000;
         const minYear = new Date(minTime - buffer).getFullYear(), maxYear = new Date(maxTime + buffer).getFullYear();
         const annotations = {};
-        const bgColors = ['rgba(248, 250, 252, 0.6)', 'rgba(240, 253, 244, 0.6)', 'rgba(239, 246, 255, 0.6)', 'rgba(254, 252, 232, 0.6)'];
+        const bgColors = ['rgba(217, 194, 142, 0.12)', 'rgba(168, 195, 171, 0.12)', 'rgba(170, 180, 214, 0.12)', 'rgba(217, 164, 162, 0.10)'];
         for (let y = minYear; y <= maxYear; y++) {
-            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:12, weight:'bold'}, color: '#475569' } };
+            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:13, weight:'bold', family:"'MaruBuri', serif"}, color: '#9b2f35' } };
         }
         myChart = new Chart(ctx, {
-            type: 'line', data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '10', fill: true, tension: 0.25, pointRadius: 5, borderWidth: 3 }] },
+            type: 'line', data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '14', fill: true, tension: 0.25, pointRadius: 4.5, pointBackgroundColor: '#fbf8f1', pointBorderWidth: 2, borderWidth: 2.4 }] },
             options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
         });
     }
@@ -2422,8 +2503,36 @@
         if (isNaN(next)) return;
         Notebook.flipTo(() => new Date(next));
     }
-    async function exportData() { if(isAdminUser()) return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
-    async function importData(input) { if(isAdminUser()) return alert("불가"); const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
+    async function exportData() {
+        if (isAdminUser()) return Notebook.dialog({ title: '사본 만들기', message: '관리자 화면에서는 사용할 수 없어요.' });
+        if (document.getElementById('sidebar')?.classList.contains('open')) toggleSidebar();
+        Notebook.slip(true);
+        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' });
+        if (!data || !data.length) return Notebook.dialog({ title: '사본 만들기', message: '아직 적힌 기록이 없어요.' });
+        let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
+        data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; });
+        const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click();
+        Notebook.dialog({ title: '사본 만들기', message: '모든 기록의 사본을 파일로 내려받았어요.\n안전한 곳에 보관해 두세요.' });
+    }
+    async function importData(input) {
+        if (isAdminUser()) { input.value = ''; return Notebook.dialog({ title: '기록 옮겨 적기', message: '관리자 화면에서는 사용할 수 없어요.' }); }
+        const f = input.files[0]; input.value = '';
+        if (!f) return;
+        if (f.size > 1048576) return Notebook.dialog({ title: '기록 옮겨 적기', message: '파일이 너무 큽니다 (최대 1MB).' });
+        if (document.getElementById('sidebar')?.classList.contains('open')) toggleSidebar();
+        const ok = await Notebook.dialog({ title: '기록 옮겨 적기', message: `「${f.name}」의 기록을 수첩에 옮겨 적습니다.`, warn: '기존 기록이 덮어씌워집니다. 진행할까요?', ok: '덮어쓰고 옮겨 적기', cancel: '그만두기' });
+        if (!ok) return;
+        const r = new FileReader();
+        r.onload = async (e) => {
+            const rows = e.target.result.split("\n").slice(1);
+            if (rows.length > 2000) return Notebook.dialog({ title: '기록 옮겨 적기', message: '데이터 행이 너무 많습니다 (최대 2,000행).' });
+            Notebook.slip(false);
+            for (let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if (cols.length >= 3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g, '').trim(); if (isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } }
+            Notebook.dialog({ title: '기록 옮겨 적기', message: '업로드 완료' });
+            loadData();
+        };
+        r.readAsText(f);
+    }
 </script>
 <script>
     // --- 책상 위의 스프링 노트: 펜 · 펜으로 쓰기 · 스티커 · WebGL 페이지 넘김 · 기분 흐름선 ---
@@ -4363,6 +4472,88 @@
             return authDone;
         }
 
+        // ---------- 메뉴 창: 수첩에서 종이를 뽑아내듯 나타나고, 다시 꽂히듯 사라짐 ----------
+        const SHEET_IN = [{ transform: 'translateY(46px) rotate(-3deg) scale(0.96)', opacity: 0 }, { transform: 'translateY(-4px) rotate(0.6deg)', opacity: 1, offset: 0.7 }, { transform: 'none', opacity: 1 }];
+        const SHEET_OUT = [{ transform: 'none', opacity: 1 }, { transform: 'translateY(40px) rotate(2deg) scale(0.97)', opacity: 0 }];
+        function sheetOf(wrap) { return wrap.querySelector('.modal-content, .stats-modal-content, .chart-modal-content'); }
+        function watchModals() {
+            document.querySelectorAll('.modal-wrap').forEach(wrap => {
+                if (wrap.dataset.nbWatch) return;
+                wrap.dataset.nbWatch = '1';
+                let shown = wrap.style.display === 'flex';
+                new MutationObserver(() => {
+                    const now = wrap.style.display === 'flex';
+                    if (now && !shown && !reduceMotion) {
+                        const s = sheetOf(wrap);
+                        wrap.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
+                        s?.animate(SHEET_IN, { duration: 420, easing: 'cubic-bezier(.2, .8, .3, 1)' });
+                    }
+                    shown = now;
+                }).observe(wrap, { attributes: true, attributeFilter: ['style'] });
+            });
+            // 닫기: 종이가 수첩으로 다시 들어간 뒤 원래 닫기 실행
+            ['closeEventModal', 'closeGiftModal', 'closePwModal', 'closeChartModal', 'closeAdminStatsModal', 'closePatientListModal'].forEach(name => {
+                const orig = window[name];
+                if (typeof orig !== 'function' || orig.nbWrapped) return;
+                const ids = { closeEventModal: 'event-modal', closeGiftModal: 'gift-modal', closePwModal: 'pw-modal', closeChartModal: 'chart-modal', closeAdminStatsModal: 'stats-modal', closePatientListModal: 'patient-list-modal' };
+                const wrapped = function (...args) {
+                    const wrap = document.getElementById(ids[name]);
+                    if (reduceMotion || !wrap || wrap.style.display !== 'flex' || wrap.dataset.nbClosing) return orig.apply(this, args);
+                    wrap.dataset.nbClosing = '1';
+                    const s = sheetOf(wrap);
+                    const a = s?.animate(SHEET_OUT, { duration: 200, easing: 'cubic-bezier(.5, 0, .7, .4)', fill: 'forwards' });
+                    wrap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+                    let done = false;
+                    const finish = () => { if (done) return; done = true; delete wrap.dataset.nbClosing; wrap.getAnimations({ subtree: true }).forEach(x => x.cancel()); orig.apply(this, args); };
+                    a?.finished.then(finish, finish); setTimeout(finish, 320);
+                };
+                wrapped.nbWrapped = true;
+                window[name] = wrapped;
+            });
+        }
+
+        // 수첩 스타일 확인·안내 쪽지 (기본 알림창 대신)
+        function nbDialog({ title, message, warn = '', ok = '확인', cancel = null }) {
+            return new Promise(resolve => {
+                let wrap = document.getElementById('nb-dialog');
+                if (!wrap) {
+                    wrap = document.createElement('div');
+                    wrap.id = 'nb-dialog'; wrap.className = 'modal-wrap';
+                    wrap.setAttribute('role', 'alertdialog'); wrap.setAttribute('aria-modal', 'true');
+                    wrap.innerHTML = '<div class="modal-content"><div class="modal-header"><span class="dlg-title"></span><span class="dlg-x" role="button" tabindex="0" aria-label="닫기">✕</span></div><div class="dlg-msg"></div><div class="dlg-msg dlg-warn"></div><div class="modal-btns"><button type="button" class="btn-modal btn-cancel dlg-cancel"></button><button type="button" class="btn-modal btn-save dlg-ok"></button></div></div>';
+                    document.body.appendChild(wrap);
+                    watchModals();
+                }
+                wrap.querySelector('.dlg-title').textContent = title;
+                wrap.querySelector('.dlg-msg').textContent = message;
+                const w = wrap.querySelector('.dlg-warn'); w.textContent = warn; w.hidden = !warn;
+                const okB = wrap.querySelector('.dlg-ok'), noB = wrap.querySelector('.dlg-cancel'), x = wrap.querySelector('.dlg-x');
+                okB.textContent = ok; noB.textContent = cancel || ''; noB.hidden = !cancel;
+                const close = v => {
+                    okB.onclick = noB.onclick = x.onclick = null; wrap.onkeydown = null;
+                    const s = sheetOf(wrap);
+                    const end = () => { wrap.style.display = 'none'; resolve(v); };
+                    if (reduceMotion || !s.animate) return end();
+                    let fin = false; const once = () => { if (fin) return; fin = true; s.getAnimations().forEach(a => a.cancel()); end(); };
+                    s.animate(SHEET_OUT, { duration: 180, fill: 'forwards' }).finished.then(once, once); setTimeout(once, 320);
+                };
+                okB.onclick = () => close(true); noB.onclick = () => close(false); x.onclick = () => close(false);
+                wrap.onkeydown = e => { if (e.key === 'Escape') close(false); };
+                wrap.style.display = 'flex';
+                (cancel ? noB : okB).focus({ preventScroll: true });
+            });
+        }
+        // 사본 한 장이 수첩에서 빠져나가는 장면 (다운로드) / 들어오는 장면 (업로드)
+        function slip(out) {
+            if (reduceMotion || !document.body.animate) return;
+            const el = document.createElement('div'); el.className = 'nb-slip'; document.body.appendChild(el);
+            const a = el.animate(out
+                ? [{ transform: 'translateY(30px) scale(0.6) rotate(-4deg)', opacity: 0 }, { transform: 'translateY(-20px) rotate(2deg)', opacity: 1, offset: 0.35 }, { transform: `translate(${window.innerWidth * 0.32}px, ${window.innerHeight * 0.5}px) rotate(18deg) scale(0.4)`, opacity: 0 }]
+                : [{ transform: `translate(${window.innerWidth * 0.32}px, ${window.innerHeight * 0.5}px) rotate(18deg) scale(0.4)`, opacity: 0 }, { transform: 'translateY(-20px) rotate(2deg)', opacity: 1, offset: 0.65 }, { transform: 'translateY(30px) scale(0.6) rotate(-4deg)', opacity: 0 }],
+                { duration: 1100, easing: 'cubic-bezier(.4, .1, .3, 1)' });
+            const rm = () => el.remove(); a.finished.then(rm, rm); setTimeout(rm, 1500);
+        }
+
         // ---------- 수첩 뒷부분의 안내 책자: 휘리릭 넘겨 뒷면을 펼쳐 읽음 ----------
         // 책자 내용은 불러와서 수첩 종이 안(Shadow DOM)에 펼침: 앱과 스타일이 섞이지 않고, 다른 페이지를 끼워 넣지 않으므로 서버의 액자 금지 설정과도 무관
         const READER_DOCS = { guide: { src: './guide/guide.html', label: '작성방법', title: '기분기록지 작성방법' }, illness: { src: './guide/illness.html', label: '질병안내서', title: '기분장애 가이드북' } };
@@ -4701,6 +4892,7 @@
             await closeBook();
         }
 
+        try { watchModals(); } catch (e) { console.warn('창 효과 준비 오류(무시됨):', e?.message || e); }
         try { buildShelf(); layoutAuth(); } catch (e) { console.warn('책장 그리기 오류(무시됨):', e?.message || e); }
         if (document.fonts?.ready) document.fonts.ready.then(() => { try { layoutAuth(); } catch (e) { /* 무시 */ } });
         let viewTimer = null;
@@ -4716,7 +4908,7 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, dialog: nbDialog, slip: safe(slip), flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
