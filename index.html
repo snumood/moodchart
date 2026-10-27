@@ -7,6 +7,8 @@
 <link rel="shortcut icon" href="./favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="기분기록지">
+<meta name="theme-color" content="#1c1c20">
+<meta name="application-version" content="1.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./site.webmanifest">
@@ -16,7 +18,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
-<title>기분기록지 1.07 | 분당서울대학교병원</title>
+<title>기분기록지 1.2 | 분당서울대학교병원</title>
 <link rel="stylesheet" href="vendor/fonts/pretendard.css">
 <link rel="stylesheet" href="vendor/fonts/maruburi.css">
 <link rel="stylesheet" href="vendor/fonts/nanum-pen-script.css">
@@ -64,7 +66,6 @@
             radial-gradient(140% 110% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(70, 58, 44, 0.22) 100%),
             var(--linen);
     }
-    #auth-screen.leaving { pointer-events: none; }
     .auth-room {
         position: absolute; inset: 0;
         background:
@@ -88,6 +89,12 @@
         content: ""; position: absolute; left: -10px; right: -10px; top: -14px; height: 18px; border-radius: 4px;
         background: linear-gradient(180deg, #7b5134, #563520); box-shadow: 0 4px 6px rgba(30, 16, 6, 0.4);
     }
+    .cab-plate {
+        position: absolute; left: 50%; top: -11px; transform: translateX(-50%); z-index: 2; padding: 3px 12px; border-radius: 3px; white-space: nowrap;
+        font-family: var(--serif-ko); font-size: 11px; letter-spacing: 2px; color: #3a2a10;
+        background: linear-gradient(180deg, #f3dc9a, #c9a24e 60%, #a8812f); box-shadow: 0 1px 2px rgba(30, 16, 6, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .cab-plate b { font-family: var(--serif); font-weight: 700; letter-spacing: 1px; }
     .cab-inner {
         position: absolute; inset: 16px 16px 26px; display: flex; flex-direction: column; border-radius: 3px; overflow: hidden;
         background: linear-gradient(180deg, #2a1a10, #3b2416); box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.55);
@@ -354,7 +361,7 @@
         --linen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.10 0'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.012' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.31 0 0 0 0 0.26 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23a)'/%3E%3Crect width='300' height='300' filter='url(%23b)'/%3E%3C/svg%3E");
     }
     @media (min-width: 900px) {
-        :root { --nb-top: 40px; --nb-x: 48px; --nb-right: 76px; --nb-bottom: 100px; }
+        :root { --nb-top: 40px; --nb-x: 76px; --nb-right: 76px; --nb-bottom: 100px; }
     }
 
     /* 리넨 책상 + 창가 빛 */
@@ -414,14 +421,29 @@
     }
 
     /* 월 인덱스 탭 (넓은 화면): 종이 뒤에 붙인 색지 인덱스, 글자는 바깥쪽에 맞춰 잘리지 않게 */
-    #nb-tabs { display: none; }
+    #nb-tabs, #nb-tabs-l { display: none; }
     @media (min-width: 900px) {
-        #nb-tabs {
+        #nb-tabs, #nb-tabs-l {
             display: flex; flex-direction: column; gap: 3px;
             position: fixed; z-index: 0;
             top: calc(var(--nb-top) + 64px); right: calc(var(--nb-right) - 54px);
             width: 70px;
         }
+        /* 지나간 달의 탭: 넘긴 종이와 함께 왼쪽 가장자리로 */
+        #nb-tabs-l { right: auto; left: calc(var(--nb-x) - 54px); }
+        #nb-tabs-l .nb-tab {
+            border-radius: 7px 0 0 7px; padding: 0 0 0 9px; text-align: left; transform: translateX(8px);
+            background:
+                linear-gradient(270deg, rgba(40, 30, 20, 0.10), rgba(40, 30, 20, 0) 30%),
+                linear-gradient(270deg, color-mix(in srgb, var(--tab, #e9e3d7) 26%, #ece6da), color-mix(in srgb, var(--tab, #f3eee4) 18%, #f6f2ea));
+            box-shadow: -2px 1px 3px rgba(40, 30, 20, 0.22), inset 1px 0 0 rgba(255, 255, 255, 0.5);
+        }
+        #nb-tabs-l .nb-tab:hover { transform: translateX(3px); }
+        .nb-tab { position: relative; }
+        /* 넘겨진 종이의 탭은 뒷면이 보임: 글자가 거울상으로 비쳐 보임 */
+        .nb-tab .tl { display: inline-block; }
+        #nb-tabs-l .nb-tab .tl { transform: scaleX(-1); opacity: 0.62; }
+        .nb-tab.away { visibility: hidden; }
         .nb-tab {
             --tab-h: clamp(22px, calc((100vh - var(--nb-top) - var(--nb-bottom) - 110px) / 12 - 3px), 36px);
             height: var(--tab-h); border: none; border-radius: 0 7px 7px 0; cursor: pointer;
@@ -442,6 +464,16 @@
             box-shadow: 3px 2px 5px rgba(40, 30, 20, 0.28), inset -1px 0 0 rgba(255, 255, 255, 0.7);
         }
     }
+    /* 넘어가는 종이에 붙어 함께 넘어가는 탭 */
+    .nb-tab-fly {
+        position: fixed; left: 0; top: 0; z-index: 115; pointer-events: none; transform-origin: 0 50%;
+        display: flex; align-items: center; justify-content: flex-end; padding-right: 9px; box-sizing: border-box;
+        border-radius: 0 7px 7px 0; white-space: nowrap;
+        font-family: var(--serif); font-weight: 600; color: #6f6a62; font-variant-numeric: lining-nums;
+        background: linear-gradient(90deg, rgba(40, 30, 20, 0.10), rgba(40, 30, 20, 0) 30%), linear-gradient(90deg, color-mix(in srgb, var(--tab, #e9e3d7) 26%, #ece6da), color-mix(in srgb, var(--tab, #f3eee4) 18%, #f6f2ea));
+        box-shadow: 2px 1px 3px rgba(40, 30, 20, 0.22);
+    }
+    .nb-tab-fly span { display: inline-block; }
     /* 종이 오른쪽 아래 살짝 접힌 귀퉁이: 잡아서 넘김 */
     #nb-corner {
         background: linear-gradient(135deg, transparent 50%, #e9e2d3 50%, #fbf7ee 72%, #efe8da);
@@ -725,7 +757,7 @@
         right: auto; bottom: auto; width: var(--nb-w); height: var(--nb-h);
         transform-origin: 0 0; will-change: transform;
     }
-    body.nb-notebook #nb-cover, body.nb-notebook #nb-ribbon, body.nb-notebook #nb-tabs { will-change: transform; }
+    body.nb-notebook #nb-cover, body.nb-notebook #nb-ribbon, body.nb-notebook #nb-tabs, body.nb-notebook #nb-tabs-l { will-change: transform; }
     body.nb-notebook #main-screen .grid-wrapper { overflow: clip; }
     body.nb-notebook #mood-table { margin-bottom: 0; }
     body.nb-notebook .scroll-arrow { display: none !important; }
@@ -760,6 +792,61 @@
     .view-mode-btn.on { border-color: var(--accent); background: #fff; color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
     .view-mode-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+
+    /* --- 메뉴: 수첩 안쪽 면지처럼 (가죽 머리띠 · 크림 종이 · 선 아이콘) --- */
+    #sidebar {
+        right: -330px; width: 310px; max-width: 88vw;
+        background: linear-gradient(90deg, rgba(60, 42, 24, 0.10), rgba(60, 42, 24, 0) 14px), linear-gradient(180deg, #fbf8f1, #f4efe4);
+        box-shadow: -18px 0 40px rgba(30, 20, 10, 0.28), -1px 0 0 rgba(60, 42, 24, 0.25);
+        transition: right 0.38s cubic-bezier(.2, .8, .3, 1);
+    }
+    #sidebar.open { right: 0; }
+    .sidebar-header {
+        height: 58px; padding: 0 12px 0 20px; justify-content: space-between; border-bottom: none;
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.08), transparent 55%);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .sb-brand { display: flex; align-items: baseline; gap: 8px; }
+    .sb-brand b { font-family: var(--serif-ko); font-weight: 400; font-size: 17px; letter-spacing: 4px; color: #e9e3d7; opacity: 0.88; }
+    .sb-ver { font-family: var(--serif); font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #c9a85a; }
+    .sb-close { width: 36px; height: 36px; border: none; border-radius: 50%; background: rgba(255, 255, 255, 0.06); color: #cfcac0; font-size: 17px; cursor: pointer; }
+    .sb-close:hover, .sb-close:focus-visible { background: rgba(255, 255, 255, 0.14); color: #fff; outline: none; }
+    .sidebar-content { padding: 18px 20px 24px; }
+    .sidebar-overlay { background: rgba(30, 22, 14, 0.32); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
+    .user-badge {
+        background: none; padding: 4px 12px 4px 30px; border-radius: 4px; position: relative; margin-bottom: 16px;
+        font-family: var(--hand); font-size: 22px; font-weight: 400; color: var(--ink);
+        box-shadow: inset 0 0 0 1px rgba(155, 47, 53, 0.35), 0 0 0 3px #fbf8f1, 0 0 0 4px rgba(155, 47, 53, 0.18);
+    }
+    .user-badge::before { content: "이름"; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font-family: var(--print); font-size: 8.5px; letter-spacing: 1px; color: var(--accent); }
+    .menu-section { margin-bottom: 18px; border-bottom: none; padding-bottom: 0; }
+    .menu-title {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+        font-family: var(--serif-ko); font-weight: 600; font-size: 11.5px; letter-spacing: 2px; color: var(--accent);
+    }
+    .menu-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(155, 47, 53, 0.35), rgba(155, 47, 53, 0)); }
+    .menu-item {
+        display: flex; align-items: center; gap: 11px; padding: 8px; margin: 0 -8px; border-radius: 8px;
+        font-family: var(--print); font-size: 13.5px; font-weight: 500; color: var(--print-ink); text-decoration: none;
+        transition: background .15s, color .15s;
+    }
+    .menu-item:hover, .menu-item:focus-visible { font-weight: 500; color: var(--accent); background: rgba(155, 47, 53, 0.07); outline: none; }
+    .menu-item:hover .mi, .menu-item:focus-visible .mi { color: var(--accent); transform: translateX(1px); }
+    .mi { flex: none; width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; color: #6f6a62; transition: transform .15s, color .15s; }
+    .menu-item span, .view-mode-btn span { display: flex; flex-direction: column; gap: 1px; }
+    .mi-warn { font-style: normal; font-size: 10.5px; font-weight: 600; color: #b3262d; }
+    .view-mode { gap: 8px; margin: 6px 0 4px; }
+    .view-mode-btn { flex-direction: row; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; border-color: rgba(60, 58, 70, 0.14); background: rgba(255, 255, 255, 0.55); }
+    .view-mode-btn .mi { width: 22px; height: 22px; }
+    .view-mode-btn.on .mi { color: var(--accent); }
+    .sb-legal { font-size: 10px; color: #8d877b; line-height: 1.5; margin-top: 18px; word-break: keep-all; }
+    .sb-version { margin-top: 10px; font-family: var(--serif); font-size: 11px; letter-spacing: 1px; color: #a39c8f; text-align: center; }
+    #doc-panel { background: rgba(155, 47, 53, 0.05); border: 1px dashed rgba(155, 47, 53, 0.3); border-radius: 10px; padding: 12px; }
+    #doc-panel input { border: none; border-bottom: 1px solid rgba(51, 53, 61, 0.35); border-radius: 0; background: transparent; font-family: var(--print); }
+    #doc-panel button { border-radius: 8px; }
+    #doc-panel .patient-list-open { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    #doc-panel .patient-list-open .mi { color: inherit; }
     @media (prefers-reduced-motion: reduce) {
         td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
     }
@@ -770,6 +857,7 @@
 <div id="auth-screen">
     <div class="auth-room" aria-hidden="true">
         <div class="cabinet">
+            <div class="cab-plate">기분기록지 <b>1.2</b></div>
             <div class="cab-inner"><div class="cab-shelf"></div><div class="cab-shelf"></div><div class="cab-shelf"></div></div>
             <div class="cab-door left"></div>
             <div class="cab-door right"><div class="cab-lock"><div class="cab-key"><div class="key-bow"></div></div></div></div>
@@ -850,14 +938,15 @@
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="sidebar">
     <div class="sidebar-header">
-        <span style="cursor:pointer; font-size:20px; font-weight:bold;" onclick="toggleSidebar()">✕</span>
+        <div class="sb-brand"><b>기분기록지</b><span class="sb-ver">1.2</span></div>
+        <button type="button" class="sb-close" onclick="toggleSidebar()" aria-label="메뉴 닫기">✕</button>
     </div>
     <div class="sidebar-content">
         <div class="user-badge" id="user-badge"></div>
         
         <div id="doc-panel">
             <div style="font-weight:bold; margin-bottom:5px; color:#1565c0;">환자 조회</div>
-            <button class="patient-list-open" onclick="openPatientListModal()">👥 사용자 목록에서 선택</button>
+            <button class="patient-list-open" onclick="openPatientListModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="17" cy="8" r="2.4"/><path d="M15.5 13.6c2.3.1 4 1.4 4.6 4"/></svg><span>사용자 목록에서 선택</span></button>
             <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
                 <input id="search-id" placeholder="ID 또는 번호">
                 <button onclick="searchPatient()">검색</button>
@@ -871,51 +960,52 @@
 
         <div class="menu-section hidden" id="admin-stats-menu-section">
             <div class="menu-title">관리자</div>
-            <div class="menu-item" onclick="openAdminStatsModal()">📋 이용자 통계</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="openAdminStatsModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/></svg><span>이용자 통계</span></div>
         </div>
 
         <div class="menu-section">
             <div class="menu-title">보기 방식</div>
             <div class="view-mode" role="radiogroup" aria-label="보기 방식">
-                <button type="button" class="view-mode-btn" data-mode="read" role="radio" onclick="Notebook.setViewMode('read')">📖 가독성 모드<small>글씨를 크게, 종이 안에서 스크롤</small></button>
-                <button type="button" class="view-mode-btn" data-mode="notebook" role="radio" onclick="Notebook.setViewMode('notebook')">📒 수첩 모드<small>한 장을 한눈에, 끌어서 수첩 옮기기</small></button>
+                <button type="button" class="view-mode-btn" data-mode="read" role="radio" onclick="Notebook.setViewMode('read')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5C6 5 9 5 12 7c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 7v12.5"/></svg><span>가독성 모드<small>글씨를 크게, 종이 안에서 스크롤</small></span></button>
+                <button type="button" class="view-mode-btn" data-mode="notebook" role="radio" onclick="Notebook.setViewMode('notebook')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 3v18"/><path d="M15.5 3v18"/></svg><span>수첩 모드<small>펼친 양면을 한눈에, 끌어서 옮기기</small></span></button>
             </div>
         </div>
 
         <div class="menu-section">
             <div class="menu-title">계정 관리</div>
-            <div class="menu-item" id="password-menu-item" onclick="openPwModal()">🔑 비밀번호 변경</div>
-            <div class="menu-item" onclick="doLogout()">🚪 로그아웃</div>
+            <div class="menu-item" id="password-menu-item" role="button" tabindex="0" onclick="openPwModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="12" r="4"/><path d="M12.5 12H21M17.5 12v3M20 12v2.5"/></svg><span>비밀번호 변경</span></div>
+            <div class="menu-item" role="button" tabindex="0" onclick="doLogout()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4H6v16h8"/><path d="M10 12h10"/><path d="M17 9l3 3-3 3"/></svg><span>로그아웃</span></div>
         </div>
 
         <div class="menu-section" id="gift-menu-section">
             <div class="menu-title">분석 리포트</div>
-            <div class="menu-item" onclick="openChartModal('ls')">📊 월간생활습관점수 추세보기</div>
-            <div class="menu-item" onclick="openChartModal('mssi')">📈 기분안정성평가점수 추세보기</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="openChartModal('ls')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 17v-5"/><path d="M12 17V7"/><path d="M17 17v-8"/></svg><span>월간생활습관점수 추세보기</span></div>
+            <div class="menu-item" role="button" tabindex="0" onclick="openChartModal('mssi')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M5 15l4-4 3 3 6-7"/><path d="M15 7h3v3"/></svg><span>기분안정성평가점수 추세보기</span></div>
         </div>
 
         <div class="menu-section" id="data-menu-section">
             <div class="menu-title">선물</div>
-            <div class="menu-item" onclick="openGiftModal()">🎁 선물상자</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="openGiftModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11"/><path d="M12 9C9 9 7.5 7.8 7.5 6.4S9.6 4 12 9c2.4-5 4.5-4 4.5-2.6S15 9 12 9z"/></svg><span>선물상자</span></div>
         </div>
 
         <div class="menu-section">
             <div class="menu-title">데이터 관리</div>
-            <div class="menu-item" onclick="exportData()">💾 모든 기록을 파일로 다운로드</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="exportData()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M5 19h14"/></svg><span>모든 기록을 파일로 다운로드</span></div>
             <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importData(this)">
-            <div class="menu-item" onclick="document.getElementById('import-file').click()">📂 파일을 기록으로 업로드 (이전기록삭제)</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="document.getElementById('import-file').click()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M7.5 8.5L12 4l4.5 4.5"/><path d="M5 19h14"/></svg><span>파일을 기록으로 업로드<em class="mi-warn">이전 기록이 지워져요</em></span></div>
         </div>
 
         <div class="menu-section">
             <div class="menu-title">안내</div>
-            <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="menu-item">📖 기분기록지 작성방법 보기</a>
-            <a href="https://drive.google.com/file/d/11grOF3LoZ1MYFk0GCB7WaCDRCTsYm7E7/view" target="_blank" class="menu-item">📖 기분장애 질병안내서 보기</a>
-            <a href="https://snumood.github.io/homepage/" target="_blank" class="menu-item">🏥 분당서울대학교병원 기분장애클리닉</a>
+            <a href="https://drive.google.com/file/d/1UKEOr5OjR42Ipv64zL1FsI8XPLvz3QhI/view?usp=sharing" target="_blank" class="menu-item"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M5 20.5A2.5 2.5 0 0 1 7.5 18H19v3H7.5"/><path d="M9 8h6"/></svg><span>기분기록지 작성방법 보기</span></a>
+            <a href="https://drive.google.com/file/d/11grOF3LoZ1MYFk0GCB7WaCDRCTsYm7E7/view" target="_blank" class="menu-item"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M12 7v6M9 10h6"/></svg><span>기분장애 질병안내서 보기</span></a>
+            <a href="https://snumood.github.io/homepage/" target="_blank" class="menu-item"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l8-4 8 4v12"/><path d="M4 20h16"/><path d="M12 9v6M9 12h6"/></svg><span>분당서울대학교병원 기분장애클리닉</span></a>
         </div>
         
-        <div style="font-size:10px; color:#999; line-height:1.4; margin-top:20px;">
+        <div class="sb-legal">
             본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.
         </div>
+        <div class="sb-version">기분기록지 1.2 · 분당서울대학교병원 기분장애클리닉</div>
     </div>
 </div>
 
@@ -1249,6 +1339,10 @@
         await tryDeviceLogin();
     };
 
+    document.addEventListener('keydown', e => {
+        const t = e.target;
+        if ((e.key === 'Enter' || e.key === ' ') && t?.matches?.('.menu-item[role="button"]')) { e.preventDefault(); t.click(); }
+    });
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show'); }
     function toggleAuth(m) { document.getElementById('login-form').classList.toggle('hidden', m !== 'login'); document.getElementById('join-form').classList.toggle('hidden', m !== 'join'); Notebook.authMode(m); }
 
@@ -2267,13 +2361,13 @@
         const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
         if(data==='success') { await revokeStoredDeviceLogin(); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
     }
-    function moveMonth(n) { Notebook.flip(n, () => { curDate.setMonth(curDate.getMonth() + n); renderTable(); }); }
+    function moveMonth(n) {
+        Notebook.flipTo(() => { const y = curDate.getFullYear(), m = curDate.getMonth() + n, last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(curDate.getDate(), last)); });
+    }
     function jumpToDate(val) {
         const next = new Date(val);
         if (isNaN(next)) return;
-        const dir = (next.getFullYear() * 12 + next.getMonth()) - (curDate.getFullYear() * 12 + curDate.getMonth());
-        if (dir === 0) { curDate = next; renderTable(); return; }
-        Notebook.flip(dir, () => { curDate = next; renderTable(); });
+        Notebook.flipTo(() => new Date(next));
     }
     async function exportData() { if(isAdminUser()) return alert("불가"); alert("데이터 다운로드 중..."); const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' }); if(!data || !data.length) return alert("데이터 없음"); let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n"; data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `mood_${safeFilePart(user.username)}.csv`; link.click(); }
     async function importData(input) { if(isAdminUser()) return alert("불가"); const f = input.files[0]; if(!f) return; if(f.size > 1048576) return alert("파일이 너무 큽니다 (최대 1MB)."); if(!confirm("기존 기록이 덮어씌워집니다. 진행할까요?")) return; const r = new FileReader(); r.onload = async (e) => { const rows = e.target.result.split("\n").slice(1); if(rows.length > 2000) return alert("데이터 행이 너무 많습니다 (최대 2,000행)."); for(let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(cols.length>=3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g,'').trim(); if(isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } } alert("업로드 완료"); loadData(); }; r.readAsText(f); }
@@ -2899,7 +2993,7 @@
         const nbView = { s: 1, sFit: 1, zoom: false, dx: 0, dy: 0, minDx: 0, minDy: 0, x0: 0 };
         let panAnim = 0, inertia = 0;
         const isNotebook = () => viewMode === 'notebook';
-        const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs', 'nb-pages', 'nb-edge-r', 'nb-edge-l'];
+        const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs', 'nb-tabs-l', 'nb-pages', 'nb-edge-r', 'nb-edge-l'];
         const clampX = x => Math.max(nbView.minDx, Math.min(0, x));
         const clampY = y => Math.max(nbView.minDy, Math.min(0, y));
 
@@ -3568,7 +3662,7 @@
             Object.assign(cv.style, { width: `${cw}px`, height: `${ch}px`, display: 'block' });
             gl.viewport(0, 0, cv.width, cv.height);
             const persp = Math.max(1700, g.W * 2.4);
-            const scene = { g, flats: [], sheet: null, sgn: 1, fade: false, C: null, F: null, alpha: 1 };
+            const scene = { g, flats: [], sheet: null, sgn: 1, fade: false, C: null, F: null, alpha: 1, persp, center: [g.spread ? g.spine : g.spine + g.W / 2, g.top + g.H * 0.45] };
             const rectOfSide = sgn => sgn > 0 ? [g.spine, g.top, g.W, g.H] : [g.spine - g.W, g.top, g.W, g.H];
             scene.halfRect = rectOfSide;
             scene.fullRect = [g.cr.left, g.top, g.cr.width, g.H];
@@ -3615,7 +3709,7 @@
                 const u = GL.u;
                 gl.uniform2f(u.uPage, g.W, g.H); gl.uniform1f(u.uSpine, g.spine); gl.uniform1f(u.uTop, g.top); gl.uniform1f(u.uSgn, scene.sgn);
                 gl.uniform2f(u.uCanvas, cw, ch);
-                gl.uniform2f(u.uCenter, g.spread ? g.spine : g.spine + g.W / 2, g.top + g.H * 0.45);
+                gl.uniform2f(u.uCenter, scene.center[0], scene.center[1]);
                 gl.uniform1f(u.uFold, k.fold); gl.uniform1f(u.uTilt, k.tilt); gl.uniform1f(u.uR, k.R); gl.uniform1f(u.uRf, k.R);
                 gl.uniform1f(u.uPersp, persp);
                 gl.uniform1f(u.uCurl, k.curl); gl.uniform1f(u.uW, g.W);
@@ -3631,6 +3725,8 @@
                 gl.drawElements(gl.TRIANGLES, GL.count, gl.UNSIGNED_SHORT, 0);
                 gl.disable(gl.DEPTH_TEST);
                 gl.activeTexture(gl.TEXTURE0);
+                scene.lastK = k;
+                scene.onDraw?.(k);
             };
             // 손끝을 목표 위치로 옮김 (lift: 옮기는 동안 위로 들리는 정도, onFrame: 손 그림 따라가기)
             scene.animate = (to, ms, { lift = 0, onFrame } = {}) => new Promise(resolve => {
@@ -3659,11 +3755,19 @@
             const texes = [oldTex];
             const oldPaper = paperRGB(pageAge());
             const oldDate = new Date(curDate);
+            tabsHeldAt = oldDate.getMonth() + 1;
             const scene = makeScene(g);
             const C = { x: g.W, y: Math.max(0, Math.min(g.H, grabY ?? g.H * 0.94)) };
             scene.C = C;
             const t = { g, scene, dir, C, oldDate };
-            t.dispose = () => { scene.hide(); texes.forEach(x => gl.deleteTexture(x)); };
+            t.dispose = () => { scene.hide(); tabsHeldAt = null; scene.disposeFlyers?.(); syncTabs(); texes.forEach(x => gl.deleteTexture(x)); };
+            // 이 넘김에 실려 가는 달들 (같은 해 안에서만; 해가 바뀌면 탭 묶음 자체가 바뀜)
+            const tabMonths = () => {
+                if (curDate.getFullYear() !== oldDate.getFullYear()) return [];
+                const a = oldDate.getMonth() + 1, b = curDate.getMonth() + 1, out = [];
+                if (dir > 0) for (let m = a; m < b; m++) out.push(m); else for (let m = b; m < a; m++) out.push(m);
+                return out;
+            };
             // 넘기다 되돌리면 원래 달을 다시 그림 (그동안은 그림으로 덮어 둠)
             t.revert = async () => {
                 if (curDate.getTime() !== t.renderedAt) return;
@@ -3678,6 +3782,7 @@
                 t.renderedAt = curDate.getTime();
                 Object.assign(scene, { sgn: 1, fade: true, sheet: { front: oldTex, crop: CROP_FULL, paper: oldPaper } });
                 t.startF = { ...C }; t.endF = turnedF(C, g.W);
+                attachTabFlyers(scene, tabMonths());
                 return t;
             }
             scene.flats = [{ tex: oldTex, crop: CROP_FULL, rect: scene.fullRect }];
@@ -3706,15 +3811,17 @@
                 Object.assign(scene, { sgn: -1, fade: false, sheet: { front: oldTex, crop: CROP_L, back: newTex, backCrop: CROP_R, paper: oldPaper } });
                 t.startF = { ...C }; t.endF = turnedF(C, g.W);
             }
+            attachTabFlyers(scene, tabMonths());
             return t;
         }
 
         // 넘기는 동안: 편집 중인 값을 먼저 저장하고, 표·점수·머리말은 눌리지 않게 함 (다른 달에 저장되는 일 방지)
-        let queuedFlip = null;
+        let queuedFlip = null, turnFocus = null;
         const TURN_LOCK = ['#main-screen .header', '#main-screen .top-assessment-bar', '#grid-container'];
         function beginTurn() {
             flipping = true;
             const a = document.activeElement;
+            turnFocus = a?.matches?.('.btn-nav, .nb-tab, #nb-title') ? a : null;
             if (a && a !== document.body && a.closest?.('#main-screen .container')) a.blur();
             TURN_LOCK.forEach(q => { const el = document.querySelector(q); if (el) el.inert = true; });
             document.body.classList.add('nb-turning');
@@ -3724,15 +3831,34 @@
             TURN_LOCK.forEach(q => { const el = document.querySelector(q); if (el) el.inert = false; });
             document.body.classList.remove('nb-turning');
             flipping = false;
+            tabsHeldAt = null; syncTabs();
             scheduleMoodLine();
-            // 넘기는 동안 들어온 요청은 끝난 뒤 하나만 이어서 처리
-            if (queuedFlip) { const q = queuedFlip; queuedFlip = null; setTimeout(() => flip(q.dir, q.doRender), 0); }
+            // 탐색 버튼·탭에서 넘겼으면 키보드 포커스를 되돌림 (그사이 다른 곳으로 옮겼으면 그대로)
+            const f = turnFocus; turnFocus = null;
+            if (f && f.isConnected && (document.activeElement === document.body || !document.activeElement)) { try { f.focus({ preventScroll: true }); } catch (e) { /* 무시 */ } }
+            // 넘기는 동안 들어온 요청은 끝난 뒤 마지막 것 하나만, 그때의 달 기준으로 처리
+            if (queuedFlip) { const q = queuedFlip; queuedFlip = null; setTimeout(() => flipTo(q), 0); }
+        }
+
+        function addMonths(d, n) {
+            const y = d.getFullYear(), m = d.getMonth() + n, last = new Date(y, m + 1, 0).getDate();
+            return new Date(y, m, Math.min(d.getDate(), last));
+        }
+        // 달 이동 요청: 목표 날짜를 실행 순간에 계산 (넘기는 중이면 마지막 요청만 기억)
+        function flipTo(getTarget) {
+            if (flipping) { queuedFlip = getTarget; return; }
+            const target = getTarget();
+            if (!target || isNaN(target)) return;
+            const dir = (target.getFullYear() * 12 + target.getMonth()) - (curDate.getFullYear() * 12 + curDate.getMonth());
+            const doRender = () => { curDate = target; renderTable(); };
+            if (dir === 0) { doRender(); return; }
+            safeFlip(Math.sign(dir), doRender);
         }
 
         // 버튼·탭으로 넘길 때: 손이 와서 귀퉁이를 집어 넘김
         async function flip(dir, doRender) {
             animateNextLoad = true;
-            if (flipping) { queuedFlip = { dir, doRender }; return; }
+            if (flipping) { doRender(); return; }   // (flipTo 가 넘김 중 요청을 미리 걸러 냄)
             if (reduceMotion || !document.querySelector('#main-screen .container')) { doRender(); return; }
             if (!initGL()) { cssFlip(dir, doRender); return; }
             beginTurn();
@@ -3745,7 +3871,8 @@
                 const lift = t.g.H * 0.10;
                 const grab = handGrabStart(sc.screen(sc.F));
                 await grab;
-                await sc.animate(t.endF, 1150, { lift, onFrame: (p, k) => handFollow(p, -4 - 10 * k) });
+                // 손은 실제로 그려진 귀퉁이를 집고 따라감
+                await sc.animate(t.endF, 1150, { lift, onFrame: (p, k) => handFollow(sc.lastK ? edgePoint(sc, sc.lastK, t.C.y) : p, -4 - 10 * k) });
                 handRelease();
             } catch (e) {
                 console.warn('페이지 넘김 효과 오류(무시됨):', e?.message || e);
@@ -3775,7 +3902,7 @@
             if (!el || el.dataset.grab) return;
             el.dataset.grab = '1';
             let s = null;
-            const doRenderFor = d => () => { curDate.setMonth(curDate.getMonth() + d); renderTable(); };
+            const doRenderFor = d => () => { curDate = addMonths(curDate, d); renderTable(); };
             const toF = (t, ev) => {
                 const g = t.g, sgn = t.scene.sgn;
                 const lx = sgn * (ev.clientX - g.spine), ly = ev.clientY - g.top;
@@ -3861,6 +3988,67 @@
             });
         }
 
+        // ---------- 달 인덱스 탭: 지나간 달은 왼쪽, 이번 달과 남은 달은 오른쪽 ----------
+        const flyingMonths = new Set();
+        let tabsHeldAt = null;   // 넘김 준비 중에는 탭을 원래 달 기준으로 붙잡아 둠
+        function syncTabs() {
+            const cur = tabsHeldAt ?? (curDate.getMonth() + 1);
+            const set = (box, side) => box?.querySelectorAll('.nb-tab').forEach(b => {
+                const m = Number(b.dataset.m);
+                const here = (side === 'r' ? m >= cur : m < cur) && !flyingMonths.has(m);
+                b.classList.toggle('away', !here);
+                b.classList.toggle('current', side === 'r' && m === cur);
+                b.tabIndex = here ? 0 : -1;
+                b.setAttribute('aria-hidden', here ? 'false' : 'true');
+            });
+            set(document.getElementById('nb-tabs'), 'r');
+            set(document.getElementById('nb-tabs-l'), 'l');
+        }
+        // 넘어가는 종이 가장자리의 한 점(종이 좌표 y)이 지금 화면 어디에 있는지 (셰이더와 같은 계산)
+        function edgePoint(scene, k, y) {
+            const g = scene.g, W = g.W, H = g.H;
+            const nx = Math.cos(k.tilt), ny = Math.sin(k.tilt);
+            const d = (W - k.fold) * nx + (y - H / 2) * ny;
+            const bx = W - d * nx, by = y - d * ny;
+            let qx, qy, z, a;
+            if (d <= 0) { qx = W; qy = y; z = 0; a = 0; }
+            else if (d < Math.PI * k.R) { a = d / k.R; qx = bx + nx * k.R * Math.sin(a); qy = by + ny * k.R * Math.sin(a); z = k.R * (1 - Math.cos(a)); }
+            else { a = Math.PI; qx = bx - nx * (d - Math.PI * k.R); qy = by - ny * (d - Math.PI * k.R); z = 2 * k.R; }
+            const sx = g.spine + scene.sgn * qx, sy = g.top + qy;
+            const kp = scene.persp / (scene.persp - z);
+            return { x: scene.center[0] + (sx - scene.center[0]) * kp, y: scene.center[1] + (sy - scene.center[1]) * kp, a, kp };
+        }
+        // 넘기는 종이에 실린 달들의 탭을 종이와 함께 옮김
+        function attachTabFlyers(scene, months) {
+            if (!months.length || window.innerWidth < 900) { tabsHeldAt = null; syncTabs(); return; }
+            const right = document.getElementById('nb-tabs');
+            if (!right || getComputedStyle(right).display === 'none') { tabsHeldAt = null; syncTabs(); return; }
+            const g = scene.g;
+            tabsHeldAt = null;
+            const flyers = months.map(m => {
+                const slot = right.querySelector(`.nb-tab[data-m="${m}"]`).getBoundingClientRect();
+                const el = document.createElement('div');
+                el.className = 'nb-tab-fly';
+                el.style.setProperty('--tab', TAB_COLORS[m - 1]);
+                el.style.width = '48px'; el.style.height = `${slot.height}px`;
+                el.style.fontSize = getComputedStyle(right.querySelector('.nb-tab')).fontSize;
+                el.innerHTML = `<span>${m}월</span>`;
+                document.body.appendChild(el);
+                flyingMonths.add(m);
+                return { el, span: el.firstChild, y: slot.top + slot.height / 2 - g.top, h: slot.height };
+            });
+            syncTabs();
+            scene.onDraw = k => flyers.forEach(f => {
+                const p = edgePoint(scene, k, f.y);
+                const sx = scene.sgn * Math.cos(p.a);
+                // 한 쪽만 보이는 가독성 모드: 넘겨진 종이의 탭은 수첩 왼쪽 가장자리에 모임
+                const x = g.spread ? p.x : Math.max(p.x, g.spine);
+                f.el.style.transform = `translate(${x}px, ${p.y - f.h / 2}px) scale(${sx * p.kp}, ${p.kp})`;
+                f.span.style.opacity = sx < 0 ? '0.62' : '1';   // 뒷면이 보이는 동안은 글자가 비쳐 보임
+            });
+            scene.disposeFlyers = () => { flyers.forEach(f => { f.el.remove(); flyingMonths.delete(Number(f.span.textContent.replace('월', ''))); }); syncTabs(); };
+        }
+
         // ---------- 노트 꾸미기 (표지 · 스프링 · 리본 · 인덱스 탭 · 제목 · 펜) ----------
         function buildDecor() {
             const main = document.getElementById('main-screen');
@@ -3870,16 +4058,24 @@
                     el.id = id; el.setAttribute('aria-hidden', 'true');
                     main.insertBefore(el, main.firstChild);
                 });
-                const tabs = document.createElement('div');
-                tabs.id = 'nb-tabs';
-                for (let m = 1; m <= 12; m++) {
-                    const b = document.createElement('button');
-                    b.type = 'button'; b.className = 'nb-tab'; b.dataset.m = m;
-                    b.textContent = `${m}월`;
-                    b.style.setProperty('--tab', TAB_COLORS[m - 1]);
-                    b.onclick = () => jumpToDate(`${curDate.getFullYear()}-${String(m).padStart(2, '0')}-01`);
-                    tabs.appendChild(b);
-                }
+                // 같은 자리에 오른쪽(남은 달)·왼쪽(지나간 달) 두 벌을 두고, 달마다 한쪽에만 보임
+                const mkTabs = id => {
+                    const box = document.createElement('div');
+                    box.id = id;
+                    for (let m = 1; m <= 12; m++) {
+                        const b = document.createElement('button');
+                        b.type = 'button'; b.className = 'nb-tab'; b.dataset.m = m;
+                        b.innerHTML = `<span class="tl">${m}월</span>`;
+                        b.setAttribute('aria-label', `${m}월`);
+                        b.style.setProperty('--tab', TAB_COLORS[m - 1]);
+                        // 겹침: 오른쪽 묶음은 앞 달이 위, 넘겨 쌓인 왼쪽 묶음은 최근에 넘긴 달이 위
+                        b.style.zIndex = id === 'nb-tabs' ? String(13 - m) : String(m);
+                        b.onclick = () => jumpToDate(`${curDate.getFullYear()}-${String(m).padStart(2, '0')}-01`);
+                        box.appendChild(b);
+                    }
+                    return box;
+                };
+                const tabs = mkTabs('nb-tabs'), tabsL = mkTabs('nb-tabs-l');
                 const pages = document.createElement('div');
                 pages.id = 'nb-pages'; pages.setAttribute('aria-hidden', 'true');
                 pages.appendChild(document.createElement('div'));
@@ -3887,7 +4083,7 @@
                 const edgeR = document.createElement('div'), edgeL = document.createElement('div');
                 edgeR.id = 'nb-edge-r'; edgeL.id = 'nb-edge-l';
                 edgeR.title = '종이 끝을 잡고 왼쪽으로 끌면 다음 달'; edgeL.title = '종이 끝을 잡고 오른쪽으로 끌면 이전 달';
-                main.append(edgeR, edgeL, tabs);
+                main.append(edgeR, edgeL, tabs, tabsL);
                 const cont = main.querySelector('.container');
                 if (cont) {
                     const ageCv = document.createElement('canvas');
@@ -3927,7 +4123,7 @@
                 title.append(num, meta);
                 title.setAttribute('aria-label', `${y}년 ${m}월, 날짜 고르기`);
             }
-            document.querySelectorAll('.nb-tab').forEach(b => b.classList.toggle('current', Number(b.dataset.m) === curDate.getMonth() + 1));
+            syncTabs();
             renderAge();
         }
 
@@ -4058,10 +4254,15 @@
         }
 
         // 로그인되면: 열쇠가 돌고 → 유리문이 열리고 → 수첩을 꺼내 책상 위 펼칠 자리에 놓음
-        let authDone = Promise.resolve();
+        let authDone = Promise.resolve(), authSafety = null;
         function finishAuth() {
+            clearTimeout(authSafety);
+            const mainEl = document.getElementById('main-screen');
+            if (mainEl) mainEl.inert = false;
             const scr = document.getElementById('auth-screen');
             if (!scr) return;
+            const box = scr.querySelector('.auth-box');
+            if (box) box.inert = false;
             scr.classList.add('hidden');
             scr.classList.remove('leaving');
             scr.querySelector('.auth-pull')?.remove();
@@ -4072,6 +4273,13 @@
             if (!scr || scr.classList.contains('hidden')) return;
             if (reduceMotion || !scr.animate) { finishAuth(); return; }
             scr.classList.add('leaving');
+            // 연출 동안 꼬리표 입력과 뒤의 기록표는 모두 잠금 (클릭·키보드가 통과하지 않게)
+            scr.querySelector('.auth-box').inert = true;
+            const mainEl = document.getElementById('main-screen');
+            if (mainEl) mainEl.inert = true;
+            // 어떤 이유로든 수첩이 펼쳐지지 않으면 잠시 뒤 첫 화면을 치움
+            clearTimeout(authSafety);
+            authSafety = setTimeout(finishAuth, 6000);
             authDone = (async () => {
                 const opt = (ms, easing = 'ease', delay = 0) => ({ duration: ms, easing, delay, fill: 'forwards' });
                 const box = scr.querySelector('.auth-box'), str = scr.querySelector('.tag-string');
@@ -4176,10 +4384,13 @@
             opening = true;
             const ribbon = document.getElementById('nb-ribbon');
             if (ribbon) ribbon.style.opacity = '0';
-            const { book, board, band, shadeEl, mask } = buildBook(r);
-            const fromRect = authRect();
-            finishAuth();
+            let book = null;
             try {
+                const built = buildBook(r);
+                book = built.book;
+                const { board, band, shadeEl, mask } = built;
+                const fromRect = authRect();
+                finishAuth();
                 // 첫 화면의 닫힌 수첩 자리에서 이어서 펼칠 자리로 옮겨 감
                 const from = fromRect || r;
                 const sx = from.width / r.width, sy = from.height / r.height;
@@ -4203,7 +4414,8 @@
                 ], { duration: 1400, easing: 'cubic-bezier(.55, .05, .3, 1)' });
                 await run(book, [{ opacity: 1 }, { opacity: 0 }], { duration: 260 });
             } finally {
-                book.remove();
+                book?.remove();
+                finishAuth();
                 document.body.classList.remove('nb-book-anim');
                 opening = false;
             }
@@ -4277,7 +4489,7 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
