@@ -981,6 +981,50 @@
         background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 15px, rgba(60, 58, 70, 0.1) 15px 16px), #fbf8f1;
         box-shadow: 0 14px 30px -8px rgba(30, 20, 10, 0.5);
     }
+    /* --- 1년 = 수첩 한 권: 해가 지날수록 표지가 바래고 모서리가 닳음 --- */
+    #nb-cover, #nb-book .front, .auth-pull, .yr-book { --w: var(--wear, 0); }
+    #nb-cover, #nb-book .front, .auth-pull { filter: brightness(calc(1 + var(--w) * 0.55)) sepia(calc(var(--w) * 0.5)) saturate(calc(1 + var(--w) * 0.3)); }
+    #nb-cover::after, #nb-book .front::after, .auth-pull::after, .yr-book::after {
+        content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--w);
+        background:
+            radial-gradient(70px 46px at 6% 5%, rgba(255, 238, 214, 0.20), transparent 70%),
+            radial-gradient(90px 56px at 95% 96%, rgba(255, 238, 214, 0.24), transparent 70%),
+            radial-gradient(46px 34px at 93% 4%, rgba(255, 238, 214, 0.16), transparent 70%),
+            radial-gradient(56px 80px at 3% 94%, rgba(255, 238, 214, 0.18), transparent 70%),
+            radial-gradient(160px 30px at 60% 40%, rgba(255, 238, 214, 0.05), transparent 70%),
+            repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 11px),
+            repeating-linear-gradient(32deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 17px);
+    }
+    #nb-book .front .emboss-year, .auth-pull .emboss-year { font-family: var(--serif); font-weight: 600; font-size: 15px; letter-spacing: 6px; padding-left: 6px; color: #0c0c0d; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16); margin-top: 4px; }
+    /* 책장 */
+    #nb-shelf { position: fixed; inset: 0; z-index: 2700; }
+    #nb-shelf.hidden { display: none; }
+    #nb-shelf .auth-room { position: absolute; inset: 0; }
+    #nb-shelf .cabinet { transform: translateX(-50%); }
+    .shelf-ui { position: absolute; left: 0; right: 0; top: 14px; display: flex; justify-content: center; gap: 10px; align-items: center; pointer-events: none; z-index: 3; }
+    .shelf-hint { padding: 6px 14px; border-radius: 16px; background: rgba(24, 24, 27, 0.78); color: #f3efe7; font-size: 13px; pointer-events: none; }
+    .shelf-back { pointer-events: auto; padding: 7px 14px; border: none; border-radius: 16px; background: #9b2f35; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
+    .yr-book {
+        flex: none; position: relative; width: 30px; height: 90%; margin-right: 2px; border: none; padding: 0; cursor: pointer; border-radius: 3px 3px 0 0;
+        background: linear-gradient(90deg, #0b0b0d, #2c2c31 45%, #141416);
+        filter: brightness(calc(1 + var(--w) * 0.7)) sepia(calc(var(--w) * 0.55));
+        box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.06), inset -2px 0 0 rgba(0, 0, 0, 0.4);
+        transition: transform .2s cubic-bezier(.2, .9, .3, 1.3);
+    }
+    .yr-book:hover, .yr-book:focus-visible { transform: translateY(-8px); outline: none; }
+    .yr-book .yl {   /* 등 라벨: 오래될수록 누렇게 */
+        position: absolute; left: 3px; right: 3px; bottom: 12%; padding: 4px 0; border-radius: 2px; text-align: center;
+        font-family: var(--serif); font-weight: 700; font-size: 10px; line-height: 1.1; color: #2a2016;
+        background: color-mix(in srgb, #f6f1e6 calc(100% - var(--w) * 100%), #d6b77a);
+    }
+    .yr-book .yt { position: absolute; top: 14%; left: 0; right: 0; writing-mode: vertical-rl; margin: 0 auto; font-family: var(--serif-ko); font-size: 9px; letter-spacing: 3px; color: #8d8a84; }
+    .yr-book.slot { visibility: hidden; }
+    .nb-newband {   /* 새 수첩을 두른 종이띠 */
+        position: absolute; left: 0; right: 0; top: 42%; height: 46px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        background: linear-gradient(180deg, #f6efe0, #e9dcc0); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+        font-family: var(--serif-ko); color: #6b3a2e; letter-spacing: 3px; font-size: 15px;
+    }
+    .nb-newband b { font-family: var(--serif); font-size: 20px; letter-spacing: 2px; color: #9b2f35; }
     @media (prefers-reduced-motion: reduce) {
         td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
     }
@@ -1103,6 +1147,11 @@
                 <button type="button" class="view-mode-btn" data-mode="read" role="radio" onclick="Notebook.setViewMode('read')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5C6 5 9 5 12 7c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 7v12.5"/></svg><span>가독성 모드<small>글씨를 크게, 종이 안에서 스크롤</small></span></button>
                 <button type="button" class="view-mode-btn" data-mode="notebook" role="radio" onclick="Notebook.setViewMode('notebook')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 3v18"/><path d="M15.5 3v18"/></svg><span>수첩 모드<small>펼친 양면을 한눈에, 끌어서 옮기기</small></span></button>
             </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">수첩</div>
+            <div class="menu-item" role="button" tabindex="0" onclick="Notebook.browseShelf()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M5 20V5h3v15"/><path d="M8 20V7h3v13"/><path d="M12.5 20l2.2-14 3 .5-2.2 14"/></svg><span>책장에서 지난 수첩 꺼내기<small style="font-size:11px;color:#8a8478;font-weight:400">한 해에 한 권, 지난 수첩은 책장에</small></span></div>
         </div>
 
         <div class="menu-section">
@@ -4008,12 +4057,13 @@
         }
         // 달 이동 요청: 목표 날짜를 실행 순간에 계산 (넘기는 중이면 마지막 요청만 기억)
         function flipTo(getTarget) {
-            if (flipping) { queuedFlip = getTarget; return; }
+            if (flipping || swapping) { queuedFlip = getTarget; return; }
             const target = getTarget();
             if (!target || isNaN(target)) return;
             const dir = (target.getFullYear() * 12 + target.getMonth()) - (curDate.getFullYear() * 12 + curDate.getMonth());
             const doRender = () => { curDate = target; renderTable(); };
             if (dir === 0) { doRender(); return; }
+            if (target.getFullYear() !== curDate.getFullYear() && !reduceMotion && document.querySelector('#main-screen .container') && !document.getElementById('main-screen').classList.contains('hidden')) { swapToYear(target); return; }
             safeFlip(Math.sign(dir), doRender);
         }
 
@@ -4091,6 +4141,7 @@
                 if (!s.moved) {
                     if (Math.hypot(e.clientX - s.x0, e.clientY - s.y0) < 6) return;
                     if (flipping || reduceMotion || !initGL() || !document.querySelector('#main-screen .container')) return;
+                    if (addMonths(curDate, dir).getFullYear() !== curDate.getFullYear()) return;   // 해가 바뀌면 손을 놓을 때 수첩을 바꿈
                     s.moved = true;
                     beginTurn();
                     animateNextLoad = true;
@@ -4286,6 +4337,7 @@
                 title.setAttribute('aria-label', `${y}년 ${m}월, 날짜 고르기`);
             }
             syncTabs();
+            applyWear();
             renderAge();
         }
 
@@ -4459,7 +4511,7 @@
                 const to = closedRect() || { left: vw * 0.2, top: vh * 0.1, width: vw * 0.6, height: vh * 0.75 };
                 const pull = document.createElement('div');
                 pull.className = 'auth-pull';
-                pull.innerHTML = '<div class="emboss-ko">기분기록지</div><div class="emboss-en">MOOD JOURNAL</div><div class="band"></div>';
+                pull.innerHTML = `<div class="emboss-ko">기분기록지</div><div class="emboss-en">MOOD JOURNAL</div><div class="emboss-year">${new Date().getFullYear()}</div><div class="band"></div>`;
                 Object.assign(pull.style, { left: `${to.left}px`, top: `${to.top}px`, width: `${to.width}px`, height: `${to.height}px` });
                 const T = (r, extra = '') => `translate(${r.left - to.left}px, ${r.top - to.top}px) scale(${r.width / to.width}, ${r.height / to.height})${extra}`;
                 const mid = { left: from.left - from.width * 1.5, top: from.top - from.height * 0.12, width: from.width * 4, height: from.height * 1.16 };
@@ -4728,6 +4780,184 @@
             openReader(a.dataset.reader);
         });
 
+        // ---------- 1년 = 수첩 한 권: 지난 수첩은 책장에, 해가 바뀌면 새 수첩 ----------
+        const yearOf = d => d.getFullYear();
+        const thisYear = () => new Date().getFullYear();
+        function wearOf(year) { const n = thisYear() - year; return n <= 0 ? 0 : Math.min(1, 1 - Math.pow(0.72, n)); }
+        function applyWear() { document.documentElement.style.setProperty('--wear', wearOf(yearOf(curDate)).toFixed(3)); }
+        // 기록이 있는 해들 (로그인 대상마다 한 번만, 전체 기록 조회와 같은 호출)
+        const yearCache = {};
+        async function recordYears() {
+            const key = `${isAdminUser() ? 'a' : 'p'}:${target}`;
+            if (yearCache[key]) return yearCache[key];
+            const req = isAdminUser()
+                ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
+                : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+            const { data, error } = await req;
+            if (error) return new Set();
+            const ys = new Set((data || []).map(r => Number(String(r.record_date).slice(0, 4))).filter(y => y >= 2000 && y <= 2099));
+            yearCache[key] = ys;
+            return ys;
+        }
+        // 책장 장면 (문은 열려 있고 가운데 칸에 해마다 수첩이 꽂힘)
+        function shelfEl() {
+            let el = document.getElementById('nb-shelf');
+            if (el) return el;
+            el = document.createElement('div');
+            el.id = 'nb-shelf'; el.className = 'hidden';
+            el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '책장');
+            el.innerHTML = `<div class="auth-room"><div class="cabinet"><div class="cab-plate">기분기록지 <b>1.2</b></div><div class="cab-inner"><div class="cab-shelf"></div><div class="cab-shelf yr-row"></div><div class="cab-shelf"></div></div></div></div>
+                <div class="shelf-ui"><span class="shelf-hint">꺼낼 수첩을 고르세요</span><button type="button" class="shelf-back">지금 수첩 다시 꺼내기</button></div>`;
+            document.body.appendChild(el);
+            const rnd = rng(77);
+            el.querySelectorAll('.cab-shelf').forEach((row, ri) => {
+                for (let i = 0; i < 40; i++) {
+                    const b = document.createElement('div');
+                    b.className = 'cab-book' + (rnd() < 0.35 ? ' plain' : '');
+                    Object.assign(b.style, { width: `${9 + Math.floor(rnd() * 13)}px`, height: `${66 + Math.floor(rnd() * 26)}%`, background: `linear-gradient(90deg, ${shade(BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)], -0.25)}, ${BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)]} 40%, ${shade(BOOK_COLORS[Math.floor(rnd() * BOOK_COLORS.length)], -0.35)})` });
+                    if (ri === 1 && i === 0) b.style.marginLeft = '6px';
+                    row.appendChild(b);
+                }
+            });
+            el.addEventListener('keydown', e => { if (e.key === 'Escape') el.querySelector('.shelf-back')?.click(); });
+            return el;
+        }
+        function layoutShelf(el) {
+            const vh = window.innerHeight, vw = window.innerWidth;
+            const ch = Math.min(640, vh * 0.8), cw = Math.min(vw - 28, 560, ch * 0.92);
+            const cab = el.querySelector('.cabinet');
+            cab.style.setProperty('--cab-w', `${cw}px`); cab.style.setProperty('--cab-h', `${ch}px`);
+        }
+        // 가운데 칸 맨 앞에 해마다 수첩 등을 꽂음 (slotYear: 아직 비어 있는 자리)
+        function fillYearRow(el, years, slotYear) {
+            const row = el.querySelector('.yr-row');
+            row.querySelectorAll('.yr-book').forEach(b => b.remove());
+            const first = row.firstChild;
+            [...years].sort((a, b) => a - b).forEach(y => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'yr-book' + (y === slotYear ? ' slot' : ''); b.dataset.year = y;
+                b.style.setProperty('--wear', wearOf(y).toFixed(3));
+                b.setAttribute('aria-label', `${y}년 수첩`);
+                b.innerHTML = `<span class="yt">기분기록지</span><span class="yl">${y}</span>`;
+                row.insertBefore(b, first);
+            });
+        }
+        function carryEl(rect, year, fresh) {
+            const el = document.createElement('div');
+            el.className = 'auth-pull';
+            el.style.setProperty('--wear', wearOf(year).toFixed(3));
+            el.innerHTML = `<div class="emboss-ko">기분기록지</div><div class="emboss-en">MOOD JOURNAL</div><div class="emboss-year">${year}</div><div class="band"></div>${fresh ? `<div class="nb-newband">새 수첩 <b>${year}</b></div>` : ''}`;
+            Object.assign(el.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px`, zIndex: '2750' });
+            document.body.appendChild(el);
+            return el;
+        }
+        const T = (r, to, extra = '') => `translate(${r.left - to.left}px, ${r.top - to.top}px) scale(${r.width / to.width}, ${r.height / to.height})${extra}`;
+        const play = (el, frames, opts) => settleWithin(el.animate(frames, { fill: 'forwards', ...opts }).finished, (opts.duration || 300) + (opts.delay || 0) + 500);
+
+        // 지금 수첩을 덮어 책장에 꽂음 → 책장 장면이 열려 있는 상태로 끝남
+        async function shelveCurrent(years) {
+            const curY = yearOf(curDate);
+            await closeBook();
+            // 닫을 때 걷어 둔 책갈피 끈은 다시 펼칠 때 내려오도록 숨겨 둠
+            const ribbon = document.getElementById('nb-ribbon');
+            if (ribbon) { ribbon.getAnimations().forEach(a => a.cancel()); ribbon.style.opacity = '0'; }
+            const desk = closedRect() || { left: innerWidth * 0.3, top: innerHeight * 0.1, width: innerWidth * 0.4, height: innerHeight * 0.75 };
+            document.getElementById('nb-book')?.remove();
+            const el = shelfEl(); layoutShelf(el);
+            fillYearRow(el, new Set([...years, curY]), curY);
+            el.classList.remove('hidden');
+            el.querySelector('.shelf-ui').hidden = true;
+            const room = el.querySelector('.auth-room');
+            if (!reduceMotion) await play(room, [{ opacity: 0 }, { opacity: 1 }], { duration: 380 });
+            const slot = el.querySelector(`.yr-book[data-year="${curY}"]`);
+            const to = slot.getBoundingClientRect();
+            const carry = carryEl(desk, curY, false);
+            if (!reduceMotion) {
+                const mid = { left: to.left - to.width * 1.5, top: to.top - to.height * 0.1, width: to.width * 4, height: to.height * 1.15 };
+                carry.style.transformOrigin = '0 0';
+                await play(carry, [{ transform: 'none' }, { transform: T(mid, desk), offset: 0.7 }, { transform: T(to, desk) }], { duration: 900, easing: 'cubic-bezier(.4, .1, .3, 1)' });
+            }
+            carry.remove();
+            slot.classList.remove('slot');
+            return el;
+        }
+        // 책장에서 수첩을 꺼내 책상 위로 (없으면 새 수첩을 받음) → openBook 이 이어서 펼침
+        async function takeOut(el, year) {
+            const room = el.querySelector('.auth-room');
+            const spine = el.querySelector(`.yr-book[data-year="${year}"]`);
+            const deskRect = closedRect() || { left: innerWidth * 0.3, top: innerHeight * 0.1, width: innerWidth * 0.4, height: innerHeight * 0.75 };
+            const fresh = !spine;
+            const carry = carryEl(deskRect, year, fresh);
+            carry.style.transformOrigin = '0 0';
+            if (!reduceMotion) {
+                if (spine) {
+                    const from = spine.getBoundingClientRect();
+                    spine.style.visibility = 'hidden';
+                    const mid = { left: from.left - from.width * 1.5, top: from.top - from.height * 0.12, width: from.width * 4, height: from.height * 1.16 };
+                    carry.style.transform = T(from, deskRect);
+                    play(room, [{ opacity: 1 }, { opacity: 0 }], { duration: 650, delay: 260, easing: 'ease-in' });
+                    await play(carry, [{ transform: T(from, deskRect) }, { transform: T(mid, deskRect), offset: 0.3 }, { transform: 'none' }], { duration: 980, easing: 'cubic-bezier(.35, .6, .3, 1)' });
+                } else {
+                    // 새해 수첩: 종이띠를 두른 채 아래에서 올라와 책상에 놓이고, 띠가 벗겨짐
+                    play(room, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, easing: 'ease-in' });
+                    await play(carry, [{ transform: `translateY(${innerHeight - deskRect.top + 40}px) rotate(-6deg)` }, { transform: 'translateY(-10px) rotate(1deg)', offset: 0.75 }, { transform: 'none' }], { duration: 950, easing: 'cubic-bezier(.25, .8, .3, 1)' });
+                    const band = carry.querySelector('.nb-newband');
+                    if (band) await play(band, [{ transform: 'none', opacity: 1 }, { transform: 'translateX(60%) rotate(4deg)', opacity: 0 }], { duration: 520, delay: 250, easing: 'cubic-bezier(.5, 0, .3, 1)' });
+                }
+            }
+            carry.querySelector('.nb-newband')?.remove();
+            el.classList.add('hidden');
+            room.getAnimations().forEach(a => a.cancel());
+        }
+        let swapping = false;
+        // 다른 해의 수첩으로 바꿈 (12월↔1월을 넘을 때, 날짜 고르기로 다른 해를 고를 때)
+        async function swapToYear(targetDate) {
+            if (swapping) return;
+            swapping = true; beginTurn();
+            try {
+                const years = await recordYears().catch(() => new Set());
+                const el = await shelveCurrent(years);
+                fillYearRow(el, new Set([...years, yearOf(curDate)]), null);
+                suppressCascade = false; animateNextLoad = true;
+                curDate = targetDate; renderTable();
+                await takeOut(el, yearOf(targetDate));
+                await openBook();
+            } catch (e) {
+                console.warn('수첩 바꾸기 오류(무시됨):', e?.message || e);
+                document.getElementById('nb-shelf')?.classList.add('hidden');
+                document.querySelectorAll('body > .auth-pull, #nb-book').forEach(x => x.remove());
+                if (yearOf(curDate) !== yearOf(targetDate)) { curDate = targetDate; renderTable(); }
+            } finally { swapping = false; endTurn(); }
+        }
+        // 메뉴 "책장": 지금 수첩을 꽂고, 고른 해의 수첩을 꺼냄
+        async function browseShelf() {
+            if (swapping || flipping) return;
+            if (document.getElementById('sidebar')?.classList.contains('open')) toggleSidebar();
+            swapping = true; beginTurn();
+            const back = new Date(curDate);
+            try {
+                const years = await recordYears().catch(() => new Set());
+                const el = await shelveCurrent(years);
+                const ui = el.querySelector('.shelf-ui'); ui.hidden = false;
+                const year = await new Promise(resolve => {
+                    el.querySelectorAll('.yr-book').forEach(b => { b.onclick = () => resolve(Number(b.dataset.year)); });
+                    el.querySelector('.shelf-back').onclick = () => resolve(yearOf(back));
+                    el.querySelector('.yr-book')?.focus({ preventScroll: true });
+                });
+                ui.hidden = true;
+                el.querySelectorAll('.yr-book').forEach(b => { b.onclick = null; });
+                const now = new Date();
+                const target = year === yearOf(back) ? back : year === now.getFullYear() ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(year, 11, 1);
+                curDate = target; animateNextLoad = true; renderTable();
+                await takeOut(el, year);
+                await openBook();
+            } catch (e) {
+                console.warn('책장 오류(무시됨):', e?.message || e);
+                document.getElementById('nb-shelf')?.classList.add('hidden');
+                document.querySelectorAll('body > .auth-pull, #nb-book').forEach(x => x.remove());
+            } finally { swapping = false; endTurn(); }
+        }
+
         // ---------- 수첩 열기 · 닫기 ----------
         let opening = false, pendingCascade = false;
         function bookRect() {
@@ -4745,6 +4975,7 @@
                 <div class="face front">
                     <div class="emboss-ko">기분기록지</div>
                     <div class="emboss-en">MOOD JOURNAL</div>
+                    <div class="emboss-year">${curDate.getFullYear()}</div>
                     <div class="emboss-foot">분당서울대학교병원 기분장애클리닉</div>
                 </div>
                 <div class="face inside"></div>`;
@@ -4785,7 +5016,7 @@
         }
         // 첫 화면의 닫힌 수첩 자리 (이미 숨겨졌으면 잠깐 꺼내 재고 다시 숨김: 그려지지 않음)
         function authRect() {
-            const pulled = document.querySelector('#auth-screen .auth-pull');
+            const pulled = document.querySelector('#auth-screen .auth-pull, body > .auth-pull');
             if (pulled) return pulled.getBoundingClientRect();
             const scr = document.getElementById('auth-screen'), el = scr?.querySelector('.auth-book');
             if (!el) return null;
@@ -4809,6 +5040,8 @@
                 const { board, band, shadeEl, mask } = built;
                 const fromRect = authRect();
                 finishAuth();
+                document.querySelectorAll('body > .auth-pull').forEach(x => x.remove());
+                document.getElementById('nb-shelf')?.classList.add('hidden');
                 // 첫 화면의 닫힌 수첩 자리에서 이어서 펼칠 자리로 옮겨 감
                 const from = fromRect || r;
                 const sx = from.width / r.width, sy = from.height / r.height;
@@ -4908,7 +5141,7 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, dialog: nbDialog, slip: safe(slip), flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, browseShelf: safe(browseShelf), dialog: nbDialog, slip: safe(slip), flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
