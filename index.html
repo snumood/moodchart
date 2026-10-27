@@ -452,24 +452,36 @@
     @keyframes drawLine { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* 책상 위의 펜 */
+    /* 책상 위의 호두나무 펜 트레이: 펜을 비스듬히 흩어 놓음 */
     #pen-tray {
-        position: fixed; z-index: 950; left: 50%; bottom: 8px; transform: translateX(-50%);
-        height: 74px; display: flex; align-items: flex-end; gap: 4px; padding: 0 6px;
+        position: fixed; z-index: 950; left: 50%; bottom: 10px; transform: translateX(-50%);
+        width: 262px; height: 64px; border-radius: 18px;
+        background:
+            radial-gradient(120% 140% at 50% 120%, rgba(0, 0, 0, 0.25), transparent 60%),
+            repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.035) 0 2px, rgba(0, 0, 0, 0.04) 2px 5px, rgba(255, 255, 255, 0) 5px 11px),
+            linear-gradient(180deg, #7b5134, #5e3a22 55%, #4a2c19);
+        box-shadow:
+            inset 0 2px 0 rgba(255, 230, 200, 0.18), inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+            inset 0 0 0 5px rgba(60, 36, 20, 0.55), inset 0 8px 14px rgba(0, 0, 0, 0.45),
+            0 10px 18px -6px rgba(40, 28, 16, 0.45), 0 2px 3px rgba(40, 28, 16, 0.3);
     }
+    #pen-tray::after { content: ""; position: absolute; inset: 6px; border-radius: 13px; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0) 40%); }
     .nb-pen {
-        width: 38px; height: 74px; border: none; background: none; padding: 0; cursor: pointer; position: relative;
+        position: absolute; left: var(--x); top: -3px; width: 16px; height: 74px; border: none; background: none; padding: 0; cursor: pointer;
+        pointer-events: none; z-index: 1;
+        transform-origin: 50% 50%;
+        transform: translate(0, var(--y)) rotate(var(--a));
         transition: transform .3s cubic-bezier(.2, 1.2, .4, 1), filter .3s, opacity .3s;
-        transform: rotate(-30deg) translateY(6px);
-        filter: drop-shadow(4px 5px 3px rgba(40, 30, 20, 0.35));
+        filter: drop-shadow(2px 3px 1.5px rgba(20, 10, 4, 0.55));
     }
-    .nb-pen svg { width: 16px; height: 74px; display: block; margin: 0 auto; }
-    .nb-pen:hover { transform: rotate(-30deg) translateY(1px); }
-    /* 들고 있는 펜은 자리가 비어 흐릿하게 */
-    .nb-pen.active { transform: rotate(-30deg) translateY(10px); opacity: 0.22; filter: none; }
-    .nb-pen.pencil { margin-left: 12px; }
-    .nb-pen.pencil.off { transform: rotate(-58deg) translateY(12px); filter: drop-shadow(3px 4px 2px rgba(40, 30, 20, 0.3)) grayscale(0.5); opacity: 0.8; }
-    .nb-pen.pencil:not(.off) { transform: rotate(-36deg) translateY(-2px); }
+    .nb-pen svg { width: 16px; height: 74px; display: block; }
+    .nb-pen svg * { pointer-events: visiblePainted; }
+    .nb-pen:hover, .nb-pen:focus-visible { transform: translate(0, calc(var(--y) - 5px)) rotate(var(--a)); filter: drop-shadow(4px 7px 3px rgba(20, 10, 4, 0.45)); z-index: 2; outline: none; }
+    .nb-pen:focus-visible svg { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px var(--accent)); }
+    /* 들고 있는 펜은 트레이 자리가 비어 보이게 */
+    .nb-pen.active { opacity: 0.26; filter: grayscale(0.85) blur(0.3px); }
+    .nb-pen.pencil.off { filter: drop-shadow(2px 3px 1.5px rgba(20, 10, 4, 0.5)) grayscale(0.6); opacity: 0.7; }
+    .nb-pen.pencil:not(.off) { transform: translate(0, calc(var(--y) - 3px)) rotate(calc(var(--a) + 6deg)); }
     #nb-toast {
         position: fixed; z-index: 960; left: 50%; bottom: 90px; transform: translateX(-50%);
         background: rgba(24, 24, 27, 0.9); color: #f3efe7; font-family: var(--print); font-size: 12.5px; font-weight: 500; letter-spacing: 0.2px;
@@ -523,6 +535,46 @@
         #nb-book .front .emboss-ko { font-size: 24px; letter-spacing: 9px; }
         #nb-ribbon { right: calc(var(--nb-right) + 18px); }
     }
+
+    /* --- 수첩 모드: 한 장을 통째로 보고, 넘치면 수첩을 끌어서 옮김 --- */
+    body.nb-notebook #main-screen .container {
+        right: auto; bottom: auto; width: var(--nb-w); height: var(--nb-h);
+        transform-origin: 0 0; will-change: transform;
+    }
+    body.nb-notebook #nb-cover, body.nb-notebook #nb-ribbon, body.nb-notebook #nb-tabs { will-change: transform; }
+    body.nb-notebook #main-screen .grid-wrapper { overflow: clip; }
+    body.nb-notebook #mood-table { margin-bottom: 0; }
+    body.nb-notebook .scroll-arrow { display: none !important; }
+    body.nb-notebook, body.nb-notebook #main-screen * { touch-action: none; }
+    body.nb-notebook #main-screen { cursor: grab; }
+    body.nb-dragging, body.nb-dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+    #nb-cover { transition: box-shadow .25s ease; }
+    body.nb-dragging #nb-cover {
+        box-shadow: 0 40px 70px -14px rgba(40, 30, 20, 0.5), 0 16px 30px -10px rgba(40, 30, 20, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+    /* 돋보기: 수첩 모드에서 가까이 보기 */
+    #nb-zoom {
+        position: fixed; z-index: 950; right: 18px; bottom: 14px;
+        width: 46px; height: 46px; padding: 0; border: none; background: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        filter: drop-shadow(3px 4px 3px rgba(40, 30, 20, 0.35));
+        transform: rotate(-12deg); transition: transform .3s cubic-bezier(.2, 1.2, .4, 1);
+    }
+    #nb-zoom.hidden { display: none; }
+    #nb-zoom:hover { transform: rotate(-12deg) translateY(-3px); }
+    #nb-zoom.on { transform: rotate(8deg) translateY(-4px) scale(1.06); }
+    #nb-zoom.on .zv { display: none; }
+    #nb-zoom:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+    /* 사이드바: 보기 방식 고르기 */
+    .view-mode { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 6px; }
+    .view-mode-btn {
+        display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%;
+        padding: 9px 12px; border: 1px solid #e2ddd3; border-radius: 10px; background: #faf8f4; cursor: pointer;
+        font: inherit; font-size: 13px; font-weight: 600; color: #333; text-align: left;
+    }
+    .view-mode-btn small { font-size: 11px; font-weight: 400; color: #8a8478; }
+    .view-mode-btn.on { border-color: var(--accent); background: #fff; color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+    .view-mode-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     @media (prefers-reduced-motion: reduce) {
         td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
@@ -623,6 +675,14 @@
         <div class="menu-section hidden" id="admin-stats-menu-section">
             <div class="menu-title">관리자</div>
             <div class="menu-item" onclick="openAdminStatsModal()">📋 이용자 통계</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">보기 방식</div>
+            <div class="view-mode" role="radiogroup" aria-label="보기 방식">
+                <button type="button" class="view-mode-btn" data-mode="read" role="radio" onclick="Notebook.setViewMode('read')">📖 가독성 모드<small>글씨를 크게, 종이 안에서 스크롤</small></button>
+                <button type="button" class="view-mode-btn" data-mode="notebook" role="radio" onclick="Notebook.setViewMode('notebook')">📒 수첩 모드<small>한 장을 한눈에, 끌어서 수첩 옮기기</small></button>
+            </div>
         </div>
 
         <div class="menu-section">
@@ -1558,7 +1618,7 @@
                 control.disabled = true;
             });
         }
-        if(isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
+        if(!Notebook.afterTableBuilt(isCurMonth) && isCurMonth) setTimeout(() => { const todayHeader = document.querySelector('.today-header'); if(todayHeader) todayHeader.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }, 100);
         setTimeout(checkScroll, 500);
         if(target) loadData();
     }
@@ -2026,12 +2086,12 @@
     // 화면 표현만 담당합니다. 기록 값과 저장 방식(RPC)은 바꾸지 않습니다.
     const Notebook = (() => {
         const PENS = [
-            { name: '먹색', color: '#2c3445' },
-            { name: '파랑', color: '#2f5fd0' },
-            { name: '빨강', color: '#d9463e' },
-            { name: '초록', color: '#2e8b57' },
-            { name: '보라', color: '#7a4cc2' },
-            { name: '주황', color: '#e07b28' }
+            { name: '먹색', color: '#2c3445', type: 'fountain', kind: '만년필' },
+            { name: '파랑', color: '#2f5fd0', type: 'ballpoint', kind: '볼펜' },
+            { name: '빨강', color: '#d9463e', type: 'ballpoint', kind: '볼펜' },
+            { name: '초록', color: '#2e8b57', type: 'gel', kind: '젤펜' },
+            { name: '보라', color: '#7a4cc2', type: 'gel', kind: '젤펜' },
+            { name: '주황', color: '#e07b28', type: 'marker', kind: '사인펜' }
         ];
         const TAB_COLORS = ['#ffb3b3', '#ffd59e', '#fff0a0', '#c9f0b0', '#a8e6d8', '#b3d4ff', '#c9b8ff', '#f5b8e6', '#ffc9a8', '#d8e8a0', '#a0d8f0', '#e0c0ff'];
         const INK_KEY = 'mood_ink_v1';
@@ -2091,41 +2151,76 @@
             td.classList.add(cls);
         }
 
-        // ---------- 펜 SVG (옻칠 몸통 · 금장 클립) ----------
+        // ---------- 펜 SVG: 종류마다 다른 모양 (만년필 · 볼펜 · 젤펜 · 사인펜) ----------
+        // 모두 16×74 좌표, 펜촉 끝은 (8, 72.5) — 손에 쥔 그림도 같은 좌표를 씀
         function shade(hex, k) {
             const n = parseInt(hex.slice(1), 16);
             const f = c => Math.max(0, Math.min(255, Math.round(k < 0 ? c * (1 + k) : c + (255 - c) * k)));
             return `rgb(${f(n >> 16)}, ${f((n >> 8) & 255)}, ${f(n & 255)})`;
         }
         let svgSeq = 0;
-        function penSvg(color, w = 16, h = 74) {
+        const penType = color => (PENS.find(p => p.color === color) || PENS[0]).type;
+        function penSvg(color, w = 16, h = 74, type = penType(color)) {
             const id = `pg${++svgSeq}`;
-            return `<svg viewBox="0 0 16 74" width="${w}" height="${h}" aria-hidden="true">
-                <defs>
-                    <linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="${shade(color, -0.45)}"/><stop offset="0.28" stop-color="${shade(color, 0.28)}"/><stop offset="0.45" stop-color="${color}"/><stop offset="1" stop-color="${shade(color, -0.55)}"/></linearGradient>
-                    <linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#8a6a2e"/><stop offset="0.4" stop-color="#f3dc9a"/><stop offset="1" stop-color="#7a5a22"/></linearGradient>
-                    <linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#7d828c"/><stop offset="0.4" stop-color="#f2f4f7"/><stop offset="1" stop-color="#6c717b"/></linearGradient>
-                </defs>
-                <rect x="3.5" y="1" width="9" height="20" rx="4.5" fill="url(#${id}b)"/>
-                <rect x="10.6" y="3" width="2" height="22" rx="1" fill="url(#${id}g)"/>
-                <rect x="3.4" y="20" width="9.2" height="2.2" fill="url(#${id}g)"/>
-                <rect x="3.8" y="22" width="8.4" height="34" rx="1.2" fill="url(#${id}b)"/>
-                <rect x="4" y="55.5" width="8" height="2" fill="url(#${id}g)"/>
-                <path d="M4.2 57.5 H11.8 L9.6 68.5 H6.4 Z" fill="url(#${id}m)"/>
-                <path d="M6.4 68.5 H9.6 L8 72.5 Z" fill="#2a2d33"/>
-            </svg>`;
+            const body = `<linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="${shade(color, -0.45)}"/><stop offset="0.28" stop-color="${shade(color, 0.3)}"/><stop offset="0.45" stop-color="${color}"/><stop offset="1" stop-color="${shade(color, -0.55)}"/></linearGradient>`;
+            const gold = `<linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#8a6a2e"/><stop offset="0.4" stop-color="#f3dc9a"/><stop offset="1" stop-color="#7a5a22"/></linearGradient>`;
+            const metal = `<linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#7d828c"/><stop offset="0.4" stop-color="#f2f4f7"/><stop offset="1" stop-color="#6c717b"/></linearGradient>`;
+            const dark = `<linearGradient id="${id}d" x1="0" x2="1"><stop offset="0" stop-color="#121418"/><stop offset="0.4" stop-color="#4a4f59"/><stop offset="1" stop-color="#0b0c0f"/></linearGradient>`;
+            const glass = `<linearGradient id="${id}t" x1="0" x2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.45"/><stop offset="0.3" stop-color="#ffffff" stop-opacity="0.75"/><stop offset="0.55" stop-color="${color}" stop-opacity="0.18"/><stop offset="1" stop-color="${shade(color, -0.4)}" stop-opacity="0.5"/></linearGradient>`;
+            let art;
+            if (type === 'fountain') {
+                // 만년필: 옻칠 몸통, 금장 클립·띠, 금 펜촉
+                art = `<rect x="3" y="1" width="10" height="23" rx="5" fill="url(#${id}b)"/>
+                    <path d="M10.4 3 h2.2 v17.5 a1.1 1.1 0 0 1 -2.2 0 Z" fill="url(#${id}g)"/>
+                    <rect x="3" y="22" width="10" height="2.4" fill="url(#${id}g)"/>
+                    <path d="M3.2 24.4 H12.8 L11.8 51.5 H4.2 Z" fill="url(#${id}b)"/>
+                    <rect x="4.6" y="51.5" width="6.8" height="5.5" rx="0.8" fill="url(#${id}d)"/>
+                    <path d="M4.9 57 H11.1 L9.3 67 L8 72.5 L6.7 67 Z" fill="url(#${id}g)"/>
+                    <path d="M8 62.5 V72" stroke="#5a4316" stroke-width="0.5"/><circle cx="8" cy="62" r="0.8" fill="#5a4316"/>`;
+            } else if (type === 'ballpoint') {
+                // 노크식 볼펜: 금속 노크·클립, 고무 띠 그립, 금속 촉
+                art = `<rect x="6" y="0.6" width="4" height="5.4" rx="1.4" fill="url(#${id}m)"/>
+                    <rect x="4.6" y="5.4" width="6.8" height="50" rx="2.6" fill="url(#${id}b)"/>
+                    <path d="M10.2 6.5 h1.9 v21 q0 2 -1.9 2.6 Z" fill="url(#${id}m)"/>
+                    <g stroke="${shade(color, -0.55)}" stroke-width="0.7" opacity="0.7"><path d="M4.8 41 H11.2"/><path d="M4.8 43.2 H11.2"/><path d="M4.8 45.4 H11.2"/><path d="M4.8 47.6 H11.2"/><path d="M4.8 49.8 H11.2"/></g>
+                    <path d="M4.6 55 H11.4 L9.1 68 H6.9 Z" fill="url(#${id}m)"/>
+                    <path d="M6.9 68 H9.1 L8 72.5 Z" fill="#2a2d33"/>`;
+            } else if (type === 'gel') {
+                // 젤펜: 투명 몸통 속 잉크심, 고무 그립, 같은 색 뚜껑 끝
+                art = `<rect x="4.4" y="0.8" width="7.2" height="8" rx="2.6" fill="url(#${id}b)"/>
+                    <path d="M10.6 2 h1.8 v15 q0 1.6 -1.8 2 Z" fill="${shade(color, -0.2)}"/>
+                    <rect x="4" y="8" width="8" height="37" rx="1.6" fill="url(#${id}t)"/>
+                    <rect x="7.1" y="9" width="1.8" height="40" rx="0.9" fill="${color}" opacity="0.9"/>
+                    <rect x="4" y="44" width="8" height="12" rx="1.6" fill="url(#${id}d)"/>
+                    <g fill="#ffffff" opacity="0.16"><circle cx="6" cy="47" r="0.7"/><circle cx="10" cy="47" r="0.7"/><circle cx="8" cy="49.5" r="0.7"/><circle cx="6" cy="52" r="0.7"/><circle cx="10" cy="52" r="0.7"/></g>
+                    <path d="M5 56 H11 L9 67.5 H7 Z" fill="url(#${id}t)" stroke="${shade(color, -0.3)}" stroke-width="0.3"/>
+                    <path d="M7 67.5 H9 L8 72.5 Z" fill="url(#${id}m)"/>`;
+            } else {
+                // 사인펜: 굵은 몸통, 같은 색 뚜껑과 섬유 촉
+                art = `<rect x="2.8" y="1" width="10.4" height="25" rx="3" fill="url(#${id}b)"/>
+                    <path d="M10.6 3 h2.3 v19 q0 2 -2.3 2.4 Z" fill="${shade(color, -0.25)}"/>
+                    <rect x="2.8" y="25.5" width="10.4" height="30" rx="1.5" fill="#f1ede6"/>
+                    <rect x="2.8" y="31" width="10.4" height="8" fill="url(#${id}b)" opacity="0.85"/>
+                    <path d="M2.8 25.5 H13.2 V55.5 H2.8 Z" fill="none" stroke="#c9c2b6" stroke-width="0.5"/>
+                    <path d="M4 55.5 H12 L9.6 66 H6.4 Z" fill="url(#${id}d)"/>
+                    <path d="M6.4 66 H9.6 L8.6 72.5 H7.4 Z" fill="${color}"/>`;
+            }
+            return `<svg viewBox="0 0 16 74" width="${w}" height="${h}" aria-hidden="true"><defs>${body}${gold}${metal}${dark}${glass}</defs>${art}</svg>`;
         }
         function pencilSvg() {
             const id = `pc${++svgSeq}`;
             return `<svg viewBox="0 0 16 74" width="16" height="74" aria-hidden="true">
                 <defs>
-                    <linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#0d0e10"/><stop offset="0.35" stop-color="#3a3d44"/><stop offset="0.55" stop-color="#1c1e22"/><stop offset="1" stop-color="#060607"/></linearGradient>
-                    <linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#7d828c"/><stop offset="0.4" stop-color="#f2f4f7"/><stop offset="1" stop-color="#6c717b"/></linearGradient>
+                    <linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#0d0e10"/><stop offset="0.33" stop-color="#3a3d44"/><stop offset="0.34" stop-color="#26282d"/><stop offset="0.66" stop-color="#1c1e22"/><stop offset="0.67" stop-color="#121316"/><stop offset="1" stop-color="#060607"/></linearGradient>
+                    <linearGradient id="${id}m" x1="0" x2="1"><stop offset="0" stop-color="#8a7a4a"/><stop offset="0.4" stop-color="#efe2b2"/><stop offset="1" stop-color="#7a6a3a"/></linearGradient>
+                    <linearGradient id="${id}w" x1="0" x2="1"><stop offset="0" stop-color="#c9a878"/><stop offset="0.5" stop-color="#ecd3a8"/><stop offset="1" stop-color="#b8956a"/></linearGradient>
                 </defs>
-                <rect x="4" y="1" width="8" height="7" rx="2.5" fill="#efece6"/>
+                <rect x="4.2" y="1" width="7.6" height="7" rx="2.2" fill="#e9a3a0"/>
                 <rect x="4" y="7.5" width="8" height="5" fill="url(#${id}m)"/>
+                <path d="M4 9 H12 M4 11 H12" stroke="#7a6a3a" stroke-width="0.4"/>
                 <rect x="4" y="12.5" width="8" height="45" fill="url(#${id}b)"/>
-                <path d="M4 57.5 H12 L8.9 68 H7.1 Z" fill="#e8cfa4"/>
+                <text x="8" y="36" font-size="3" fill="#c8b070" text-anchor="middle" transform="rotate(90 8 36)" font-family="serif">2B</text>
+                <path d="M4 57.5 H12 L8.9 68 H7.1 Z" fill="url(#${id}w)"/>
                 <path d="M7.1 68 H8.9 L8 71.5 Z" fill="#3b3c40"/>
             </svg>`;
         }
@@ -2527,20 +2622,274 @@
         }
         function scheduleAge() { clearTimeout(ageTimer); ageTimer = setTimeout(renderAge, 120); }
 
+        // ---------- 보기 방식: 가독성 모드(종이 안에서 스크롤) · 수첩 모드(한 장을 통째로, 끌어서 옮김) ----------
+        // 수첩 모드는 한 장 전체가 세로로 한 화면에 들어오게 줄이고, 넘치는 쪽은 수첩 자체를 끌어서 옮김.
+        // 돋보기(가까이 보기)를 켜면 원래 크기로 커지고 상하좌우로 옮겨 봄.
+        const VIEW_KEY = 'mood_view_mode';
+        const DRAG_HINT_KEY = 'mood_drag_hint';
+        let viewMode = store.get(VIEW_KEY, 'read') === 'notebook' ? 'notebook' : 'read';
+        const nbView = { s: 1, sFit: 1, zoom: false, dx: 0, dy: 0, minDx: 0, minDy: 0, x0: 0 };
+        let panAnim = 0, inertia = 0;
+        const isNotebook = () => viewMode === 'notebook';
+        const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs'];
+        const clampX = x => Math.max(nbView.minDx, Math.min(0, x));
+        const clampY = y => Math.max(nbView.minDy, Math.min(0, y));
+
+        function applyPan(dx, dy = nbView.dy) {
+            nbView.dx = dx; nbView.dy = dy;
+            const cont = document.querySelector('#main-screen .container');
+            if (!cont || !isNotebook()) return;
+            cont.style.transform = `translate(${dx}px, ${dy}px) scale(${nbView.s})`;
+            NB_MOVERS.forEach(id => { const el = document.getElementById(id); if (el) el.style.transform = (dx || dy) ? `translate(${dx}px, ${dy}px)` : ''; });
+        }
+        function clearView() {
+            const main = document.getElementById('main-screen');
+            ['--nb-x', '--nb-right', '--nb-bottom', '--nb-w', '--nb-h'].forEach(v => main?.style.removeProperty(v));
+            const cont = document.querySelector('#main-screen .container');
+            if (cont) cont.style.transform = '';
+            NB_MOVERS.forEach(id => { const el = document.getElementById(id); if (el) el.style.transform = ''; });
+            Object.assign(nbView, { dx: 0, dy: 0, minDx: 0, minDy: 0, s: 1, zoom: false });
+        }
+        function rootVars() {
+            const root = getComputedStyle(document.documentElement);
+            const v = name => parseFloat(root.getPropertyValue(name)) || 0;
+            return { top: v('--nb-top'), bottom: v('--nb-bottom'), mx: v('--nb-x'), mr: v('--nb-right') };
+        }
+        function layoutView() {
+            document.body.classList.toggle('nb-notebook', isNotebook());
+            const main = document.getElementById('main-screen');
+            const cont = main?.querySelector('.container');
+            if (!cont) return;
+            cancelAnimationFrame(panAnim); cancelAnimationFrame(inertia);
+            if (!isNotebook()) { clearView(); syncZoomButton(); renderAge(); scheduleMoodLine(); return; }
+            if (main.classList.contains('hidden')) return;
+            const table = document.getElementById('mood-table');
+            const header = cont.querySelector('.header'), bar = cont.querySelector('.top-assessment-bar');
+            if (!table || !header || !bar) return;
+            const { top, bottom, mx, mr } = rootVars();
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const Wn = Math.max(table.offsetWidth, 560);
+            const Hn = header.offsetHeight + bar.offsetHeight + table.offsetHeight + 2;
+            const roomH = vh - top - bottom, roomW = vw - mx - mr;
+            nbView.sFit = Math.min(1, roomH / Hn);
+            if (nbView.sFit > 0.92) nbView.zoom = false;   // 이미 거의 원래 크기면 가까이 볼 필요 없음
+            const s = nbView.zoom ? 1 : nbView.sFit;
+            const Wv = Wn * s, Hv = Hn * s;
+            const x0 = Wv <= roomW ? mx + (roomW - Wv) / 2 : mx;
+            main.style.setProperty('--nb-x', `${x0}px`);
+            main.style.setProperty('--nb-right', `${vw - x0 - Wv}px`);
+            main.style.setProperty('--nb-bottom', `${vh - top - Hv}px`);
+            main.style.setProperty('--nb-w', `${Wn}px`);
+            main.style.setProperty('--nb-h', `${Hn}px`);
+            nbView.s = s; nbView.x0 = x0;
+            nbView.minDx = Math.min(0, roomW - Wv);
+            nbView.minDy = Math.min(0, roomH - Hv);
+            applyPan(clampX(nbView.dx), clampY(nbView.dy));
+            syncZoomButton();
+            renderAge();
+            scheduleMoodLine();
+            if (nbView.minDx < 0 && store.get(DRAG_HINT_KEY, '') !== '1') {
+                store.set(DRAG_HINT_KEY, '1');
+                setTimeout(() => toast('수첩을 끌어서 옮겨 볼 수 있어요'), 900);
+            }
+        }
+        function animatePan(toX, toY = nbView.dy, ms = 650) {
+            cancelAnimationFrame(panAnim);
+            const fx = nbView.dx, fy = nbView.dy, t0 = performance.now();
+            toX = clampX(toX); toY = clampY(toY);
+            if (reduceMotion || (Math.abs(toX - fx) < 1 && Math.abs(toY - fy) < 1)) { applyPan(toX, toY); return; }
+            const step = now => {
+                const t = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - t, 3);
+                applyPan(fx + (toX - fx) * e, fy + (toY - fy) * e);
+                if (t < 1) panAnim = requestAnimationFrame(step);
+            };
+            panAnim = requestAnimationFrame(step);
+        }
+        // 오늘 칸이 화면 가운데 오도록 수첩을 옮김
+        function panToToday() {
+            if (!isNotebook() || nbView.minDx >= 0) return;
+            const th = document.querySelector('.today-header');
+            if (!th) return;
+            const cx = nbView.x0 + (th.offsetLeft + th.offsetWidth / 2) * nbView.s;
+            animatePan(window.innerWidth / 2 - cx);
+        }
+        // 가까이 보기 ↔ 한 장 전체: 화면의 한 점(기본은 가운데)을 기준으로 커지거나 작아짐
+        function setZoom(on, cx = window.innerWidth / 2, cy = window.innerHeight / 2) {
+            if (!isNotebook() || (on && nbView.sFit > 0.92) || on === nbView.zoom) return;
+            const { top } = rootVars();
+            const s0 = nbView.s;
+            const nx = (cx - nbView.x0 - nbView.dx) / s0, ny = (cy - top - nbView.dy) / s0;   // 종이 위의 점 (원래 크기 좌표)
+            nbView.zoom = on;
+            layoutView();
+            const s1 = nbView.s;
+            applyPan(clampX(cx - nbView.x0 - nx * s1), clampY(cy - top - ny * s1));
+            const cont = document.querySelector('#main-screen .container');
+            if (cont && !reduceMotion && cont.animate) cont.animate([{ opacity: 0.55, filter: 'blur(1.5px)' }, { opacity: 1, filter: 'none' }], { duration: 260, easing: 'ease-out' });
+            toast(on ? '가까이 보기: 끌어서 위아래·옆으로 옮겨요' : '한 장 전체 보기');
+        }
+        function syncZoomButton() {
+            const b = document.getElementById('nb-zoom');
+            if (!b) return;
+            const show = isNotebook() && nbView.sFit <= 0.92;
+            b.classList.toggle('hidden', !show);
+            b.classList.toggle('on', nbView.zoom);
+            b.setAttribute('aria-pressed', nbView.zoom ? 'true' : 'false');
+            b.title = nbView.zoom ? '한 장 전체 보기' : '가까이 보기';
+            b.setAttribute('aria-label', b.title);
+        }
+        function afterTableBuilt(isCurMonth) {
+            layoutView();
+            if (!isNotebook()) return false;
+            if (isCurMonth) setTimeout(panToToday, 120);
+            return true;
+        }
+        function setViewMode(mode) {
+            viewMode = mode === 'notebook' ? 'notebook' : 'read';
+            store.set(VIEW_KEY, viewMode);
+            Object.assign(nbView, { dx: 0, dy: 0, zoom: false });
+            syncViewButtons();
+            layoutView();
+            if (isNotebook()) setTimeout(panToToday, 60);
+            else {
+                const th = document.querySelector('.today-header');
+                if (th) th.scrollIntoView({ inline: 'center', block: 'nearest' });
+            }
+            toast(isNotebook() ? '수첩 모드: 한 장을 한눈에 봐요' : '가독성 모드: 글씨를 크게 봐요');
+        }
+        function syncViewButtons() {
+            document.querySelectorAll('.view-mode-btn').forEach(b => {
+                const on = b.dataset.mode === viewMode;
+                b.classList.toggle('on', on);
+                b.setAttribute('aria-checked', on ? 'true' : 'false');
+            });
+        }
+
+        // 손으로 수첩을 밀어 옮기기 (관성 · 끝에서 살짝 늘어났다 되돌아옴)
+        (() => {
+            let drag = null;
+            const blocked = t => !t || t.closest?.('#sidebar, .sidebar-overlay, .modal-wrap, #pen-tray, #nb-zoom, #auth-screen, .nb-tab, #nb-book');
+            // 입력란에서는 글자 선택·편집이 우선 (끌기 시작 안 함)
+            const editable = t => t.closest?.('input, select, textarea, [contenteditable=""], [contenteditable="true"]');
+            const canPan = () => isNotebook() && (nbView.minDx < 0 || nbView.minDy < 0) && !document.getElementById('main-screen')?.classList.contains('hidden') && !flipping;
+            const rubber = (x, min) => x > 0 ? x * 0.32 : x < min ? min + (x - min) * 0.32 : x;
+            const settle = (vx, vy) => {
+                cancelAnimationFrame(inertia);
+                let last = performance.now();
+                const axis = (pos, v, min, dt) => {
+                    let x = pos + v * dt;
+                    v *= Math.pow(0.994, dt);
+                    // 범위를 벗어나면 용수철처럼 되돌아옴
+                    const over = x > 0 ? x : x < min ? x - min : 0;
+                    if (over) { v = v * 0.8 - over * 0.012 * dt / 16; x = pos + v * dt; }
+                    return [x, v, Math.abs(v) > 0.01 || Math.abs(over) > 0.5];
+                };
+                const tick = now => {
+                    const dt = Math.min(32, now - last); last = now;
+                    const [x, nvx, mx] = axis(nbView.dx, vx, nbView.minDx, dt);
+                    const [y, nvy, my] = axis(nbView.dy, vy, nbView.minDy, dt);
+                    vx = nvx; vy = nvy;
+                    if (mx || my) { applyPan(x, y); inertia = requestAnimationFrame(tick); }
+                    else applyPan(clampX(x), clampY(y));
+                };
+                inertia = requestAnimationFrame(tick);
+            };
+            document.addEventListener('pointerdown', e => {
+                if (drag || !e.isPrimary || !canPan() || blocked(e.target) || editable(e.target) || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                cancelAnimationFrame(inertia); cancelAnimationFrame(panAnim);
+                const now = performance.now();
+                drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx0: nbView.dx, dy0: nbView.dy, moved: false, lx: e.clientX, ly: e.clientY, lt: now, vx: 0, vy: 0 };
+            });
+            document.addEventListener('pointermove', e => {
+                if (!drag || e.pointerId !== drag.id) return;
+                const ddx = e.clientX - drag.x0, ddy = e.clientY - drag.y0;
+                const canX = nbView.minDx < 0, canY = nbView.minDy < 0;
+                if (!drag.moved) {
+                    const okX = canX && Math.abs(ddx) >= 7 && Math.abs(ddx) >= Math.abs(ddy);
+                    const okY = canY && Math.abs(ddy) >= 7 && Math.abs(ddy) >= Math.abs(ddx);
+                    if (!okX && !okY && !(canX && canY && Math.hypot(ddx, ddy) >= 7)) return;
+                    drag.moved = true;
+                    try { document.body.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+                    document.body.classList.add('nb-dragging');
+                    document.activeElement?.blur?.();
+                }
+                const now = performance.now(), dt = Math.max(1, now - drag.lt);
+                drag.vx = drag.vx * 0.6 + ((e.clientX - drag.lx) / dt) * 0.4;
+                drag.vy = drag.vy * 0.6 + ((e.clientY - drag.ly) / dt) * 0.4;
+                drag.lx = e.clientX; drag.ly = e.clientY; drag.lt = now;
+                applyPan(canX ? rubber(drag.dx0 + ddx, nbView.minDx) : nbView.dx, canY ? rubber(drag.dy0 + ddy, nbView.minDy) : nbView.dy);
+            });
+            const end = e => {
+                if (!drag || e.pointerId !== drag.id) return;
+                const d = drag; drag = null;
+                document.body.classList.remove('nb-dragging');
+                if (!d.moved) return;
+                // 끌고 난 뒤의 클릭이 칸을 체크하지 않도록 한 번 막음
+                const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+                document.addEventListener('click', stop, { capture: true, once: true });
+                setTimeout(() => document.removeEventListener('click', stop, { capture: true }), 0);
+                const still = performance.now() - d.lt > 80;
+                settle(still || nbView.minDx >= 0 ? 0 : d.vx, still || nbView.minDy >= 0 ? 0 : d.vy);
+            };
+            document.addEventListener('pointerup', end);
+            document.addEventListener('pointercancel', end);
+            // 키보드로 화면 밖 칸에 가면 그 칸이 보이도록 수첩을 옮김
+            document.addEventListener('focusin', e => {
+                if (!isNotebook() || drag) return;
+                const t = e.target;
+                if (!t?.closest?.('#main-screen .container')) return;
+                const r = t.getBoundingClientRect();
+                const { top, bottom, mx, mr } = rootVars();
+                const vw = window.innerWidth, vh = window.innerHeight;
+                let x = nbView.dx, y = nbView.dy;
+                if (r.left < mx) x += mx - r.left + 24; else if (r.right > vw - mr) x -= r.right - (vw - mr) + 24;
+                if (r.top < top) y += top - r.top + 24; else if (r.bottom > vh - bottom) y -= r.bottom - (vh - bottom) + 24;
+                if (x !== nbView.dx || y !== nbView.dy) animatePan(x, y, 320);
+            });
+            // 휠·트랙패드: 옮기기, 핀치(Ctrl+휠)는 가까이 보기 켜고 끄기
+            let pinchAcc = 0, pinchTimer = null;
+            document.addEventListener('wheel', e => {
+                if (!isNotebook() || blocked(e.target) || document.getElementById('main-screen')?.classList.contains('hidden')) return;
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    pinchAcc += e.deltaY;
+                    clearTimeout(pinchTimer);
+                    pinchTimer = setTimeout(() => { pinchAcc = 0; }, 250);
+                    if (pinchAcc < -40) { pinchAcc = 0; setZoom(true, e.clientX, e.clientY); }
+                    else if (pinchAcc > 40) { pinchAcc = 0; setZoom(false, e.clientX, e.clientY); }
+                    return;
+                }
+                if (!canPan()) return;
+                e.preventDefault();
+                cancelAnimationFrame(inertia); cancelAnimationFrame(panAnim);
+                let x = e.deltaX, y = e.deltaY;
+                if (nbView.minDy >= 0 && !x) { x = y; y = 0; }   // 세로로 옮길 게 없으면 휠은 가로로
+                if (e.shiftKey && !e.deltaX) { x = e.deltaY; y = 0; }
+                applyPan(clampX(nbView.dx - x), clampY(nbView.dy - y));
+            }, { passive: false });
+        })();
+
         // ---------- 페이지를 그림으로 옮기기 (WebGL 텍스처용) ----------
         function snapshotPage(scale) {
             const cont = document.querySelector('#main-screen .container');
             const cr = cont.getBoundingClientRect();
+            // 수첩 모드에서는 종이가 축소되어 있으므로 원래 크기 좌표로 그린 뒤 화면 크기에 입힘
+            const nw = cont.offsetWidth || cr.width, nh = cont.offsetHeight || cr.height;
+            const k = cr.width / nw;
             const cv = document.createElement('canvas');
-            cv.width = Math.round(cr.width * scale);
-            cv.height = Math.round(cr.height * scale);
+            cv.width = Math.round(nw * scale);
+            cv.height = Math.round(nh * scale);
             const c = cv.getContext('2d');
             c.scale(scale, scale);
             c.translate(-cr.left, -cr.top);
             c.fillStyle = '#fffcf3';
-            c.fillRect(cr.left, cr.top, cr.width, cr.height);
+            c.fillRect(cr.left, cr.top, nw, nh);
 
-            const rectOf = el => el.getBoundingClientRect();
+            const rectOf = el => {
+                const r = el.getBoundingClientRect();
+                if (Math.abs(k - 1) < 0.002) return r;
+                const left = cr.left + (r.left - cr.left) / k, top = cr.top + (r.top - cr.top) / k, width = r.width / k, height = r.height / k;
+                return { left, top, width, height, right: left + width, bottom: top + height };
+            };
             const text = (el, str, r, opts = {}) => {
                 const cs = getComputedStyle(el);
                 c.font = opts.font || `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
@@ -2686,7 +3035,7 @@
             const ageCv = document.getElementById('nb-age');
             if (ageCv && ageCv.width) {
                 c.save(); c.globalCompositeOperation = 'multiply';
-                c.drawImage(ageCv, cr.left, cr.top, cr.width, cr.height);
+                c.drawImage(ageCv, cr.left, cr.top, nw, nh);
                 c.restore();
             }
             return { canvas: cv, rect: cr };
@@ -3079,11 +3428,11 @@
                 b.type = 'button';
                 b.className = 'nb-pen';
                 b.dataset.color = p.color;
-                b.title = `${p.name} 펜`;
+                b.title = `${p.name} ${p.kind}`;
                 b.setAttribute('role', 'radio');
-                b.setAttribute('aria-label', `${p.name} 펜`);
+                b.setAttribute('aria-label', `${p.name} ${p.kind}`);
                 b.innerHTML = penSvg(p.color);
-                b.onclick = () => { if (p.color === pen) return; pickUpWithHand(b, () => { pen = p.color; store.set(PEN_KEY, pen); applyPen(); toast(`${p.name} 펜을 들었어요`); }); };
+                b.onclick = () => { if (p.color === pen) return; pickUpWithHand(b, () => { pen = p.color; store.set(PEN_KEY, pen); applyPen(); toast(`${p.name} ${p.kind}을 들었어요`); }); };
                 tray.appendChild(b);
             });
             const pc = document.createElement('button');
@@ -3102,7 +3451,18 @@
                 toast(lineOn ? '연필로 기분 흐름선을 그렸어요' : '기분 흐름선을 지웠어요');
             };
             tray.appendChild(pc);
-            document.body.appendChild(tray);
+            // 트레이 안에 손으로 내려놓은 듯 조금씩 다른 각도·위치로 놓음
+            [...tray.querySelectorAll('.nb-pen')].forEach((el, i) => {
+                const h = hash(`pen${i}`);
+                el.style.setProperty('--x', `${36 + i * 28}px`);
+                el.style.setProperty('--y', `${(h % 5) - 2}px`);
+                el.style.setProperty('--a', `${54 + (h % 7) - 3}deg`);
+            });
+            const zb = document.createElement('button');
+            zb.type = 'button'; zb.id = 'nb-zoom'; zb.className = 'hidden';
+            zb.innerHTML = `<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><defs><radialGradient id="nbzg" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="0.5" stop-color="#dfe9f2" stop-opacity="0.35"/><stop offset="1" stop-color="#9fb3c6" stop-opacity="0.45"/></radialGradient><linearGradient id="nbzh" x1="0" x2="1"><stop offset="0" stop-color="#3b2416"/><stop offset="0.45" stop-color="#7a4a2c"/><stop offset="1" stop-color="#2c1a10"/></linearGradient></defs><path d="M25.5 25.5 L36 36" stroke="url(#nbzh)" stroke-width="5.5" stroke-linecap="round"/><circle cx="16" cy="16" r="11" fill="url(#nbzg)" stroke="#b08a3e" stroke-width="2.6"/><path d="M11 16 H21" stroke="#5b4630" stroke-width="2" stroke-linecap="round"/><path class="zv" d="M16 11 V21" stroke="#5b4630" stroke-width="2" stroke-linecap="round"/></svg>`;
+            zb.onclick = () => setZoom(!nbView.zoom);
+            document.body.append(tray, zb);
             applyPen();
         }
 
@@ -3203,10 +3563,13 @@
         function onLogin() {
             buildDecor();
             buildTray();
+            syncViewButtons();
+            document.body.classList.toggle('nb-notebook', isNotebook());
             scheduleAge();
             document.getElementById('pen-tray').classList.toggle('hidden', isAdminUser());
             animateNextLoad = true;
-            openBook();
+            // 같은 흐름에서 이어지는 renderTable 이 수첩 모드 배치를 마친 뒤의 크기로 표지를 엶
+            queueMicrotask(() => openBook().catch(e => console.warn('수첩 열기 오류(무시됨):', e?.message || e)));
         }
 
         async function close() {
@@ -3215,7 +3578,8 @@
             await closeBook();
         }
 
-        window.addEventListener('resize', () => { scheduleMoodLine(); scheduleAge(); });
+        let viewTimer = null;
+        window.addEventListener('resize', () => { scheduleMoodLine(); scheduleAge(); clearTimeout(viewTimer); viewTimer = setTimeout(layoutView, 120); });
         if (document.fonts?.ready) document.fonts.ready.then(scheduleMoodLine);
 
         // 꾸미기 효과에서 오류가 나도 기록 저장·화면 전환은 계속되도록 감쌈
@@ -3226,7 +3590,8 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose };
+        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose,
+            setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
 </body>
