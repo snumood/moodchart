@@ -1025,6 +1025,16 @@
         font-family: var(--serif-ko); color: #6b3a2e; letter-spacing: 3px; font-size: 15px;
     }
     .nb-newband b { font-family: var(--serif); font-size: 20px; letter-spacing: 2px; color: #9b2f35; }
+    /* --- 언어 --- */
+    .lang-row { flex-direction: row; }
+    .lang-row .view-mode-btn { justify-content: center; font-family: var(--print); }
+    .lang-switch { position: absolute; top: 12px; right: 12px; z-index: 5; display: flex; gap: 2px; padding: 3px; border-radius: 18px; background: rgba(40, 28, 16, 0.55); }
+    .lang-switch .lang-btn { border: none; border-radius: 14px; padding: 5px 11px; background: none; color: #efe6d4; font-family: var(--print); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .lang-switch .lang-btn.on { background: #f3e6c8; color: #4f3f28; }
+    html[lang="en"] .emboss-en, html[lang="en"] #nb-title .t-en { display: none; }
+    html[lang="en"] .auth-emboss-en { display: none; }
+    html[lang="en"] #nb-book .front .emboss-ko, html[lang="en"] .auth-pull .emboss-ko { letter-spacing: 6px; font-size: 28px; }
+    html[lang="en"] .nb-tab { font-size: clamp(11px, calc(var(--tab-h) * 0.42), 14px); }
     @media (prefers-reduced-motion: reduce) {
         td.ink-anim.checked::after, td.ink-anim .cell-select, td.ink-anim .cell-input, td.sticker-pop, #mood-line.drawing path, #mood-line.drawing line { animation: none; }
     }
@@ -1042,6 +1052,7 @@
         </div>
     </div>
     <svg class="tag-string" aria-hidden="true"><path d=""/></svg>
+    <div class="lang-switch" role="radiogroup" aria-label="Language"><button type="button" class="lang-btn" data-lang="ko" role="radio" onclick="I18N.set('ko')"><span class="lang-name">한국어</span></button><button type="button" class="lang-btn" data-lang="en" role="radio" onclick="I18N.set('en')"><span class="lang-name">English</span></button></div>
     <div class="auth-box" role="form" aria-label="기분기록지 로그인">
         <h2 id="auth-title">기분기록지</h2>
         <div id="login-form">
@@ -1146,6 +1157,14 @@
             <div class="view-mode" role="radiogroup" aria-label="보기 방식">
                 <button type="button" class="view-mode-btn" data-mode="read" role="radio" onclick="Notebook.setViewMode('read')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5C6 5 9 5 12 7c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 7v12.5"/></svg><span>가독성 모드<small>글씨를 크게, 종이 안에서 스크롤</small></span></button>
                 <button type="button" class="view-mode-btn" data-mode="notebook" role="radio" onclick="Notebook.setViewMode('notebook')"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 3v18"/><path d="M15.5 3v18"/></svg><span>수첩 모드<small>펼친 양면을 한눈에, 끌어서 옮기기</small></span></button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">언어 · Language</div>
+            <div class="view-mode lang-row" role="radiogroup" aria-label="Language">
+                <button type="button" class="view-mode-btn lang-btn" data-lang="ko" role="radio" onclick="I18N.set('ko')"><span class="lang-name">한국어</span></button>
+                <button type="button" class="view-mode-btn lang-btn" data-lang="en" role="radio" onclick="I18N.set('en')"><span class="lang-name">English</span></button>
             </div>
         </div>
 
@@ -2518,11 +2537,11 @@
         const annotations = {};
         const bgColors = ['rgba(217, 194, 142, 0.12)', 'rgba(168, 195, 171, 0.12)', 'rgba(170, 180, 214, 0.12)', 'rgba(217, 164, 162, 0.10)'];
         for (let y = minYear; y <= maxYear; y++) {
-            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: y+'년', position: 'start', yAdjust: 20, font: {size:13, weight:'bold', family:"'MaruBuri', serif"}, color: '#9b2f35' } };
+            annotations['year'+y] = { type: 'box', xMin: luxon.DateTime.fromObject({year:y, month:1, day:1}).toMillis(), xMax: luxon.DateTime.fromObject({year:y, month:12, day:31}).toMillis(), backgroundColor: bgColors[(y - minYear) % bgColors.length], borderWidth: 0, label: { display: true, content: I18N.lang === 'en' ? String(y) : y+'년', position: 'start', yAdjust: 20, font: {size:13, weight:'bold', family:"'MaruBuri', serif"}, color: '#9b2f35' } };
         }
         myChart = new Chart(ctx, {
             type: 'line', data: { datasets: [{ label: label, data: points, borderColor: color, backgroundColor: color + '14', fill: true, tension: 0.25, pointRadius: 4.5, pointBackgroundColor: '#fbf8f1', pointBorderWidth: 2, borderWidth: 2.4 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', displayFormats: { month: I18N.lang === 'en' ? 'MMM' : 'MM월' } }, min: minTime - buffer, max: maxTime + buffer }, y: { beginAtZero: true, max: 200 } }, plugins: { annotation: { annotations: annotations }, legend: { display: false } } }
         });
     }
     function openPwModal() { if(isAdminUser()) return; document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
@@ -2582,6 +2601,402 @@
         };
         r.readAsText(f);
     }
+</script>
+<script>
+    // 영어 사전 (guides-src/i18n/en_dict.py 에서 생성)
+    const DICT = {
+"기분기록지": "Mood Journal",
+"기분기록지 로그인": "Mood Journal sign-in",
+"아이디": "User ID",
+"아이디를 적어 주세요": "Write your user ID",
+"비밀번호": "Password",
+"이 기기에서 30일간 로그인 유지": "Stay signed in on this device for 30 days",
+"※공용기기에서는 사용하지 마세요": "※ Do not use this on a shared device",
+"열쇠로 열기 (로그인)": "Open with your key (sign in)",
+"새 수첩 만들기 (회원가입)": "Start a new notebook (sign up)",
+"새 수첩 대출 카드 (회원가입)": "New notebook library card (sign up)",
+"희망 아이디": "Desired user ID",
+"연결 번호": "Link number",
+"명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열": "The number written on your clinic card, or an identifying string such as initials + date of birth",
+"⚠️ 이 번호는 담당 의료진이 작성 내용을 확인할 수 있도록 연결하는 용도입니다.": "⚠️ This number links your journal so that your care team can see what you record.",
+"예: 43445678 또는 HGD19990305 (중복 가입 불가)": "e.g. 43445678 or HGD19990305 (cannot be registered twice)",
+"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. It is best not to use a user ID that could identify you. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. If you enter the number written on your clinic card, your care team can also see what you record.",
+"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 작성내용을 함께 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. If you enter the number written on your clinic card, your care team can also see what you record.",
+"위 내용을 확인하였으며 동의합니다.": "I have read the above and agree.",
+"가입완료": "Create account",
+"돌아가기": "Back",
+"가입 완료.": "Account created.",
+"동의가 필요합니다.": "Please agree to the terms.",
+"필수 입력 누락": "Please fill in all required fields.",
+"이미 존재하는 아이디입니다.": "This user ID already exists.",
+"이미 존재하는 아이디 또는 중복된 등록번호입니다.": "This user ID already exists or the registration number is already used.",
+"이미 가입된 번호나 문자열입니다. 다른 번호나 문자열을 사용하세요": "This number or string is already registered. Please use a different one.",
+"중복된 데이터가 존재하여 가입할 수 없습니다.": "Cannot sign up because duplicate data exists.",
+"로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.": "Sign-in failed: the user ID does not exist or the password is wrong.",
+"보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.": "For your security, you have been signed out after 10 minutes of inactivity.",
+"관리자 로그인이 필요합니다.": "Administrator sign-in is required.",
+"승인된 관리자 Google 계정이 아닙니다.": "This is not an approved administrator Google account.",
+"월간생활습관점수": "Monthly Lifestyle Score",
+"기분안정성평가점수": "Mood Stability Score (MSSI)",
+"점": "pts",
+" 점": " pts",
+"항목 / 날짜": "Item / Date",
+"요일": "Day",
+"오늘": "Today",
+"날짜 고르기": "Choose a date",
+"일": "Sun",
+"월": "Mon",
+"화": "Tue",
+"수": "Wed",
+"목": "Thu",
+"금": "Fri",
+"토": "Sat",
+"+4 극히 상승": "+4 Extremely elevated",
+"+3 상당한 상승": "+3 Markedly elevated",
+"+2 분명한 상승": "+2 Clearly elevated",
+"+1 미세한 상승": "+1 Slightly elevated",
+"0  보통 기분": "0  Usual mood",
+"-1 미세한 저하": "-1 Slightly low",
+"-2 분명한 저하": "-2 Clearly low",
+"-3 상당한 저하": "-3 Markedly low",
+"-4 극히 저하": "-4 Extremely low",
+"아무것도 할 수 없거나 입원": "Unable to do anything, or hospitalized",
+"상당한 지장, 주변에서 힘들어함": "Marked disruption; others are struggling with it",
+"다소 지장, 전과 다르다는 지적": "Some disruption; others say you seem different",
+"미미한 기능 변화": "Slight change in functioning",
+"평온하고 정상적인 상태": "Calm, usual state",
+"일상을 유지하기 위해 노력 필요": "Effort needed to keep up daily life",
+"상당한 노력해도 기능이 떨어짐": "Functioning drops even with great effort",
+"혼재 상태": "Mixed state",
+"두려움/소심함/걱정/불안": "Fear/timidity/worry/anxiety",
+"짜증/분노": "Irritability/anger",
+"관심/흥미/즐거움/소비/계획": "Interest/enjoyment/spending/plans",
+"활동량": "Activity level",
+"생각의 속도와 양": "Speed and amount of thinking",
+"생각의 내용": "Content of thinking",
+"-4 너무 없음, 0 적당, 4 극히 증가": "-4 none at all, 0 usual, 4 extremely increased",
+"-4 매우 감소, 0 적당, 4 극히 증가": "-4 greatly decreased, 0 usual, 4 extremely increased",
+"-4 매우 느리고 적음, 0 적당, 4 극히 빠르고 많음": "-4 very slow and little, 0 usual, 4 extremely fast and much",
+"-4 극히 부정적, 0 적당, 4 극히 긍정적": "-4 extremely negative, 0 usual, 4 extremely positive",
+"수면시간 (시간)": "Hours of sleep",
+"0~24시간": "0–24 hours",
+"체중 (kg) *일요일만": "Weight (kg) *Sundays only",
+"일요일만 작성": "Sundays only",
+"생리기간": "Menstruation",
+"음주 (음주량[잔],주종)": "Alcohol (drinks, type)",
+"폭식": "Binge eating",
+"통증 및 신체증상": "Pain and physical symptoms",
+"울음": "Crying",
+"과호흡": "Hyperventilation",
+"공황발작": "Panic attack",
+"운동": "Exercise",
+"정신과처방약물복용": "Took prescribed psychiatric medication",
+"자동 체크됩니다": "Checked automatically",
+"클릭하여 기록": "Click to record",
+"생활사건기록 (클릭)": "Life events (click)",
+"기록된 생활사건이 없습니다.": "No life events recorded.",
+"기분은 하루 최대 2개입니다.": "You can mark at most 2 moods per day.",
+"과거기록을 수정하고자 합니다. 수정하시겠습니까?": "You are about to change a past record. Change it?",
+"해당 월의 기록이 없습니다.": "There are no records for this month.",
+"입력 필요": "Please fill in the fields.",
+"불일치": "The passwords do not match.",
+"완료. 재로그인하세요.": "Done. Please sign in again.",
+"실패": "Failed",
+"신정": "New Year's Day",
+"설날": "Lunar New Year",
+"삼일절": "Independence Movement Day",
+"어린이날": "Children's Day",
+"석가탄신일": "Buddha's Birthday",
+"현충일": "Memorial Day",
+"제헌절": "Constitution Day",
+"광복절": "Liberation Day",
+"추석": "Chuseok",
+"개천절": "National Foundation Day",
+"한글날": "Hangeul Day",
+"크리스마스": "Christmas",
+"대체공휴일": "Substitute holiday",
+"국회의원선거": "General election",
+"대통령선거": "Presidential election",
+"지방선거": "Local elections",
+"펜 고르기": "Choose a pen",
+"먹색": "Ink black",
+"파랑": "Blue",
+"빨강": "Red",
+"초록": "Green",
+"보라": "Purple",
+"주황": "Orange",
+"만년필": "fountain pen",
+"볼펜": "ballpoint pen",
+"젤펜": "gel pen",
+"사인펜": "felt-tip pen",
+"연필: 기분 흐름선": "Pencil: mood line",
+"연필로 기분 흐름선 보기": "Show the mood line in pencil",
+"연필로 기분 흐름선을 그렸어요": "Drew the mood line in pencil",
+"기분 흐름선을 지웠어요": "Erased the mood line",
+"가까이 보기": "Look closer",
+"한 장 전체 보기": "See the whole spread",
+"가까이 보기: 끌어서 위아래·옆으로 옮겨요": "Closer look: drag to move up, down and sideways",
+"가독성 모드: 글씨를 크게 봐요": "Readability mode: larger text",
+"수첩 모드: 한 장을 한눈에 봐요": "Notebook mode: the whole page at a glance",
+"수첩을 끌어서 옮겨 볼 수 있어요": "You can drag the notebook around",
+"귀퉁이를 잡고 끌어 넘기기 (누르면 다음 달)": "Grab the corner and drag to turn (tap for next month)",
+"귀퉁이를 잡고 끌어 넘기기 (누르면 이전 달)": "Grab the corner and drag to turn (tap for previous month)",
+"종이 끝을 잡고 왼쪽으로 끌면 다음 달": "Grab the page edge and drag left for next month",
+"종이 끝을 잡고 오른쪽으로 끌면 이전 달": "Grab the page edge and drag right for previous month",
+"책장": "Bookshelf",
+"꺼낼 수첩을 고르세요": "Choose a notebook to take out",
+"지금 수첩 다시 꺼내기": "Take this year's notebook back",
+"새 수첩": "New notebook",
+"안내 책자": "Guide booklets",
+"작성방법": "How to",
+"질병안내서": "Mood disorder",
+"기분기록지 작성방법": "How to Keep Your Mood Journal",
+"기분장애 가이드북": "Mood Disorder Guide",
+"글자 작게": "Smaller text",
+"글자 크게": "Larger text",
+"수첩으로 돌아가기": "Back to the journal",
+"책자 고르기": "Choose a booklet",
+"닫기": "Close",
+"메뉴 닫기": "Close menu",
+"보기 방식": "View",
+"가독성 모드": "Readability mode",
+"글씨를 크게, 종이 안에서 스크롤": "Larger text, scroll within the page",
+"수첩 모드": "Notebook mode",
+"펼친 양면을 한눈에, 끌어서 옮기기": "The open spread at a glance; drag to move",
+"수첩": "Notebook",
+"책장에서 지난 수첩 꺼내기": "Take an earlier notebook from the bookshelf",
+"한 해에 한 권, 지난 수첩은 책장에": "One notebook a year; past ones stay on the shelf",
+"계정 관리": "Account",
+"비밀번호 변경": "Change password",
+"로그아웃": "Sign out",
+"분석 리포트": "Reports",
+"월간생활습관점수 추세보기": "Monthly Lifestyle Score trend",
+"기분안정성평가점수 추세보기": "Mood Stability Score trend",
+"선물": "Gifts",
+"선물상자": "Gift box",
+"🎁 선물상자": "🎁 Gift box",
+"데이터 관리": "Data",
+"모든 기록을 파일로 다운로드": "Download all records as a file",
+"파일을 기록으로 업로드": "Upload a file into your records",
+"이전 기록이 지워져요": "Earlier records will be overwritten",
+"안내": "Guides",
+"기분기록지 작성방법 보기": "How to keep your mood journal",
+"기분장애 질병안내서 보기": "Mood disorder guide",
+"분당서울대학교병원 기분장애클리닉": "Mood Disorder Clinic, Seoul National University Bundang Hospital",
+"기분기록지 1.2 · 분당서울대학교병원 기분장애클리닉": "Mood Journal 1.2 · Mood Disorder Clinic, Seoul National University Bundang Hospital",
+"기분기록지 1.2 | 분당서울대학교병원": "Mood Journal 1.2 | Seoul National University Bundang Hospital",
+"언어": "Language",
+"언어 · Language": "Language",
+"현재 비밀번호": "Current password",
+"새 비밀번호": "New password",
+"새 비밀번호 확인": "Confirm new password",
+"변경하기": "Change",
+"취소": "Cancel",
+"저장하기": "Save",
+"확인": "OK",
+"추세 그래프": "Trend chart",
+"월간생활습관점수 추세": "Monthly Lifestyle Score trend",
+"기분안정성평가점수 추세": "Mood Stability Score trend",
+"데이터가 없습니다.": "No data yet.",
+"보유한 이모티콘을 선택하세요": "Choose one of your stickers",
+"※ 주민번호, 이름, 연락처 등 개인정보는 입력하지 마세요": "※ Do not enter personal information such as ID numbers, names or contact details",
+"내용을 입력하세요.": "Write here.",
+"모은 선물함": "Collected gifts",
+"받은 선물함": "Received gifts",
+"성실히 기록하면 새로운 선물을 발견할 수 있어요!": "Keep recording faithfully and you will find new gifts!",
+"상자 열어보기": "Open the box",
+"누군가에게 받은 선물은 생활사건기록에 사용할 수 있어요.": "Gifts you receive from someone can be used in your life-event notes.",
+"✉️ 이 아이콘을 누군가에게 선물하기": "✉️ Give this sticker to someone",
+"* 선물하면 선물함에서 사라집니다!": "* Once given, it leaves your gift box!",
+"보유한 아이콘이 없습니다.": "You have no stickers yet.",
+"로딩중...": "Loading...",
+"누군가에게 선물하기": "Give to someone",
+"🎁 보답하기 (내 선물 보내기)": "🎁 Send a thank-you gift",
+"📨 이 아이콘으로 보답 선물 보내기": "📨 Send this sticker as a thank-you gift",
+"💌 답례 또는 특별 선물입니다": "💌 A thank-you or special gift",
+"🎁 보답으로 보낼 아이콘을 선택하세요!": "🎁 Choose a sticker to send back!",
+"보낼 수 없는 상태입니다.": "This cannot be sent right now.",
+"선택한 아이콘을 보답으로 보내시겠습니까?": "Send the selected sticker as a thank-you gift?",
+"💌 따뜻한 마음이 담긴 보답 선물을 보냈습니다!": "💌 Your warm thank-you gift has been sent!",
+"아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?": "The box won't open yet. Shall we record a little more?",
+"🎁 선물이 누군가에게 배달되었습니다! 따뜻한 마음 감사합니다.": "🎁 Your gift has been delivered to someone! Thank you for your kindness.",
+"사본 만들기": "Make a copy",
+"관리자 화면에서는 사용할 수 없어요.": "Not available in the administrator view.",
+"아직 적힌 기록이 없어요.": "There are no records yet.",
+"모든 기록의 사본을 파일로 내려받았어요.\n안전한 곳에 보관해 두세요.": "A copy of all your records has been downloaded.\nKeep it somewhere safe.",
+"기록 옮겨 적기": "Copy records in",
+"파일이 너무 큽니다 (최대 1MB).": "The file is too large (max 1 MB).",
+"기존 기록이 덮어씌워집니다. 진행할까요?": "Existing records will be overwritten. Continue?",
+"덮어쓰고 옮겨 적기": "Overwrite and copy in",
+"그만두기": "Cancel",
+"데이터 행이 너무 많습니다 (최대 2,000행).": "Too many rows (max 2,000).",
+"업로드 완료": "Upload complete",
+"📢 [알림] 이번 달 평가를 진행해주세요!\n(상단바 [월간] 항목 입력)\n입력 시 특별한 선물을 드려요!": "📢 [Reminder] Please fill in this month's scores!\n(the monthly fields at the top)\nYou'll receive a special gift when you do!",
+"정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)": "Really give this sticker to someone?\n(It will leave your gift box once sent)",
+"이 선물에 대한 보답을 보내시겠습니까?\n'모은 선물함'으로 이동합니다.": "Send a thank-you for this gift?\nYou'll go to 'Collected gifts'.",
+"기록은 사라지지 않고 당신을 지탱해 줄 거예요.": "Your records will stay and support you.",
+"기록을 통해 더 행복해질 당신을 기대합니다.": "We look forward to you growing happier through your records.",
+"기분을 기록하는 것은 나를 사랑하는 첫 걸음입니다.": "Recording your mood is the first step to caring for yourself.",
+"꾸준히 스스로의 기분을 관찰한 당신에게 선물을 드려요!": "A gift for you, who kept watching your own mood!",
+"나를 알아가는 여정에 함께해주셔서 감사합니다.": "Thank you for joining this journey of getting to know yourself.",
+"당신의 꾸준함이 빛을 발하고 있어요.": "Your steadiness is shining through.",
+"당신의 모든 감정을 존중하고 응원합니다.": "We respect and support all of your feelings.",
+"당신의 성실함이 멋진 선물을 가져왔네요!": "Your diligence has brought a wonderful gift!",
+"당신의 하루하루가 소중하게 기록되고 있습니다.": "Each of your days is being recorded with care.",
+"마음의 날씨를 살피는 당신은 지혜로운 사람입니다.": "Checking the weather of your mind is a wise thing to do.",
+"선물 상자 속에 담긴 응원의 마음을 받아주세요.": "Please accept the encouragement inside this gift box.",
+"스스로를 이해하려는 노력에 박수를 보냅니다!": "We applaud your effort to understand yourself!",
+"어떤 기분이든 괜찮아요, 기록하는 것만으로 충분합니다.": "Any mood is okay — recording it is enough.",
+"오늘 받은 선물처럼, 당신의 하루도 선물 같기를.": "Like the gift you got today, may your day be a gift too.",
+"오늘도 자신을 돌보는 당신이 멋집니다!": "You are wonderful for caring for yourself today!",
+"오늘도 한 걸음 더 나아갔군요, 축하해요!": "You took one more step today — congratulations!",
+"작은 기록들이 모여 더 나은 내일을 만듭니다.": "Small records add up to a better tomorrow.",
+"잠시 쉬어가도 괜찮아요, 꾸준함만 잃지 마세요.": "It's okay to rest a while — just keep going steadily.",
+"조금씩 더 단단해지는 마음을 느껴보세요.": "Feel your mind growing a little steadier each day.",
+"힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.": "We're cheering for you, who kept recording even in hard moments.",
+"환자 조회": "Find a patient",
+"사용자 목록에서 선택": "Choose from the user list",
+"ID 또는 번호": "ID or number",
+"검색": "Search",
+"환자 데이터 복구 (다운로드)": "Recover patient data (download)",
+"병원 등록번호": "Hospital registration number",
+"다운로드": "Download",
+"관리자": "Administrator",
+"이용자 통계": "Usage statistics",
+"통계 기간": "Statistics period",
+"1주": "1 wk",
+"2주": "2 wk",
+"4주": "4 wk",
+"2개월": "2 mo",
+"3개월": "3 mo",
+"6개월": "6 mo",
+"1년": "1 yr",
+"기간을 불러오는 중입니다.": "Loading the period...",
+"선택 기간의 실제 기록 사용자": "Users who actually recorded in this period",
+"실제 사용자": "Active users",
+"등록번호 등록 사용자": "Users with a registration number",
+"미등록 사용자": "Users without a registration number",
+"신규 기록 사용자": "New recording users",
+"전체 기록 일수": "Total recorded days",
+"사용자당 평균 기록 일수": "Average recorded days per user",
+"현재 아이템 및 선물": "Current items and gifts",
+"아이템 보유 사용자": "Users holding items",
+"전체 보유 아이템": "Total items held",
+"전체 선물·답례": "All gifts and thank-yous",
+"선물을 보낸 사용자": "Users who sent gifts",
+"선물을 받은 사용자": "Users who received gifts",
+"선물 기능 사용자": "Users of the gift feature",
+"일반 선물": "Regular gifts",
+"답례 선물": "Thank-you gifts",
+"사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 아이템과 선물은 현재 DB에 남아 있는 사용자 보유 항목만 집계합니다. 사용자 아이디나 등록번호는 표시하지 않습니다.": "User counts are based on days actually recorded, not on sign-ins. Items and gifts count only what users currently hold in the database. User IDs and registration numbers are not shown.",
+"사용자 목록": "User list",
+"아이디 또는 병원 등록번호 일부로 검색": "Search by part of a user ID or hospital registration number",
+"등록번호": "Reg. no.",
+"최근 기록일": "Last recorded",
+"기록일수": "Days recorded",
+"더 보기": "More",
+"최근 기록일 순으로 표시합니다. 행을 누르면 해당 사용자의 기록지를 읽기 전용으로 엽니다. 목록 조회와 사용자 선택은 관리자 접근 기록에 남습니다.": "Sorted by last recorded date. Tap a row to open that user's chart read-only. Listing and selecting users are logged in the administrator access log.",
+"목록을 불러오는 중입니다.": "Loading the list...",
+"목록을 불러오지 못했습니다.": "Could not load the list.",
+"검색 결과가 없습니다.": "No results.",
+"통계를 불러오는 중입니다.": "Loading statistics...",
+"통계를 불러오지 못했습니다.": "Could not load statistics.",
+"ID 또는 번호를 입력하세요.": "Enter an ID or number.",
+"번호를 입력하세요.": "Enter a number.",
+"해당 정보로 가입된 환자를 찾을 수 없습니다.": "No patient is registered with this information.",
+"Google 관리자": "Google administrator",
+"오류: ": "Error: ",
+"조회 오류: ": "Lookup error: ",
+"조회 권한 오류: ": "Permission error: "
+};
+    // ---------- 언어 (한국어 / English): 화면 글자를 사전으로 바꿈. 사용자가 쓴 내용은 건드리지 않음 ----------
+    const I18N = (() => {
+        const KEY = 'mood_lang';
+        let lang = 'ko';
+        try { lang = localStorage.getItem(KEY) === 'en' ? 'en' : 'ko'; } catch (e) { /* 저장 불가 환경 */ }
+        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const MS = MONTHS.map(m => m.slice(0, 3));
+        const PATS = [["^(\\d{1,2})월$", "{MS1}"], ["^(\\d{4})년 (\\d{1,2})월$", "{M2} \\1"], ["^(\\d{4})년 (\\d{1,2})월, 날짜 고르기$", "{M2} \\1, choose a date"], ["^(\\d{1,2})일 생활사건$", "Life events on day \\1"], ["^조회 대상: (.+) 님$", "Viewing: \\1"], ["^Google 관리자 · 조회: (.+)$", "Google administrator · viewing: \\1"], ["^(.+)명 중 (.+)명 표시$", "Showing \\2 of \\1"], ["^(\\d{4})년 수첩$", "\\1 notebook"], ["^글자 크기 (\\d+)%$", "Text size \\1%"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)을 들었어요$", "Picked up the {T1} {T2}"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)$", "{T1} {T2}"], ["^「(.+)」의 기록을 수첩에 옮겨 적습니다\\.$", "Records from “\\1” will be copied into your notebook."], ["^\\[생활사건\\]\\n([\\s\\S]*)$", "[Life events]\n\\1"], ["^🎁 누군가로부터 (\\d+)개의 새로운 선물이 도착했습니다! \\[받은 선물함\\]을 확인해보세요\\.$", "🎁 \\1 new gift(s) arrived from someone! Check [Received gifts]."], ["^🎁 선물이 도착했습니다!\\n\\n\\[(.+?)\\] ([\\s\\S]*)$", "🎁 A gift has arrived!\n\n[\\1] {T2}"], ["^🎉 축하합니다! ([\\s\\S]*?)\\n\\n\\[(.+?)\\] 아이콘이 선물함에 도착했습니다\\.$", "🎉 Congratulations! {T1}\n\n[\\2] sticker has arrived in your gift box."], ["^🎉 축하합니다! \\[(.+?)\\] 아이콘을 획득했습니다!\\n\\n\"([\\s\\S]*)\"$", "🎉 Congratulations! You got the [\\1] sticker!\n\n\"{T2}\""], ["^🎉 점수 입력 보상!\\n\\n\\[(.+?)\\] 아이콘을 획득했습니다!\\n\"([\\s\\S]*)\"\\n\\(선물함에서 확인하세요\\)$", "🎉 Reward for entering your scores!\n\nYou got the [\\1] sticker!\n\"{T2}\"\n(Check your gift box)"], ["^🎁 선물이 누군가에게 배달되었습니다!\\n\\n🎉 \\[특별 보상\\] 따뜻한 마음을 가진 당신에게 특별한 선물 \\[(.+?)\\]을 드려요!$", "🎁 Your gift has been delivered to someone!\n\n🎉 [Special reward] A special gift [\\1] for your warm heart!"], ["^(기분|생각|의욕|기분기복|활동량): (.*)$", "{T1}: \\2"]].map(([re, tpl]) => [new RegExp(re), tpl]);
+        const SKIP = 'script, style, textarea, input, .cell-event, .user-badge, #patient-list-body, [data-i18n-skip], .lang-name';
+        const ATTR_SKIP = '.cell-event, .user-badge, #patient-list-body, [data-i18n-skip]';   // 입력칸의 안내문(placeholder)은 번역
+        const textOrig = new Map();   // 원래 한국어로 되돌리기 위한 기록
+        const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'];
+        function fill(tpl, m) {
+            return tpl.replace(/\{MS(\d)\}/g, (_, g) => MS[Number(m[g]) - 1] || m[g])
+                .replace(/\{M(\d)\}/g, (_, g) => MONTHS[Number(m[g]) - 1] || m[g])
+                .replace(/\{T(\d)\}/g, (_, g) => tr(m[g]))
+                .replace(/\\(\d)/g, (_, g) => m[g] ?? '');
+        }
+        function tr(s) {
+            if (lang !== 'en' || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
+            const k = s.trim();
+            let out = Object.prototype.hasOwnProperty.call(DICT, k) ? DICT[k] : undefined;
+            if (out === undefined) for (const [re, tpl] of PATS) { const m = k.match(re); if (m) { out = fill(tpl, m); break; } }
+            if (out === undefined && k.includes('\n')) {   // 여러 줄 알림: 줄마다
+                const lines = k.split('\n'); const t = lines.map(l => (l.trim() ? tr(l) : l));
+                if (t.some((x, i) => x !== lines[i])) out = t.join('\n');
+            }
+            return out === undefined ? s : s.replace(k, out);
+        }
+        function skip(node) { const el = node.nodeType === 1 ? node : node.parentElement; return !el || !!el.closest(SKIP); }
+        function translateText(n) {
+            if (skip(n)) return;
+            const t = tr(n.data);
+            if (t !== n.data) { if (!textOrig.has(n)) textOrig.set(n, n.data); n.data = t; }
+        }
+        function translateAttrs(el) {
+            if (el.closest(ATTR_SKIP)) return;
+            ATTRS.forEach(a => {
+                const v = el.getAttribute(a);
+                if (!v || !/[가-힣]/.test(v)) return;
+                const t = tr(v);
+                if (t !== v) { el.setAttribute(`data-ko-${a}`, v); el.setAttribute(a, t); }
+            });
+        }
+        function translateTree(root) {
+            if (lang !== 'en' || !root) return;
+            if (root.nodeType === 3) return translateText(root);
+            if (root.nodeType !== 1 && root.nodeType !== 11) return;
+            if (root.nodeType === 1) translateAttrs(root);
+            const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            for (let n = w.nextNode(); n; n = w.nextNode()) translateText(n);
+            root.querySelectorAll?.('[placeholder], [title], [aria-label], [alt]').forEach(translateAttrs);
+        }
+        function restoreAll() {
+            textOrig.forEach((ko, n) => { if (n.isConnected) n.data = ko; });
+            textOrig.clear();
+            ATTRS.forEach(a => document.querySelectorAll(`[data-ko-${a}]`).forEach(el => { el.setAttribute(a, el.getAttribute(`data-ko-${a}`)); el.removeAttribute(`data-ko-${a}`); }));
+        }
+        const obs = new MutationObserver(list => {
+            if (lang !== 'en') return;
+            list.forEach(m => {
+                if (m.type === 'characterData') translateText(m.target);
+                else if (m.type === 'attributes') { if (!m.target.hasAttribute(`data-ko-${m.attributeName}`) || /[가-힣]/.test(m.target.getAttribute(m.attributeName) || '')) { m.target.removeAttribute(`data-ko-${m.attributeName}`); translateAttrs(m.target); } }
+                else m.addedNodes.forEach(translateTree);
+            });
+        });
+        const KO_TITLE = document.title;
+        function apply() {
+            document.documentElement.lang = lang;
+            document.title = lang === 'en' ? tr(KO_TITLE) : KO_TITLE;
+            if (lang === 'en') translateTree(document.body); else restoreAll();
+            document.querySelectorAll('.lang-btn').forEach(b => { const on = b.dataset.lang === lang; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+            document.querySelectorAll('a[data-reader]').forEach(a => { a.href = `./guide/${a.dataset.reader}${lang === 'en' ? '.en' : ''}.html`; });
+            window.dispatchEvent(new CustomEvent('nb-lang', { detail: lang }));
+        }
+        function set(l) {
+            lang = l === 'en' ? 'en' : 'ko';
+            try { localStorage.setItem(KEY, lang); } catch (e) { /* 무시 */ }
+            apply();
+        }
+        // 기본 알림·확인 창도 같은 사전으로
+        const _alert = window.alert.bind(window), _confirm = window.confirm.bind(window);
+        window.alert = m => _alert(tr(String(m ?? '')));
+        window.confirm = m => _confirm(tr(String(m ?? '')));
+        obs.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+        apply();
+        return { get lang() { return lang; }, set, t: tr, apply };
+    })();
 </script>
 <script>
     // --- 책상 위의 스프링 노트: 펜 · 펜으로 쓰기 · 스티커 · WebGL 페이지 넘김 · 기분 흐름선 ---
@@ -3393,7 +3808,7 @@
                 inertia = requestAnimationFrame(tick);
             };
             document.addEventListener('pointerdown', e => {
-                if (drag || !e.isPrimary || !canPan() || blocked(e.target) || editable(e.target) || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                if (two || drag || !e.isPrimary || !canPan() || blocked(e.target) || editable(e.target) || (e.pointerType === 'mouse' && e.button !== 0)) return;
                 cancelAnimationFrame(inertia); cancelAnimationFrame(panAnim);
                 const now = performance.now();
                 drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx0: nbView.dx, dy0: nbView.dy, moved: false, lx: e.clientX, ly: e.clientY, lt: now, vx: 0, vy: 0 };
@@ -3444,6 +3859,63 @@
                 if (r.top < top) y += top - r.top + 24; else if (r.bottom > vh - bottom) y -= r.bottom - (vh - bottom) + 24;
                 if (x !== nbView.dx || y !== nbView.dy) animatePan(x, y, 320);
             });
+            // 휴대폰: 두 손가락으로 끌면 칸·입력란 위에서도 확실히 수첩이 따라 움직임 (벌리면 가까이, 오므리면 전체)
+            const touches = new Map();
+            let two = null;
+            const mid = () => { const [a, b] = [...touches.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) }; };
+            const touchOk = e => e.pointerType === 'touch' && isNotebook() && !document.getElementById('main-screen')?.classList.contains('hidden') && !flipping && !blocked(e.target);
+            const startTwo = () => {
+                const m = mid();
+                cancelAnimationFrame(inertia); cancelAnimationFrame(panAnim);
+                if (drag) drag = null;
+                document.activeElement?.blur?.();
+                document.body.classList.add('nb-dragging');
+                two = { mx: m.x, my: m.y, dx0: nbView.dx, dy0: nbView.dy, d0: m.d, lx: m.x, ly: m.y, lt: performance.now(), vx: 0, vy: 0, pinched: false };
+            };
+            document.addEventListener('pointerdown', e => {
+                if (!touchOk(e)) return;
+                touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (touches.size === 2) { startTwo(); e.stopPropagation(); }
+            }, true);
+            document.addEventListener('pointermove', e => {
+                if (!touches.has(e.pointerId)) return;
+                touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (!two || touches.size < 2) return;
+                e.stopPropagation();
+                const m = mid(), now = performance.now(), dt = Math.max(1, now - two.lt);
+                two.vx = two.vx * 0.6 + ((m.x - two.lx) / dt) * 0.4; two.vy = two.vy * 0.6 + ((m.y - two.ly) / dt) * 0.4;
+                two.lx = m.x; two.ly = m.y; two.lt = now;
+                // 벌리거나 오므리면 가까이 보기 전환 (한 번의 동작에 한 번)
+                if (!two.pinched && two.d0 > 30) {
+                    const ratio = m.d / two.d0;
+                    if ((ratio > 1.35 && !nbView.zoom) || (ratio < 0.72 && nbView.zoom)) {
+                        two.pinched = true;
+                        setZoom(ratio > 1, m.x, m.y);
+                        Object.assign(two, { mx: m.x, my: m.y, dx0: nbView.dx, dy0: nbView.dy });
+                        return;
+                    }
+                }
+                const x = nbView.minDx < 0 ? rubber(two.dx0 + m.x - two.mx, nbView.minDx) : nbView.dx;
+                const y = nbView.minDy < 0 ? rubber(two.dy0 + m.y - two.my, nbView.minDy) : nbView.dy;
+                applyPan(x, y);
+            }, true);
+            const endTouch = e => {
+                if (!touches.has(e.pointerId)) return;
+                touches.delete(e.pointerId);
+                if (!two || touches.size >= 2) return;
+                const t = two; two = null;
+                document.body.classList.remove('nb-dragging');
+                const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+                document.addEventListener('click', stop, { capture: true, once: true });
+                setTimeout(() => document.removeEventListener('click', stop, { capture: true }), 350);
+                const still = performance.now() - t.lt > 80;
+                settle(still || nbView.minDx >= 0 ? 0 : t.vx, still || nbView.minDy >= 0 ? 0 : t.vy);
+                touches.clear();
+            };
+            document.addEventListener('pointerup', endTouch, true);
+            document.addEventListener('pointercancel', endTouch, true);
+            // iOS Safari 의 브라우저 확대 제스처가 수첩 이동을 가로채지 않게
+            ['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => { if (isNotebook()) e.preventDefault(); }, { passive: false }));
             // 휠·트랙패드: 옮기기, 핀치(Ctrl+휠)는 가까이 보기 켜고 끄기
             let pinchAcc = 0, pinchTimer = null;
             document.addEventListener('wheel', e => {
@@ -4608,7 +5080,8 @@
 
         // ---------- 수첩 뒷부분의 안내 책자: 휘리릭 넘겨 뒷면을 펼쳐 읽음 ----------
         // 책자 내용은 불러와서 수첩 종이 안(Shadow DOM)에 펼침: 앱과 스타일이 섞이지 않고, 다른 페이지를 끼워 넣지 않으므로 서버의 액자 금지 설정과도 무관
-        const READER_DOCS = { guide: { src: './guide/guide.html', label: '작성방법', title: '기분기록지 작성방법' }, illness: { src: './guide/illness.html', label: '질병안내서', title: '기분장애 가이드북' } };
+        const READER_DOCS_KO = { guide: { src: './guide/guide.html', label: '작성방법', title: '기분기록지 작성방법' }, illness: { src: './guide/illness.html', label: '질병안내서', title: '기분장애 가이드북' } };
+        const READER_DOCS = new Proxy(READER_DOCS_KO, { get: (o, k) => { const d = o[k]; return d && I18N.lang === 'en' ? { ...d, src: d.src.replace('.html', '.en.html') } : d; } });
         const readerCache = {};
         const READER_FONT_KEY = 'mood_reader_font';
         let readerPushed = false, readerBusy = false, readerCloseQueued = false;
@@ -4628,7 +5101,7 @@
                         <button type="button" class="rd-btn close" data-act="close">수첩으로 돌아가기</button>
                     </div>
                     <div class="rd-tabs" role="tablist" aria-label="책자 고르기">
-                        ${Object.entries(READER_DOCS).map(([k, d]) => `<button type="button" class="rd-tab" role="tab" data-doc="${k}">${d.label}</button>`).join('')}
+                        ${Object.entries(READER_DOCS_KO).map(([k, d]) => `<button type="button" class="rd-tab" role="tab" data-doc="${k}">${d.label}</button>`).join('')}
                     </div>
                     <div class="rd-paper"><div class="rd-scroll" tabindex="0"></div></div>
                 </div>`;
@@ -4658,7 +5131,8 @@
             toast(`글자 크기 ${100 + step * 10}%`);
         }
         async function loadDoc(kind) {
-            if (readerCache[kind]) return readerCache[kind];
+            const ck = `${kind}:${I18N.lang}`;
+            if (readerCache[ck]) return readerCache[ck];
             const d = READER_DOCS[kind];
             const res = await fetch(d.src, { cache: 'no-cache' });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4669,8 +5143,8 @@
             const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => `<link rel="stylesheet" href="${new URL(l.getAttribute('href'), base).href}">`).join('');
             const styles = [...doc.querySelectorAll('style')].map(st => st.outerHTML).join('');
             const page = doc.querySelector('.page');
-            readerCache[kind] = { html: `${links}${styles}<style>:host { display: block; } .doc-root { color: var(--ink); font-family: var(--print); line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; } .doc-root .page { border-radius: 0; box-shadow: none; min-height: 100%; }</style><div class="doc-root">${page ? page.outerHTML : ''}</div>` };
-            return readerCache[kind];
+            readerCache[ck] = { html: `${links}${styles}<style>:host { display: block; } .doc-root { color: var(--ink); font-family: var(--print); line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; } .doc-root .page { border-radius: 0; box-shadow: none; min-height: 100%; }</style><div class="doc-root">${page ? page.outerHTML : ''}</div>` };
+            return readerCache[ck];
         }
         async function showDoc(kind) {
             const d = READER_DOCS[kind] || READER_DOCS.guide;
@@ -4678,14 +5152,14 @@
             r.querySelector('.rd-title').textContent = d.title;
             host.setAttribute('aria-label', d.title);
             r.querySelectorAll('.rd-tab').forEach(b => { const on = b.dataset.doc === kind; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-            if (host.dataset.doc === kind) return;
+            if (host.dataset.doc === `${kind}:${I18N.lang}`) return;
             const sr = host.shadowRoot || host.attachShadow({ mode: 'open' });
             const req = (showDoc.req = (showDoc.req || 0) + 1);   // 마지막으로 고른 책자만 표시
             try {
                 const { html } = await loadDoc(kind);
                 if (req !== showDoc.req) return;
                 sr.innerHTML = html;
-                host.dataset.doc = kind;
+                host.dataset.doc = `${kind}:${I18N.lang}`;
                 host.scrollTop = 0;
                 applyReaderFont();
                 wireDoc(sr);

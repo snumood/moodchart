@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 220" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<title>Diagram of mood repeatedly rising and falling in response to stimuli</title>
+<defs><marker id="h" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#33353d"/></marker></defs>
+<g font-family="'Pretendard Variable','Pretendard','Apple SD Gothic Neo',sans-serif" font-size="15" fill="#33353d">
+<text x="8" y="62">Mood up</text><text x="8" y="132">Mood down</text><text x="8" y="97" fill="#9b2f35" font-weight="700">Stimulus</text></g>
+<rect x="113" y="43" width="192" height="10" rx="3" fill="#9b2f35" fill-opacity=".85" stroke="#33353d" stroke-width="1.2"/>
+<rect x="113" y="131" width="192" height="10" rx="3" fill="#9b2f35" fill-opacity=".85" stroke="#33353d" stroke-width="1.2"/>
+<path d="M113 92H585" stroke="#33353d" stroke-width="1.4"/>
+<g stroke="#33353d" stroke-width="1.4" stroke-dasharray="6 4"><path d="M315 47H520M290 135H580"/></g>
+<g stroke="#33353d" stroke-width="1.8" marker-end="url(#h)"><path d="M113 78L162 50"/><path d="M165 50L200 76"/><path d="M217 76L250 50"/><path d="M252 52L272 78"/><path d="M130 92L165 130"/><path d="M167 130L196 98"/><path d="M238 92L252 130"/><path d="M254 130L286 98"/><path d="M326 100L358 60"/><path d="M358 58L376 22"/><path d="M394 78L466 32"/><path d="M324 98L346 124"/><path d="M328 118L372 156"/><path d="M446 92L482 140"/><path d="M482 140L516 176"/></g>
+<g stroke="#9b2f35" stroke-width="1.5">
+<path d="M305 47C330 40 345 20 372 20C400 25 420 45 450 40C480 35 510 55 570 52"/>
+<path d="M305 138C340 150 370 160 380 155C420 145 450 130 480 135C520 150 515 180 520 178C540 165 560 140 590 130"/></g>
+</svg>

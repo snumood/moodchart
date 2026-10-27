@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<title>Mood spectrum: mood changes in normal mood, depression, and mania/hypomania</title>
+<g font-family="'Pretendard Variable','Pretendard','Apple SD Gothic Neo',sans-serif" fill="#33353d" stroke="none">
+<g font-size="12.5">
+<text x="48" y="22" font-family="'MaruBuri','AppleMyungjo',serif" font-size="16" font-weight="700">Normal mood:</text>
+<text x="48" y="48">Mood changes within the normal range</text>
+<text x="48" y="68">that ordinary people experience</text>
+<text x="48" y="94">No matter how good or bad the events,</text>
+<text x="48" y="114">mood does not leave a certain range</text>
+<text x="48" y="134">for more than a few days</text>
+<text x="336" y="22" font-family="'MaruBuri','AppleMyungjo',serif" font-size="16" font-weight="700">Depression:</text>
+<text x="336" y="48">(Nearly every day for 2 weeks or more,</text>
+<text x="336" y="68">all day) Loss of enjoyment and interest</text>
+<text x="336" y="88.0">with lasting low mood that disrupts</text><text x="336" y="108.0">social and occupational functioning</text>
+<text x="626" y="22" font-family="'MaruBuri','AppleMyungjo',serif" font-size="16" font-weight="700">Mania/Hypomania</text>
+<text x="626" y="48">An abnormally elevated state.</text>
+<text x="626" y="68">Cheerfully high, talkative, and eager to do</text>
+<text x="626" y="88">many things, but not enough to cause</text>
+<text x="626" y="108">serious problems: hypomania.</text>
+<text x="626" y="132">Elevated mood lasting a week or more and</text>
+<text x="626" y="152">disrupting social or work life: mania.</text>
+</g></g>
+<g stroke="#33353d" stroke-width="1.2" stroke-dasharray="4 4"><path d="M326 10V560M616 10V560"/></g>
+<rect x="45" y="210" width="855" height="60" fill="#d9c28e" fill-opacity=".55"/>
+<rect x="45" y="270" width="855" height="60" fill="#d9c28e" fill-opacity=".28"/>
+<rect x="45" y="445" width="855" height="55" fill="#aab4d6" fill-opacity=".3"/>
+<rect x="45" y="500" width="855" height="60" fill="#aab4d6" fill-opacity=".6"/>
+<g stroke="#33353d" stroke-width="1.4"><path d="M45 210H900M45 270H900M45 330H900M45 445H900M45 500H900M45 560H900"/></g>
+<path d="M45 385H900" stroke="#33353d" stroke-width="1.8"/>
+<rect x="1" y="347" width="36" height="90" rx="6" fill="#fbf8f1" stroke="#aab4d6" stroke-width="1.2"/>
+<g font-family="'Pretendard Variable','Pretendard','Apple SD Gothic Neo',sans-serif" font-size="15" fill="#5b7bb5" text-anchor="middle">
+<text transform="rotate(-90 24 392)" x="24" y="392" font-size="13">Normal range</text></g>
+<g font-family="'Pretendard Variable','Pretendard','Apple SD Gothic Neo',sans-serif" font-size="15" fill="#33353d" text-anchor="middle">
+<rect x="540" y="227" width="154" height="20" rx="4" fill="#fbf8f1" fill-opacity=".85"/><text x="617" y="243">Mania</text>
+<rect x="534" y="287" width="154" height="22" rx="4" fill="#fbf8f1" fill-opacity=".85"/><text x="611" y="304">Hypomania</text>
+<rect x="540" y="465" width="140" height="22" rx="4" fill="#fbf8f1" fill-opacity=".85"/><text x="610" y="482">Mild depression</text>
+<rect x="540" y="522" width="140" height="22" rx="4" fill="#fbf8f1" fill-opacity=".85"/><text x="610" y="539">Severe depression</text>
+<text x="832" y="309" font-size="13" fill="#9b2f35">Hypomania</text></g>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b2f35"/></marker></defs>
+<path d="M838 316L805 345" stroke="#9b2f35" stroke-width="1.6" marker-end="url(#a)"/>
+<g transform="scale(1.125 1)" stroke="#33353d" stroke-width="1.8">
+<path d="M50 385C60 355 80 345 95 348C120 352 130 395 140 405C150 400 155 345 165 340C185 340 195 400 205 418C220 425 235 410 250 390C262 375 275 395 290 404"/>
+<path d="M290 404C295 370 300 365 305 368L312 385L320 380C325 400 335 480 365 510C390 520 420 510 440 490C455 470 465 410 470 380C475 375 480 400 482 408C495 395 495 375 505 368C520 370 530 380 545 385"/>
+<path d="M545 380C552 370 560 375 570 388C590 398 620 385 640 330C650 270 665 232 680 230C700 232 710 290 725 360C735 395 755 405 765 400C775 385 790 380 800 395"/>
+<path stroke="#9b2f35" stroke-dasharray="6 4" d="M545 400C555 385 565 372 580 380C600 392 615 395 630 380C645 350 650 300 665 298C685 300 695 340 705 365C715 385 730 392 745 380C760 372 775 378 800 395"/>
+</g></svg>
