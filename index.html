@@ -965,6 +965,27 @@
         background: radial-gradient(circle, #d9d2c3 3px, rgba(0, 0, 0, 0.18) 3.6px, transparent 4.5px) 0 0 / 10px 24px repeat-y;
     }
     /* 관리자: 색인 카드 대장 */
+    /* 생활습관·기분안정성 설문: 수첩에서 꺼낸 종이 한 장 (응답하면 그달 점수 칸에 자동 입력) */
+    .survey-sheet { max-width: 640px; }
+    .survey-intro { margin: 2px 0 14px; color: #6f6a62; font-size: 14px; line-height: 1.7; }
+    .sv-q { margin: 0 0 14px; padding: 12px 14px 10px; border: 1px solid rgba(60, 58, 70, 0.14); border-radius: 10px; background: rgba(255, 253, 248, 0.85); }
+    .sv-q legend { padding: 0 4px; font-weight: 700; color: #23252c; line-height: 1.6; }
+    .sv-q legend b { color: #9b2f35; margin-right: 6px; }
+    .sv-note { margin: 2px 0 6px; color: #6f6a62; font-size: 13px; }
+    .sv-sub { margin: 8px 0 2px; font-size: 13px; font-weight: 700; color: #6f6a62; }
+    .sv-opts { display: grid; gap: 6px; margin-top: 6px; }
+    .sv-opts.row { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+    .sv-opts label { display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px; border: 1px solid rgba(60, 58, 70, 0.16); border-radius: 8px; background: #fffdf8; cursor: pointer; font-size: 14px; line-height: 1.5; color: #33353d; }
+    .sv-opts label:has(input:checked) { border-color: #9b2f35; background: rgba(155, 47, 53, 0.07); color: #7a2228; }
+    .sv-opts input { accent-color: #9b2f35; margin-top: 3px; flex: none; }
+    .sv-detail[hidden] { display: none; }
+    .sv-foot { position: sticky; bottom: -22px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 6px -4px 0; padding: 12px 4px 4px; background: linear-gradient(180deg, rgba(251, 248, 241, 0), #fbf8f1 30%); }
+    .sv-progress { color: #6f6a62; font-size: 14px; }
+    .sv-submit { padding: 11px 18px; border: 0; border-radius: 10px; background: #9b2f35; color: #fff; font: 700 15px/1.2 inherit; cursor: pointer; }
+    .sv-submit:hover { background: #7a2228; }
+    .sv-msg { flex-basis: 100%; color: #9b2f35; font-size: 13px; }
+    .sv-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(60, 58, 70, 0.08); color: #6f6a62; font-size: 18px; cursor: pointer; }
+    .sv-submit:disabled { opacity: 0.6; cursor: wait; }
     .stats-modal-content { background: linear-gradient(90deg, transparent 0 38px, rgba(155, 47, 53, 0.25) 38px 39px, transparent 39px), repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(70, 110, 160, 0.13) 27px 28px), #fbf8f1; padding-left: 52px; }
     .stats-card { background: rgba(255, 255, 255, 0.6); border-color: rgba(60, 58, 70, 0.14); border-radius: 4px; }
     .stats-card-value { color: var(--accent); font-family: var(--serif); }
@@ -1101,10 +1122,10 @@
         </div>
 
         <div class="top-assessment-bar">
-            <a href="https://snumood.github.io/homepage/ls.html" target="_blank" rel="noopener noreferrer">월간생활습관점수</a>
+            <a href="#" onclick="openSurvey('ls'); return false;">월간생활습관점수</a>
             <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
             <span style="color:#ddd">|</span>
-            <a href="https://snumood.github.io/homepage/mssi.html" target="_blank" rel="noopener noreferrer">기분안정성평가점수</a>
+            <a href="#" onclick="openSurvey('mssi'); return false;">기분안정성평가점수</a>
             <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
         </div>
 
@@ -1323,6 +1344,14 @@
             <button class="btn-modal btn-cancel" onclick="closePwModal()">취소</button>
             <button class="btn-modal btn-save" onclick="changePassword()">변경하기</button>
         </div>
+    </div>
+</div>
+
+<div id="survey-modal" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="survey-title">
+    <div class="stats-modal-content survey-sheet">
+        <div class="modal-header"><span id="survey-title"></span><button type="button" class="sv-close" aria-label="닫기" onclick="closeSurvey()">✕</button></div>
+        <p id="survey-intro" class="survey-intro"></p>
+        <form id="survey-form" onsubmit="submitSurvey(event)"></form>
     </div>
 </div>
 
@@ -1852,6 +1881,7 @@
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
         }
+        return true;
     }
 
     async function checkGiftReception() {
@@ -2178,10 +2208,12 @@
         await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
     }
 
-    async function saveMonthlyScore(type, val) {
-        if(isAdminUser()) return;
-        const date = `${curDate.getFullYear()}-${String(curDate.getMonth()+1).padStart(2,'0')}-01`;
+    async function saveMonthlyScore(type, val, monthDate) {
+        if(isAdminUser()) return false;
+        const d = monthDate || curDate;
+        const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
         const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        if (error) return false;
         
         if (data && data.reward_icon) {
             const msg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
@@ -2193,7 +2225,7 @@
     async function loadData() {
         document.querySelectorAll('.checked').forEach(e=>e.classList.remove('checked'));
         document.querySelectorAll('input, select').forEach(e => { 
-            if(!e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal') && !e.id.includes('download')) {
+            if(!e.closest('#survey-modal') && !e.id.includes('search') && !e.id.includes('date') && !e.id.includes('score') && !e.id.includes('pw') && !e.id.includes('modal') && !e.id.includes('download')) {
                 e.value=''; e.dataset.oldval=''; if(e.parentElement.tagName === 'TD') e.parentElement.style.backgroundColor = '';
             }
         });
@@ -2524,6 +2556,109 @@
         const points = data.filter(r => r.category === targetCat).map(r => ({ x: r.record_date, y: parseInt(r.value) })).sort((a,b) => new Date(a.x) - new Date(b.x));
         drawDashboardChart(points, title, type === 'ls' ? '#3d7a5a' : '#4a5f9a');
     }
+    // ---------- 생활습관·기분안정성 설문 (기분기록지 안에서, 추가 로그인 없이) ----------
+    // 문항·채점은 설문 사이트 기록 앱과 같다: 생활습관 = 고른 점수 합(0–100), MSSI = Σ 빈도(1–4)×심한 정도(1–3) (0–240), 21번은 점수 제외
+    const SURVEY_DATA = {"life": [{"label": "꾸준한 약물 복용", "options": [{"v": 40, "l": "약을 의사의 지시대로 규칙적인 시간에 모두 복용하였다."}, {"v": 20, "l": "한 두 번 어쩔 수 없이 복용하지 못했지만 나머지 약은 모두 복용했다."}, {"v": 10, "l": "일주일 정도 약을 복용하지 못했지만 나머지 약은 모두 복용했다."}, {"v": 0, "l": "일주일 이상 약을 복용하지 않았다."}]}, {"label": "규칙적인 수면", "options": [{"v": 20, "l": "평일과 주말 모두 오전에 일정한 시간에 일어나 활동을 시작했다."}, {"v": 10, "l": "대부분은 일정한 시간에 일어났지만 일주일 정도는 늦게까지 자거나 낮잠을 잤다."}, {"v": 5, "l": "한달 동안 절반 정도는 규칙적으로 일어났지만, 나머지 절반 정도는 그렇지 못했다."}, {"v": 0, "l": "대부분의 날 동안 일어나는 시간이 뒤죽박죽이었다."}]}, {"label": "꾸준한 운동", "options": [{"v": 10, "l": "거의 매일 한 시간 이상 운동을 했다."}, {"v": 5, "l": "거의 매일 30분 이상 운동을 했다."}, {"v": 2, "l": "운동을 하지 않은 날이 운동을 한 날보다 많았다."}, {"v": 0, "l": "거의 운동을 하지 않았다."}]}, {"label": "햇빛 보기", "options": [{"v": 5, "l": "매일 낮에 한 번은 밖으로 나가 30분 이상 햇빛을 쬐었다."}, {"v": 3, "l": "거의 매일 낮에 밖에 나가 햇빛을 쬐거나 실내에서라도 햇빛을 쬐었다."}, {"v": 1, "l": "한달 동안 절반 정도는 햇빛을 쬐었다."}, {"v": 0, "l": "대부분의 날 동안 낮에 외출하지 않고, 실내에서도 햇빛을 보지 않았다."}]}, {"label": "음주 피하기", "options": [{"v": 5, "l": "술을 전혀 마시지 않았다."}, {"v": 3, "l": "한 번 정도 적은 양(한 잔)을 정도 마셨다."}, {"v": 1, "l": "7일 정도 한 번에 서너 잔 이내로 마셨다."}, {"v": 0, "l": "술을 마신 날이 7일 이상 있거나, 한 병 이상 과음하는 날이 있었다."}]}, {"label": "대인관계 관리", "options": [{"v": 5, "l": "다른 사람들의 반응에 크게 개의치 않았다."}, {"v": 3, "l": "다른 사람들의 반응에 기쁘거나 슬프고 화가 날 때도 있었지만 오래 담아두지 않았다."}, {"v": 1, "l": "다른 사람들의 반응에 영향을 받아 자주 생각했다."}, {"v": 0, "l": "다른 사람들의 반응을 하루 종일 생각할 때가 많았다."}]}, {"label": "무리한 일 피하기", "options": [{"v": 5, "l": "꾸준히 나아질 수 있다는 믿음을 가지고 주어진 일을 해왔다."}, {"v": 3, "l": "성급하거나 자극적인 일을 생각하기도 했지만 대부분 일상을 유지했다."}, {"v": 1, "l": "때때로 기분을 빨리 나아지게 하기 위해 자극적인 일을 시도했다."}, {"v": 0, "l": "거의 매일 무리하고 성급하거나 자극적인 일을 계획/시도했다."}]}, {"label": "기분 관찰하기", "options": [{"v": 5, "l": "매일 기분기록지를 적고, 자신의 기분을 관찰했다."}, {"v": 3, "l": "한달 동안 절반 이상은 기분기록지를 적고 기분을 살펴보았다."}, {"v": 1, "l": "기분기록지를 거의 적지 않았고, 가끔 자기 기분을 돌아보았다."}, {"v": 0, "l": "스스로의 기분을 생각하지 않고 지냈다."}]}, {"label": "스스로 아껴 주기", "options": [{"v": 5, "l": "자책하지 않고 잘하지 못할 때에도 자신을 격려했다."}, {"v": 3, "l": "자책할 때도 있었지만 곧 자신에게 너그러운 마음을 가졌다."}, {"v": 1, "l": "완벽주의적 생각에 자책하고 후회하는 날이 많았다."}, {"v": 0, "l": "거의 대부분 자기를 비난하며 보내고 자신에 대해 긍정할 수 없었다."}]}], "lifeNote": {"6": "과소비, 도박, 과도한 활동, 폭식, 약물 남용 등"}, "mssi": ["감정 기복이 있었다.", "기분이 불안정했다.", "다른 사람들과 다투는 일이 있었다.", "화가 나고 짜증이 났다.", "사소한 자극에도 눈물이 나거나 우는 날이 많았다.", "사소한 일에도 흥분되었다.", "기분이 들뜨기도 했다.", "평안하다고 느낀 적이 없다.", "불안하고 초조했다.", "갑자기 에너지가 생겨 할 일을 정하고 행동으로 옮기기도 했다.", "말이 많고 빨라졌다.", "생각이 많아서 잠들기 힘들었다.", "생각이 꼬리에 꼬리를 물고 이어졌다.", "의기양양하거나 과대한 기분을 느꼈다.", "긴장감을 느꼈다.", "잠에 들 생각을 못한 채 밤을 새거나 늦게 잤다.", "나에게 안 좋은 결과를 가져올 것을 알고도 몰입하는 것이 있었다.", "죽고 싶다는 생각이 들었다.", "충동적으로 모든 일을 그만두고 싶어졌다.", "자해를 하고 싶다는 생각이 들었다."], "freq": ["1일 미만(몇 시간 지속)", "1일 이상 1주 미만", "1주 이상 2주 미만", "매일 증상이 있었다"], "sev": ["약간 (증상은 있었지만 힘들지 않았다)", "상당히 (매우 불쾌하지만 참을 수 있었다)", "심하게 (정말 견디기 힘들었다)"], "q21": "우울하더라도 행동이 느려지진 않았다.", "q21opts": [{"v": 0, "l": "아니오 (느려졌다)"}, {"v": 1, "l": "예 (느려지지 않았다)"}]};
+    let surveyType = null, surveyMonth = null, surveyOpener = null;
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && surveyType) closeSurvey(); });
+
+    function svOptions(name, opts, row) {
+        return `<div class="sv-opts${row ? ' row' : ''}">` + opts.map(o =>
+            `<label><input type="radio" name="${name}" value="${o.v}"><span>${o.l}</span></label>`).join('') + '</div>';
+    }
+
+    function openSurvey(type) {
+        if (isAdminUser()) return;
+        surveyType = type;
+        surveyMonth = new Date(curDate.getFullYear(), curDate.getMonth(), 1);   // 연 달에 저장 (뒤에서 달이 바뀌어도)
+        surveyOpener = document.activeElement;
+        const ls = type === 'ls';
+        const ym = `${surveyMonth.getFullYear()}년 ${surveyMonth.getMonth() + 1}월`;
+        document.getElementById('survey-title').textContent = ls ? '생활습관 점수표' : '기분안정성 평가';
+        const intro = document.getElementById('survey-intro');
+        intro.replaceChildren();
+        [ls ? '지난 한 달을 돌아보며 솔직하게 체크해주세요.' : '최근 2주 동안의 모습을 돌아보세요. 증상이 있었다면 빈도와 심한 정도도 표시해 주세요.',
+         `${ym} 칸에 입력됩니다.`, '응답 결과는 이 수첩에만 저장됩니다. 로그인할 필요가 없습니다.'].forEach(t => {
+            const span = document.createElement('span'); span.textContent = t; intro.append(span, ' ');
+        });
+        let html = '';
+        if (ls) {
+            SURVEY_DATA.life.forEach((q, i) => {
+                const note = SURVEY_DATA.lifeNote[i] ? `<p class="sv-note">${SURVEY_DATA.lifeNote[i]}</p>` : '';
+                html += `<fieldset class="sv-q"><legend><b>${i + 1}</b>${q.label}</legend>${note}${svOptions('ls' + i, q.options)}</fieldset>`;
+            });
+        } else {
+            const yn = [{ v: 1, l: '예' }, { v: 0, l: '아니오' }];
+            SURVEY_DATA.mssi.forEach((text, i) => {
+                html += `<fieldset class="sv-q"><legend><b>${i + 1}</b>${text}</legend>${svOptions('m' + i + 'g', yn, true)}`
+                    + `<div class="sv-detail" id="sv-d${i}" hidden><p class="sv-sub">얼마나 자주?</p>${svOptions('m' + i + 'f', SURVEY_DATA.freq.map((l, k) => ({ v: k + 1, l })))}`
+                    + `<p class="sv-sub">얼마나 심했나요?</p>${svOptions('m' + i + 's', SURVEY_DATA.sev.map((l, k) => ({ v: k + 1, l })))}</div></fieldset>`;
+            });
+            html += `<fieldset class="sv-q"><legend><b>21</b>${SURVEY_DATA.q21}</legend>${svOptions('m20g', SURVEY_DATA.q21opts, true)}</fieldset>`;
+        }
+        html += '<div class="sv-foot"><span class="sv-progress" id="sv-progress"></span><button type="submit" class="sv-submit">점수 계산해서 기분기록지에 입력</button><span class="sv-msg" id="sv-msg" role="alert"></span></div>';
+        const form = document.getElementById('survey-form');
+        form.innerHTML = html;
+        form.onchange = e => {
+            const m = /^m(\d+)g$/.exec(e.target.name || '');
+            if (m && Number(m[1]) < 20) document.getElementById('sv-d' + m[1]).hidden = e.target.value !== '1';
+            svProgress();
+        };
+        svProgress();
+        document.getElementById('survey-modal').style.display = 'flex';
+        document.getElementById('main-screen').setAttribute('inert', '');
+        form.closest('.stats-modal-content').scrollTop = 0;
+        document.querySelector('#survey-modal .sv-close').focus();
+    }
+
+    function closeSurvey() {
+        document.getElementById('survey-modal').style.display = 'none';
+        document.getElementById('main-screen').removeAttribute('inert');
+        surveyType = null; surveyMonth = null;
+        if (surveyOpener && surveyOpener.focus) surveyOpener.focus();
+    }
+
+    function svVal(name) {
+        const el = document.querySelector(`#survey-form input[name="${name}"]:checked`);
+        return el ? Number(el.value) : null;
+    }
+
+    // 점수 계산. 다 답하지 않았으면 null
+    function svScore() {
+        if (surveyType === 'ls') {
+            const v = SURVEY_DATA.life.map((_, i) => svVal('ls' + i));
+            return { done: v.filter(x => x !== null).length, total: v.length, score: v.includes(null) ? null : v.reduce((a, b) => a + b, 0) };
+        }
+        let done = 0, score = 0, complete = true;
+        for (let i = 0; i < 20; i++) {
+            const g = svVal(`m${i}g`), f = svVal(`m${i}f`), s = svVal(`m${i}s`);
+            if (g === 0) done++;
+            else if (g === 1 && f !== null && s !== null) { done++; score += f * s; }
+            else complete = false;
+        }
+        if (svVal('m20g') !== null) done++; else complete = false;
+        return { done, total: 21, score: complete ? score : null };
+    }
+
+    function svProgress() { const r = svScore(); document.getElementById('sv-progress').textContent = `${r.done} / ${r.total}`; }
+
+    async function submitSurvey(e) {
+        e.preventDefault();
+        const r = svScore();
+        if (r.score === null) { document.getElementById('sv-msg').textContent = '아직 답하지 않은 문항이 있어요.'; return; }
+        const type = surveyType, month = surveyMonth;
+        const input = document.getElementById('score-' + type);
+        const sameMonth = curDate.getFullYear() === month.getFullYear() && curDate.getMonth() === month.getMonth();
+        if (sameMonth && input.value !== '' && String(input.value) !== String(r.score) && !confirm('이미 입력된 점수가 있습니다. 새 점수로 바꿀까요?')) return;
+        const btn = document.querySelector('#survey-form .sv-submit');
+        btn.disabled = true;
+        const ok = await saveMonthlyScore(type, String(r.score), month).catch(() => false);
+        btn.disabled = false;
+        if (!ok) { document.getElementById('sv-msg').textContent = '저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.'; return; }
+        if (sameMonth) input.value = r.score;
+        closeSurvey();
+        alert(`${type === 'ls' ? '생활습관 점수표' : '기분안정성 평가'}: ${r.score}` + '점을 이번 달 칸에 입력했어요.');
+    }
     function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
     function drawDashboardChart(points, label, color) {
         const ctx = document.getElementById('scoreChart').getContext('2d');
@@ -2797,6 +2932,96 @@
 "추세 그래프": "Trend chart",
 "월간생활습관점수 추세": "Monthly Lifestyle Score trend",
 "기분안정성평가점수 추세": "Mood Stability Score trend",
+"꾸준한 약물 복용": "Taking medication consistently",
+"규칙적인 수면": "Regular sleep",
+"꾸준한 운동": "Regular exercise",
+"햇빛 보기": "Getting sunlight",
+"음주 피하기": "Avoiding alcohol",
+"대인관계 관리": "Managing relationships",
+"무리한 일 피하기": "Avoiding excessive or reckless activities",
+"기분 관찰하기": "Monitoring my mood",
+"스스로 아껴 주기": "Being kind to myself",
+"1일 미만(몇 시간 지속)": "Less than 1 day (a few hours)",
+"1일 이상 1주 미만": "1 to <7 days",
+"1주 이상 2주 미만": "7 to <14 days",
+"매일 증상이 있었다": "Symptoms occurred every day",
+"약간 (증상은 있었지만 힘들지 않았다)": "Mild (symptoms were present but not distressing)",
+"상당히 (매우 불쾌하지만 참을 수 있었다)": "Moderate (very unpleasant but bearable)",
+"심하게 (정말 견디기 힘들었다)": "Severe (extremely difficult to endure)",
+"감정 기복이 있었다.": "I experienced mood swings.",
+"기분이 불안정했다.": "My mood was unstable.",
+"다른 사람들과 다투는 일이 있었다.": "I had arguments or conflicts with others.",
+"화가 나고 짜증이 났다.": "I felt angry and irritable.",
+"사소한 자극에도 눈물이 나거나 우는 날이 많았다.": "I cried easily or had many days when I burst into tears from minor stimuli.",
+"사소한 일에도 흥분되었다.": "I became overaroused even over trivial things.",
+"기분이 들뜨기도 했다.": "I felt elated or elevated in mood.",
+"평안하다고 느낀 적이 없다.": "I never felt peaceful.",
+"불안하고 초조했다.": "I felt anxious and restless.",
+"갑자기 에너지가 생겨 할 일을 정하고 행동으로 옮기기도 했다.": "I suddenly felt energetic and took action by setting goals.",
+"말이 많고 빨라졌다.": "I talked a lot and spoke rapidly.",
+"생각이 많아서 잠들기 힘들었다.": "I had so many thoughts that I found it hard to fall asleep.",
+"생각이 꼬리에 꼬리를 물고 이어졌다.": "My thoughts continued endlessly, one after another.",
+"의기양양하거나 과대한 기분을 느꼈다.": "I felt grandiose or overly self-confident.",
+"긴장감을 느꼈다.": "I felt tense.",
+"잠에 들 생각을 못한 채 밤을 새거나 늦게 잤다.": "I didn't think much about sleep, so I ended up staying up all night or going to bed late.",
+"나에게 안 좋은 결과를 가져올 것을 알고도 몰입하는 것이 있었다.": "I was immersed in certain activities even though I knew they would bring painful consequences.",
+"죽고 싶다는 생각이 들었다.": "I had thoughts of wanting to die.",
+"충동적으로 모든 일을 그만두고 싶어졌다.": "I had impulsive thoughts of quitting everything.",
+"자해를 하고 싶다는 생각이 들었다.": "I had thoughts of wanting to harm myself.",
+"우울하더라도 행동이 느려지진 않았다.": "Even when depressed, I did not feel slowed down.",
+"과소비, 도박, 과도한 활동, 폭식, 약물 남용 등": "For example overspending, gambling, excessive activity, binge eating, or substance misuse",
+"아니오 (느려졌다)": "No (I was slowed down)",
+"예 (느려지지 않았다)": "Yes (I was not slowed down)",
+"약을 의사의 지시대로 규칙적인 시간에 모두 복용하였다.": "I took all my medication at regular times, as my doctor instructed.",
+"한 두 번 어쩔 수 없이 복용하지 못했지만 나머지 약은 모두 복용했다.": "I unavoidably missed my medication once or twice, but took all the rest.",
+"일주일 정도 약을 복용하지 못했지만 나머지 약은 모두 복용했다.": "I missed my medication for about a week, but took all the rest.",
+"일주일 이상 약을 복용하지 않았다.": "I did not take my medication for a week or more.",
+"평일과 주말 모두 오전에 일정한 시간에 일어나 활동을 시작했다.": "On both weekdays and weekends, I got up at a regular time in the morning and started my day.",
+"대부분은 일정한 시간에 일어났지만 일주일 정도는 늦게까지 자거나 낮잠을 잤다.": "I mostly got up at a regular time, but for about a week I slept late or took naps.",
+"한달 동안 절반 정도는 규칙적으로 일어났지만, 나머지 절반 정도는 그렇지 못했다.": "For about half of the month I got up at a regular time, but not for the other half.",
+"대부분의 날 동안 일어나는 시간이 뒤죽박죽이었다.": "On most days, my wake-up time was all over the place.",
+"거의 매일 한 시간 이상 운동을 했다.": "I exercised for an hour or more almost every day.",
+"거의 매일 30분 이상 운동을 했다.": "I exercised for 30 minutes or more almost every day.",
+"운동을 하지 않은 날이 운동을 한 날보다 많았다.": "There were more days without exercise than days with exercise.",
+"거의 운동을 하지 않았다.": "I hardly exercised at all.",
+"매일 낮에 한 번은 밖으로 나가 30분 이상 햇빛을 쬐었다.": "Every day I went outside at least once during the daytime and got 30 minutes or more of sunlight.",
+"거의 매일 낮에 밖에 나가 햇빛을 쬐거나 실내에서라도 햇빛을 쬐었다.": "Almost every day I went outside during the daytime for sunlight, or at least got sunlight indoors.",
+"한달 동안 절반 정도는 햇빛을 쬐었다.": "I got sunlight on about half of the days in the month.",
+"대부분의 날 동안 낮에 외출하지 않고, 실내에서도 햇빛을 보지 않았다.": "On most days I did not go out during the daytime and did not get sunlight even indoors.",
+"술을 전혀 마시지 않았다.": "I did not drink alcohol at all.",
+"한 번 정도 적은 양(한 잔)을 정도 마셨다.": "I drank a small amount (one glass) about once.",
+"7일 정도 한 번에 서너 잔 이내로 마셨다.": "I drank on about 7 days, no more than three or four glasses at a time.",
+"술을 마신 날이 7일 이상 있거나, 한 병 이상 과음하는 날이 있었다.": "I drank on 7 or more days, or there were days when I drank heavily (a bottle or more).",
+"다른 사람들의 반응에 크게 개의치 않았다.": "I was not much bothered by how other people reacted.",
+"다른 사람들의 반응에 기쁘거나 슬프고 화가 날 때도 있었지만 오래 담아두지 않았다.": "Other people's reactions sometimes made me happy, sad or angry, but I did not hold on to it for long.",
+"다른 사람들의 반응에 영향을 받아 자주 생각했다.": "I was affected by other people's reactions and often thought about them.",
+"다른 사람들의 반응을 하루 종일 생각할 때가 많았다.": "I often spent the whole day thinking about other people's reactions.",
+"꾸준히 나아질 수 있다는 믿음을 가지고 주어진 일을 해왔다.": "I kept doing my tasks, believing that I could steadily get better.",
+"성급하거나 자극적인 일을 생각하기도 했지만 대부분 일상을 유지했다.": "I sometimes thought about rash or thrill-seeking things, but mostly kept up my daily routine.",
+"때때로 기분을 빨리 나아지게 하기 위해 자극적인 일을 시도했다.": "At times I tried thrill-seeking things to make myself feel better quickly.",
+"거의 매일 무리하고 성급하거나 자극적인 일을 계획/시도했다.": "Almost every day I planned or tried excessive, rash or thrill-seeking things.",
+"매일 기분기록지를 적고, 자신의 기분을 관찰했다.": "I filled in my mood chart every day and observed my mood.",
+"한달 동안 절반 이상은 기분기록지를 적고 기분을 살펴보았다.": "On more than half of the days in the month, I filled in my mood chart and checked my mood.",
+"기분기록지를 거의 적지 않았고, 가끔 자기 기분을 돌아보았다.": "I hardly filled in my mood chart and only occasionally reflected on my mood.",
+"스스로의 기분을 생각하지 않고 지냈다.": "I went about my days without thinking about my mood.",
+"자책하지 않고 잘하지 못할 때에도 자신을 격려했다.": "I did not blame myself and encouraged myself even when things did not go well.",
+"자책할 때도 있었지만 곧 자신에게 너그러운 마음을 가졌다.": "I sometimes blamed myself, but soon became kind and forgiving toward myself.",
+"완벽주의적 생각에 자책하고 후회하는 날이 많았다.": "On many days I blamed myself and had regrets because of perfectionistic thoughts.",
+"거의 대부분 자기를 비난하며 보내고 자신에 대해 긍정할 수 없었다.": "I spent almost all the time criticizing myself and could not feel positive about myself.",
+"지난 한 달을 돌아보며 솔직하게 체크해주세요.": "Look back over the past month and answer honestly.",
+"최근 2주 동안의 모습을 돌아보세요. 증상이 있었다면 빈도와 심한 정도도 표시해 주세요.": "Look back over the past two weeks. If you had a symptom, also mark how often and how severe it was.",
+"점수 계산해서 기분기록지에 입력": "Calculate and enter into my Mood Journal",
+"아직 답하지 않은 문항이 있어요.": "Some questions are still unanswered.",
+"저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.": "Could not save. Your answers are kept; please try again in a moment.",
+"예": "Yes",
+"아니오": "No",
+"얼마나 자주?": "How often?",
+"얼마나 심했나요?": "How severe?",
+"이미 입력된 점수가 있습니다. 새 점수로 바꿀까요?": "A score is already entered for this month. Replace it with the new score?",
+"점을 이번 달 칸에 입력했어요.": "points have been entered for this month.",
+"생활습관 점수표": "Lifestyle score",
+"기분안정성 평가": "Mood stability assessment",
+"응답 결과는 이 수첩에만 저장됩니다. 로그인할 필요가 없습니다.": "Your answers are saved only in this journal. No extra login is needed.",
 "데이터가 없습니다.": "No data yet.",
 "보유한 이모티콘을 선택하세요": "Choose one of your stickers",
 "※ 주민번호, 이름, 연락처 등 개인정보는 입력하지 마세요": "※ Do not enter personal information such as ID numbers, names or contact details",
@@ -2916,7 +3141,7 @@
         try { lang = localStorage.getItem(KEY) === 'en' ? 'en' : 'ko'; } catch (e) { /* 저장 불가 환경 */ }
         const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const MS = MONTHS.map(m => m.slice(0, 3));
-        const PATS = [["^(\\d{1,2})월$", "{MS1}"], ["^(\\d{4})년 (\\d{1,2})월$", "{M2} \\1"], ["^(\\d{4})년 (\\d{1,2})월, 날짜 고르기$", "{M2} \\1, choose a date"], ["^(\\d{1,2})일 생활사건$", "Life events on day \\1"], ["^조회 대상: (.+) 님$", "Viewing: \\1"], ["^Google 관리자 · 조회: (.+)$", "Google administrator · viewing: \\1"], ["^(.+)명 중 (.+)명 표시$", "Showing \\2 of \\1"], ["^(\\d{4})년 수첩$", "\\1 notebook"], ["^글자 크기 (\\d+)%$", "Text size \\1%"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)을 들었어요$", "Picked up the {T1} {T2}"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)$", "{T1} {T2}"], ["^「(.+)」의 기록을 수첩에 옮겨 적습니다\\.$", "Records from “\\1” will be copied into your notebook."], ["^\\[생활사건\\]\\n([\\s\\S]*)$", "[Life events]\n\\1"], ["^🎁 누군가로부터 (\\d+)개의 새로운 선물이 도착했습니다! \\[받은 선물함\\]을 확인해보세요\\.$", "🎁 \\1 new gift(s) arrived from someone! Check [Received gifts]."], ["^🎁 선물이 도착했습니다!\\n\\n\\[(.+?)\\] ([\\s\\S]*)$", "🎁 A gift has arrived!\n\n[\\1] {T2}"], ["^🎉 축하합니다! ([\\s\\S]*?)\\n\\n\\[(.+?)\\] 아이콘이 선물함에 도착했습니다\\.$", "🎉 Congratulations! {T1}\n\n[\\2] sticker has arrived in your gift box."], ["^🎉 축하합니다! \\[(.+?)\\] 아이콘을 획득했습니다!\\n\\n\"([\\s\\S]*)\"$", "🎉 Congratulations! You got the [\\1] sticker!\n\n\"{T2}\""], ["^🎉 점수 입력 보상!\\n\\n\\[(.+?)\\] 아이콘을 획득했습니다!\\n\"([\\s\\S]*)\"\\n\\(선물함에서 확인하세요\\)$", "🎉 Reward for entering your scores!\n\nYou got the [\\1] sticker!\n\"{T2}\"\n(Check your gift box)"], ["^🎁 선물이 누군가에게 배달되었습니다!\\n\\n🎉 \\[특별 보상\\] 따뜻한 마음을 가진 당신에게 특별한 선물 \\[(.+?)\\]을 드려요!$", "🎁 Your gift has been delivered to someone!\n\n🎉 [Special reward] A special gift [\\1] for your warm heart!"], ["^(기분|생각|의욕|기분기복|활동량): (.*)$", "{T1}: \\2"]].map(([re, tpl]) => [new RegExp(re), tpl]);
+        const PATS = [["^(\\d{4})년 (\\d{1,2})월 칸에 입력됩니다\\.$", "It will be entered in the box for {M2} \\1."], ["^생활습관 점수표: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Lifestyle score: \\1 points have been entered for this month."], ["^기분안정성 평가: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Mood stability assessment: \\1 points have been entered for this month."], ["^(\\d{1,2})월$", "{MS1}"], ["^(\\d{4})년 (\\d{1,2})월$", "{M2} \\1"], ["^(\\d{4})년 (\\d{1,2})월, 날짜 고르기$", "{M2} \\1, choose a date"], ["^(\\d{1,2})일 생활사건$", "Life events on day \\1"], ["^조회 대상: (.+) 님$", "Viewing: \\1"], ["^Google 관리자 · 조회: (.+)$", "Google administrator · viewing: \\1"], ["^(.+)명 중 (.+)명 표시$", "Showing \\2 of \\1"], ["^(\\d{4})년 수첩$", "\\1 notebook"], ["^글자 크기 (\\d+)%$", "Text size \\1%"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)을 들었어요$", "Picked up the {T1} {T2}"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)$", "{T1} {T2}"], ["^「(.+)」의 기록을 수첩에 옮겨 적습니다\\.$", "Records from “\\1” will be copied into your notebook."], ["^\\[생활사건\\]\\n([\\s\\S]*)$", "[Life events]\n\\1"], ["^🎁 누군가로부터 (\\d+)개의 새로운 선물이 도착했습니다! \\[받은 선물함\\]을 확인해보세요\\.$", "🎁 \\1 new gift(s) arrived from someone! Check [Received gifts]."], ["^🎁 선물이 도착했습니다!\\n\\n\\[(.+?)\\] ([\\s\\S]*)$", "🎁 A gift has arrived!\n\n[\\1] {T2}"], ["^🎉 축하합니다! ([\\s\\S]*?)\\n\\n\\[(.+?)\\] 아이콘이 선물함에 도착했습니다\\.$", "🎉 Congratulations! {T1}\n\n[\\2] sticker has arrived in your gift box."], ["^🎉 축하합니다! \\[(.+?)\\] 아이콘을 획득했습니다!\\n\\n\"([\\s\\S]*)\"$", "🎉 Congratulations! You got the [\\1] sticker!\n\n\"{T2}\""], ["^🎉 점수 입력 보상!\\n\\n\\[(.+?)\\] 아이콘을 획득했습니다!\\n\"([\\s\\S]*)\"\\n\\(선물함에서 확인하세요\\)$", "🎉 Reward for entering your scores!\n\nYou got the [\\1] sticker!\n\"{T2}\"\n(Check your gift box)"], ["^🎁 선물이 누군가에게 배달되었습니다!\\n\\n🎉 \\[특별 보상\\] 따뜻한 마음을 가진 당신에게 특별한 선물 \\[(.+?)\\]을 드려요!$", "🎁 Your gift has been delivered to someone!\n\n🎉 [Special reward] A special gift [\\1] for your warm heart!"], ["^(기분|생각|의욕|기분기복|활동량): (.*)$", "{T1}: \\2"]].map(([re, tpl]) => [new RegExp(re), tpl]);
         const SKIP = 'script, style, textarea, input, .cell-event, .user-badge, #patient-list-body, [data-i18n-skip], .lang-name';
         const ATTR_SKIP = '.cell-event, .user-badge, #patient-list-body, [data-i18n-skip]';   // 입력칸의 안내문(placeholder)은 번역
         const textOrig = new Map();   // 원래 한국어로 되돌리기 위한 기록
