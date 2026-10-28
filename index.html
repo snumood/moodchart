@@ -887,8 +887,9 @@
     .rd-tab.on { background: linear-gradient(90deg, #f6f1e6, #fffdf8); color: #9b2f35; font-weight: 700; }
     .rd-tab:focus-visible { outline: 2px solid #c9a85a; outline-offset: 1px; }
     /* 넘어가는 속지 (뒷부분으로 휘리릭) */
+    .rd-riffle { position: absolute; top: 10px; bottom: 12px; left: 16px; right: 12px; pointer-events: none; clip-path: inset(0 0 0 -100vw); }
     .rd-sheet {
-        position: absolute; top: 10px; bottom: 12px; left: 16px; right: 12px; border-radius: 3px 8px 8px 3px; transform-origin: 0 50%;
+        position: absolute; inset: 0; border-radius: 3px 8px 8px 3px; transform-origin: 0 50%;
         background: linear-gradient(90deg, rgba(40, 30, 20, 0.12), rgba(40, 30, 20, 0) 30px), #f7f3ea; box-shadow: 0 0 0 1px rgba(60, 40, 20, 0.08);
         backface-visibility: hidden; pointer-events: none;
     }
@@ -1237,7 +1238,7 @@
         <div class="menu-section">
             <div class="menu-title">안내</div>
             <a href="./guide/guide.html" target="_blank" rel="noopener" class="menu-item" data-reader="guide"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M5 20.5A2.5 2.5 0 0 1 7.5 18H19v3H7.5"/><path d="M9 8h6"/></svg><span>기분기록지 작성방법 보기</span></a>
-            <a href="./guide/illness.html" target="_blank" rel="noopener" class="menu-item" data-reader="illness"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M12 7v6M9 10h6"/></svg><span>기분장애 질병안내서 보기</span></a>
+            <a href="./guide/illness.html" target="_blank" rel="noopener" class="menu-item" data-reader="illness"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M12 7v6M9 10h6"/></svg><span>기분장애 가이드북 보기</span></a>
             <a href="https://snumood.github.io/homepage/" target="_blank" class="menu-item"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l8-4 8 4v12"/><path d="M4 20h16"/><path d="M12 9v6M9 12h6"/></svg><span>분당서울대학교병원 기분장애클리닉</span></a>
         </div>
         
@@ -3078,7 +3079,7 @@
 "이전 기록이 지워져요": "Earlier records will be overwritten",
 "안내": "Guides",
 "기분기록지 작성방법 보기": "How to keep your mood journal",
-"기분장애 질병안내서 보기": "Mood disorder guide",
+"기분장애 가이드북 보기": "Mood disorder guide",
 "분당서울대학교병원 기분장애클리닉": "Mood Disorder Clinic, Seoul National University Bundang Hospital",
 "기분기록지 1.2 · 분당서울대학교병원 기분장애클리닉": "Mood Journal 1.2 · Mood Disorder Clinic, Seoul National University Bundang Hospital",
 "기분기록지 1.2 | 분당서울대학교병원": "Mood Journal 1.2 | Seoul National University Bundang Hospital",
@@ -5477,7 +5478,7 @@
 
         // ---------- 수첩 뒷부분의 안내 책자: 휘리릭 넘겨 뒷면을 펼쳐 읽음 ----------
         // 책자 내용은 불러와서 수첩 종이 안(Shadow DOM)에 펼침: 앱과 스타일이 섞이지 않고, 다른 페이지를 끼워 넣지 않으므로 서버의 액자 금지 설정과도 무관
-        const READER_DOCS_KO = { guide: { src: './guide/guide.html', label: '작성방법', title: '기분기록지 작성방법' }, illness: { src: './guide/illness.html', label: '질병안내서', title: '기분장애 가이드북' } };
+        const READER_DOCS_KO = { guide: { src: './guide/guide.html', label: '작성방법', title: '기분기록지 작성방법' }, illness: { src: './guide/illness.html', label: '기분장애 가이드북', title: '기분장애 가이드북' } };
         const READER_DOCS = new Proxy(READER_DOCS_KO, { get: (o, k) => { const d = o[k]; return d && I18N.lang === 'en' ? { ...d, src: d.src.replace('.html', '.en.html') } : d; } });
         const readerCache = {};
         const READER_FONT_KEY = 'mood_reader_font';
@@ -5589,14 +5590,23 @@
         // 종이 몇 장이 빠르게 넘어가는 장면 (forward: 뒷부분으로, false: 돌아옴)
         async function riffle(book, forward) {
             if (reduceMotion || !book.animate) return;
+            // 속지는 종이 높이 안에서만 보임 (위 막대·탭을 덮거나 원근으로 커져 튀어나오면 빈 상자처럼 보임)
+            const paper = book.querySelector('.rd-paper');
+            const lane = document.createElement('div');
+            lane.className = 'rd-riffle';
+            if (paper) Object.assign(lane.style, { top: `${paper.offsetTop}px`, left: `${paper.offsetLeft}px`, width: `${paper.offsetWidth}px`, height: `${paper.offsetHeight}px` });
+            book.appendChild(lane);
+            const drop = () => lane.remove();   // 도중에 화면 크기가 바뀌면 자리가 어긋나므로 바로 걷음
+            window.addEventListener('resize', drop);
             const sheets = [];
-            for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'rd-sheet'; book.appendChild(s); sheets.push(s); }
+            for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'rd-sheet'; lane.appendChild(s); sheets.push(s); }
             const runs = sheets.map((s, i) => s.animate(
                 forward ? [{ transform: 'perspective(1800px) rotateY(0deg)', opacity: 1 }, { transform: 'perspective(1800px) rotateY(-165deg)', opacity: 0.85 }]
                         : [{ transform: 'perspective(1800px) rotateY(-165deg)', opacity: 0.85 }, { transform: 'perspective(1800px) rotateY(0deg)', opacity: 1 }],
                 { duration: 360, delay: i * 55, easing: 'cubic-bezier(.45, .05, .35, 1)', fill: 'both' }).finished);
             await settleWithin(Promise.all(runs), 1200);
-            sheets.forEach(s => s.remove());
+            window.removeEventListener('resize', drop);
+            drop();
         }
         async function openReader(kind) {
             if (readerBusy) return;
