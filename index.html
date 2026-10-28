@@ -966,7 +966,23 @@
     }
     /* 관리자: 색인 카드 대장 */
     /* 생활습관·기분안정성 설문: 수첩에서 꺼낸 종이 한 장 (응답하면 그달 점수 칸에 자동 입력) */
-    .survey-sheet { max-width: 640px; }
+    .sv-reader { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; }
+    .sv-reader.hidden { display: none; }
+    .sv-book { width: min(760px, calc(100vw - 88px)); margin-right: 40px; }
+    .sv-page {
+        position: relative; min-height: 100%; padding: 30px clamp(16px, 5vw, 48px) 10px clamp(30px, 6vw, 60px);
+        background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 31px, rgba(60, 58, 70, 0.075) 31px 32px), #fbf8f1;
+    }
+    .sv-page::before { content: ""; position: absolute; top: 0; bottom: 0; left: clamp(14px, 3.5vw, 34px); width: 1px; background: rgba(155, 47, 53, 0.28); }
+    .sv-kicker { font-family: var(--serif); font-style: italic; letter-spacing: 2px; color: #9b2f35; font-size: 15px; }
+    .sv-h { margin: 2px 0 6px; font-family: var(--serif-ko); font-size: clamp(22px, 5vw, 28px); color: #23252c; }
+    #score-ls.sv-inked, #score-mssi.sv-inked { animation: svInk .9s cubic-bezier(.3, .7, .4, 1) both; font-family: var(--hand); font-size: 22px; color: var(--ink, #1f2a44); }
+    @keyframes svInk {
+        0% { clip-path: inset(-20% 100% -20% 0); background: rgba(201, 168, 90, 0.35); }
+        60% { clip-path: inset(-20% -5% -20% 0); background: rgba(201, 168, 90, 0.35); }
+        100% { clip-path: inset(-20% -5% -20% 0); background: transparent; }
+    }
+    @media (max-width: 700px) { .sv-book { width: 100vw; margin-right: 0; } }
     .survey-intro { margin: 2px 0 14px; color: #6f6a62; font-size: 14px; line-height: 1.7; }
     .sv-q { margin: 0 0 14px; padding: 12px 14px 10px; border: 1px solid rgba(60, 58, 70, 0.14); border-radius: 10px; background: rgba(255, 253, 248, 0.85); }
     .sv-q legend { padding: 0 4px; font-weight: 700; color: #23252c; line-height: 1.6; }
@@ -986,7 +1002,6 @@
     .sv-msg { flex-basis: 100%; color: #9b2f35; font-size: 13px; }
     .sv-view { margin-left: 4px; padding: 3px 9px; border: 1px solid rgba(155, 47, 53, 0.35); border-radius: 12px; background: #fffdf8; color: #9b2f35; font-size: 12px; font-weight: 700; cursor: pointer; }
     .sv-opts input:disabled + span { color: inherit; }
-    .sv-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(60, 58, 70, 0.08); color: #6f6a62; font-size: 18px; cursor: pointer; }
     .sv-submit:disabled { opacity: 0.6; cursor: wait; }
     .stats-modal-content { background: linear-gradient(90deg, transparent 0 38px, rgba(155, 47, 53, 0.25) 38px 39px, transparent 39px), repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(70, 110, 160, 0.13) 27px 28px), #fbf8f1; padding-left: 52px; }
     .stats-card { background: rgba(255, 255, 255, 0.6); border-color: rgba(60, 58, 70, 0.14); border-radius: 4px; }
@@ -1349,11 +1364,25 @@
     </div>
 </div>
 
-<div id="survey-modal" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="survey-title">
-    <div class="stats-modal-content survey-sheet">
-        <div class="modal-header"><span id="survey-title"></span><button type="button" class="sv-close" aria-label="닫기" onclick="closeSurvey()">✕</button></div>
-        <p id="survey-intro" class="survey-intro"></p>
-        <form id="survey-form" onsubmit="submitSurvey(event)"></form>
+<div id="survey-modal" class="sv-reader hidden" role="dialog" aria-modal="true" aria-labelledby="survey-title">
+    <div class="rd-desk" onclick="closeSurvey()"></div>
+    <div class="rd-book sv-book">
+        <div class="rd-top">
+            <span class="rd-title" id="survey-title"></span>
+            <button type="button" class="rd-btn close sv-close" onclick="closeSurvey()">수첩으로 돌아가기</button>
+        </div>
+        <div class="rd-tabs" role="tablist" aria-label="설문 고르기">
+            <button type="button" class="rd-tab" role="tab" data-sv="ls" onclick="svSwitch('ls')">생활습관</button>
+            <button type="button" class="rd-tab" role="tab" data-sv="mssi" onclick="svSwitch('mssi')">기분안정성</button>
+        </div>
+        <div class="rd-paper"><div class="rd-scroll sv-scroll" tabindex="0">
+            <div class="sv-page">
+                <div class="sv-kicker">부록 · Appendix</div>
+                <h2 class="sv-h" id="survey-heading"></h2>
+                <p id="survey-intro" class="survey-intro"></p>
+                <form id="survey-form" onsubmit="submitSurvey(event)"></form>
+            </div>
+        </div></div>
     </div>
 </div>
 
@@ -2598,14 +2627,22 @@
         }
     }
 
-    function openSurvey(type, readOnly = false) {
+    function openSurvey(type, readOnly = false, keepMonth = null) {
         if (isAdminUser() && !readOnly) return;
+        if (svSaving) return;
         surveyType = type;
-        surveyMonth = new Date(curDate.getFullYear(), curDate.getMonth(), 1);   // 연 달에 저장 (뒤에서 달이 바뀌어도)
-        surveyOpener = document.activeElement;
+        surveyMonth = keepMonth || new Date(curDate.getFullYear(), curDate.getMonth(), 1);   // 연 달에 저장 (뒤에서 달이 바뀌어도)
+        if (!keepMonth) surveyOpener = document.activeElement;
         const ls = type === 'ls';
         const ym = `${surveyMonth.getFullYear()}년 ${surveyMonth.getMonth() + 1}월`;
-        document.getElementById('survey-title').textContent = ls ? '생활습관 점수표' : '기분안정성 평가';
+        const titleText = ls ? '생활습관 점수표' : '기분안정성 평가';
+        document.getElementById('survey-title').textContent = titleText;
+        document.getElementById('survey-heading').textContent = titleText;
+        document.querySelectorAll('#survey-modal .rd-tab').forEach(b => {
+            const on = b.dataset.sv === type;
+            b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+            b.hidden = readOnly && !on;
+        });
         const intro = document.getElementById('survey-intro');
         intro.replaceChildren();
         [ls ? '지난 한 달을 돌아보며 솔직하게 체크해주세요.' : '최근 2주 동안의 모습을 돌아보세요. 증상이 있었다면 빈도와 심한 정도도 표시해 주세요.',
@@ -2630,11 +2667,13 @@
         html += '<div class="sv-foot"><span class="sv-progress" id="sv-progress"></span><button type="submit" class="sv-submit">점수 계산해서 기분기록지에 입력</button><span class="sv-msg" id="sv-msg" role="alert"></span></div>';
         const form = document.getElementById('survey-form');
         form.innerHTML = html;
-        const saved = monthItems[type];
+        const shownMonth = curDate.getFullYear() === surveyMonth.getFullYear() && curDate.getMonth() === surveyMonth.getMonth();
+        const saved = shownMonth ? monthItems[type] : null;
         if (saved) svFill(type, saved);
         if (readOnly) {
             form.querySelectorAll('input').forEach(el => { el.disabled = true; });
             form.querySelector('.sv-submit').hidden = true;
+            document.getElementById('survey-heading').textContent += ' · 응답';
             const at = saved && saved.at ? new Date(saved.at) : null;
             document.getElementById('sv-msg').textContent = at ? `${at.getFullYear()}. ${at.getMonth() + 1}. ${at.getDate()}. 응답` : '';
         }
@@ -2644,17 +2683,59 @@
             svProgress();
         };
         svProgress();
-        document.getElementById('survey-modal').style.display = 'flex';
+        document.querySelector('#survey-modal .sv-scroll').scrollTop = 0;
+        const wrap = document.getElementById('survey-modal');
+        if (!wrap.classList.contains('hidden')) return;   // 탭으로 바꾼 경우: 이미 펼쳐져 있음
+        wrap.classList.remove('hidden');
         document.getElementById('main-screen').setAttribute('inert', '');
-        form.closest('.stats-modal-content').scrollTop = 0;
-        document.querySelector('#survey-modal .sv-close').focus();
+        svAnimate(true);
+        document.querySelector('#survey-modal .sv-close').focus({ preventScroll: true });
     }
 
-    function closeSurvey() {
-        document.getElementById('survey-modal').style.display = 'none';
+    // 수첩 뒷부분(부록)으로 종이가 넘어가며 펼쳐지고, 닫을 때는 앞으로 되돌아옴 (책자 리더와 같은 장면)
+    const svReduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let svBusy = false, svSaving = false, svCloseQueued = false;
+    async function svAnimate(open) {
+        const wrap = document.getElementById('survey-modal'), book = wrap.querySelector('.sv-book'), desk = wrap.querySelector('.rd-desk');
+        if (svReduce() || !book.animate) return;
+        svBusy = true;
+        try {
+            if (open) {
+                desk.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'both' });
+                book.animate([{ transform: 'translateY(18px) scale(0.97)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2, .8, .3, 1)', fill: 'both' });
+                await Notebook.riffle(book, true);
+            } else {
+                await Notebook.riffle(book, false);
+                desk.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'both' });
+                await Promise.race([book.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(18px) scale(0.97)', opacity: 0 }], { duration: 220, fill: 'both' }).finished.catch(() => {}), new Promise(r => setTimeout(r, 600))]);
+            }
+        } finally { svBusy = false; }
+        if (open && svCloseQueued) { svCloseQueued = false; closeSurvey(); }
+    }
+
+    async function svSwitch(type) {
+        if (svBusy || svSaving || type === surveyType || document.querySelector('#survey-modal .sv-submit')?.hidden) return;
+        const touched = document.querySelector('#survey-form input:checked');
+        if (touched && !confirm('작성 중인 응답은 저장되지 않습니다. 다른 설문으로 넘길까요?')) return;
+        openSurvey(type, false, surveyMonth);
+        const book = document.querySelector('#survey-modal .sv-book');
+        if (svReduce() || !book.animate) return;
+        svBusy = true;
+        try { await Notebook.riffle(book, type === 'mssi'); } finally { svBusy = false; }
+        if (svCloseQueued) { svCloseQueued = false; closeSurvey(); }
+    }
+
+    async function closeSurvey(force = false) {
+        const wrap = document.getElementById('survey-modal');
+        if (wrap.classList.contains('hidden')) return;
+        if (svSaving && !force) return;                      // 저장이 끝날 때까지 닫지 않음
+        if (svBusy) { svCloseQueued = true; return; }        // 넘어가는 중이면 끝난 뒤 닫음
+        await svAnimate(false);
+        wrap.classList.add('hidden');
+        wrap.getAnimations({ subtree: true }).forEach(a => a.cancel());
         document.getElementById('main-screen').removeAttribute('inert');
         surveyType = null; surveyMonth = null;
-        if (surveyOpener && surveyOpener.focus) surveyOpener.focus();
+        if (surveyOpener && surveyOpener.focus) surveyOpener.focus({ preventScroll: true });
     }
 
     function svVal(name) {
@@ -2702,6 +2783,7 @@
 
     async function submitSurvey(e) {
         e.preventDefault();
+        if (svSaving || svBusy) return;
         const r = svScore();
         if (r.score === null) { document.getElementById('sv-msg').textContent = '아직 답하지 않은 문항이 있어요.'; return; }
         const type = surveyType, month = surveyMonth;
@@ -2710,12 +2792,16 @@
         if (sameMonth && input.value !== '' && String(input.value) !== String(r.score) && !confirm('이미 입력된 점수가 있습니다. 새 점수로 바꿀까요?')) return;
         const form = document.getElementById('survey-form');
         const ans = svAnswers(type);
-        const lock = on => form.querySelectorAll('input, button').forEach(el => { el.disabled = on; });
+        const lock = on => {
+            svSaving = on;
+            form.querySelectorAll('input, button').forEach(el => { el.disabled = on; });
+            document.querySelectorAll('#survey-modal .rd-tab, #survey-modal .sv-close').forEach(el => { el.disabled = on; });
+        };
         lock(true);
         const itemsOk = await saveMonthlyItems(type, ans, month).catch(() => false);
         const ok = itemsOk && await saveMonthlyScore(type, String(r.score), month).catch(() => false);
-        lock(false);
         if (!ok) {
+            lock(false);
             document.getElementById('sv-msg').textContent = itemsOk
                 ? '응답은 저장했지만 점수를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.'
                 : '저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.';
@@ -2727,8 +2813,14 @@
             monthItems[type] = ans;
             document.getElementById('view-' + type).hidden = false;
         }
-        closeSurvey();
-        alert(`${type === 'ls' ? '생활습관 점수표' : '기분안정성 평가'}: ${r.score}` + '점을 이번 달 칸에 입력했어요.');
+        await closeSurvey(true);
+        lock(false);
+        if (!svReduce() && !input.closest('#main-screen.hidden')) {
+            input.classList.remove('sv-inked'); void input.offsetWidth; input.classList.add('sv-inked');
+            input.scrollIntoView({ block: 'nearest', behavior: svReduce() ? 'auto' : 'smooth' });
+            setTimeout(() => input.classList.remove('sv-inked'), 1500);
+        }
+        Notebook.toast(`${type === 'ls' ? '생활습관 점수표' : '기분안정성 평가'}: ${r.score}` + '점을 이번 달 칸에 입력했어요.');
     }
     function closeChartModal() { document.getElementById('chart-modal').style.display = 'none'; }
     function drawDashboardChart(points, label, color) {
@@ -3084,6 +3176,13 @@
 "점수 계산해서 기분기록지에 입력": "Calculate and enter into my Mood Journal",
 "아직 답하지 않은 문항이 있어요.": "Some questions are still unanswered.",
 "응답": "Answers",
+"부록 · Appendix": "Appendix",
+"생활습관": "Lifestyle",
+"기분안정성": "Mood stability",
+"설문 고르기": "Choose a questionnaire",
+"작성 중인 응답은 저장되지 않습니다. 다른 설문으로 넘길까요?": "Your unsaved answers will be lost. Switch to the other questionnaire?",
+"생활습관 점수표 · 응답": "Lifestyle score · Answers",
+"기분안정성 평가 · 응답": "Mood stability assessment · Answers",
 "저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.": "Could not save. Your answers are kept; please try again in a moment.",
 "응답은 저장했지만 점수를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.": "Your answers were saved but the score was not. Please try again in a moment.",
 "예": "Yes",
@@ -4079,7 +4178,7 @@
         // 손으로 수첩을 밀어 옮기기 (관성 · 끝에서 살짝 늘어났다 되돌아옴)
         (() => {
             let drag = null;
-            const blocked = t => !t || t.closest?.('#sidebar, .sidebar-overlay, .modal-wrap, #pen-tray, #nb-zoom, #auth-screen, .nb-tab, #nb-book, #nb-reader');
+            const blocked = t => !t || t.closest?.('#sidebar, .sidebar-overlay, .modal-wrap, #survey-modal, #pen-tray, #nb-zoom, #auth-screen, .nb-tab, #nb-book, #nb-reader');
             // 입력란에서는 글자 선택·편집이 우선 (끌기 시작 안 함)
             const editable = t => t.closest?.('input, select, textarea, [contenteditable=""], [contenteditable="true"]');
             const canPan = () => isNotebook() && (nbView.minDx < 0 || nbView.minDy < 0) && !document.getElementById('main-screen')?.classList.contains('hidden') && !flipping;
@@ -5918,7 +6017,7 @@
             Promise.resolve().then(() => flip(dir, once)).catch(e => { console.warn('페이지 넘김 오류(무시됨):', e?.message || e); once(); });
         };
         const safeClose = () => close().catch(e => console.warn('수첩 닫기 오류(무시됨):', e?.message || e));
-        return { ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, browseShelf: safe(browseShelf), dialog: nbDialog, slip: safe(slip), flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
+        return { riffle: (book, forward) => riffle(book, forward).catch(() => {}), toast: safe(toast), ink: safe(ink), afterLoad: safe(afterLoad), flip: safeFlip, scheduleMoodLine: safe(scheduleMoodLine), onLogin: safe(onLogin), onRender: safe(onRender), close: safeClose, browseShelf: safe(browseShelf), dialog: nbDialog, slip: safe(slip), flipTo: (g) => { try { flipTo(g); } catch (e) { console.warn('달 이동 오류:', e?.message || e); const t = g(); if (t) { curDate = t; renderTable(); } } }, leaveAuth: (...a) => { try { return leaveAuth(...a); } catch (e) { finishAuth(); } }, authMode: safe(authMode),
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
