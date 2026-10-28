@@ -61,12 +61,12 @@
     "path": "vendor/fonts/maruburi.css",
     "source": "https://cdn.jsdelivr.net/npm/@kfonts/maruburi@0.1.0",
     "version": "0.1.0 (NAVER MaruBuri)",
-    "weights": "300/400/600, glyph subset of the app's text",
+    "weights": "300/400/600; core = glyphs used by homepage, survey and journal; ext = remaining KS X 1001 Hangul (loaded only if needed)",
     "license": "OFL-1.1 (vendor/fonts/maruburi/OFL.txt)",
-    "sha256": "2f87db1ce0882fbf30dac0c0a4dc79eaff2f293ddfbaf9231bca4ae49905d126",
-    "bytes": 623,
-    "font_files": 3,
-    "font_files_sha256_of_sorted_hashes": "88e04b40e6f3381c923498664f983424d78e7ce3b2f9ec95cf7d52f4a3b48bfc"
+    "sha256": "2712a7399c640c5816c8dd5fa572c6d99b6299b4df484824453222f66d17c086",
+    "bytes": 53961,
+    "font_files": 6,
+    "font_files_sha256_of_sorted_hashes": "a50e8d1d7fc339bbaee9f5d2efd138e4f25464121199c550d8172b8cbaea0f9d"
   },
   {
     "repo": "moodchart",

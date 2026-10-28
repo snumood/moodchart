@@ -10,7 +10,7 @@ the Luxon adapter and annotations. Keep CSP restricted to local scripts.
 
 Fonts (SIL Open Font License 1.1) are served from `vendor/fonts/` because the
 CSP allows fonts from this site only: Pretendard (text), MaruBuri (Korean
-headings, subset to the glyphs the app uses; re-run the subset if new Korean
-heading text is added), Nanum Pen Script (handwritten entries) and Cormorant
+headings; a core subset of the glyphs used by the homepage, survey site and this
+app, plus an ext subset of the remaining common Hangul that loads only when needed), Nanum Pen Script (handwritten entries) and Cormorant
 Garamond (printed numerals). Browsers download only the unicode-range subsets
 a page actually uses.
