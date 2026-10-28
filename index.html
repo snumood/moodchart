@@ -1681,8 +1681,9 @@
             });
             if (error || !data?.password_hash || data.username !== id) throw error || new Error('invalid device token');
             const hashedPw = data.password_hash;
-            const { error: authError } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
+            const { data: check, error: authError } = await sb.rpc('mood_login_check', { p_user: id, p_pw: hashedPw });
             if (authError) throw authError;
+            if (!check?.ok) throw new Error(check?.reason || 'Auth failed');
             await completeLogin(id, hashedPw);
             return true;
         } catch (e) {
@@ -1699,9 +1700,10 @@
         if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
         else { localStorage.removeItem('mood_saved_id'); await revokeStoredDeviceLogin(); }
         const hashedPw = await hashPassword(pw); 
-        const { error } = await sb.rpc('get_records_secure', { p_user: id, p_pw: hashedPw, p_target: id, p_start: '2000-01-01', p_end: '2000-01-01' });
-        if(error && error.message.includes('Auth failed')) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
-        if(error) return alert('오류: ' + error.message);
+        const { data: check, error } = await sb.rpc('mood_login_check', { p_user: id, p_pw: hashedPw });
+        if(error) return alert('오류: ' + (error.message || '로그인 서버에 연결하지 못했습니다.'));
+        if(check?.reason === 'locked') return alert('로그인 시도가 너무 많아 잠시 잠겼습니다. 15분 뒤 다시 시도해 주세요.');
+        if(!check?.ok) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
         if(document.getElementById('remember-me').checked) await saveDeviceLogin(id, hashedPw, 'patient');
         await completeLogin(id, hashedPw);
     }
