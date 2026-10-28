@@ -984,6 +984,8 @@
     .sv-submit { padding: 11px 18px; border: 0; border-radius: 10px; background: #9b2f35; color: #fff; font: 700 15px/1.2 inherit; cursor: pointer; }
     .sv-submit:hover { background: #7a2228; }
     .sv-msg { flex-basis: 100%; color: #9b2f35; font-size: 13px; }
+    .sv-view { margin-left: 4px; padding: 3px 9px; border: 1px solid rgba(155, 47, 53, 0.35); border-radius: 12px; background: #fffdf8; color: #9b2f35; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .sv-opts input:disabled + span { color: inherit; }
     .sv-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(60, 58, 70, 0.08); color: #6f6a62; font-size: 18px; cursor: pointer; }
     .sv-submit:disabled { opacity: 0.6; cursor: wait; }
     .stats-modal-content { background: linear-gradient(90deg, transparent 0 38px, rgba(155, 47, 53, 0.25) 38px 39px, transparent 39px), repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 27px, rgba(70, 110, 160, 0.13) 27px 28px), #fbf8f1; padding-left: 52px; }
@@ -1123,10 +1125,10 @@
 
         <div class="top-assessment-bar">
             <a href="#" onclick="openSurvey('ls'); return false;">월간생활습관점수</a>
-            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)">
+            <input id="score-ls" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('ls', this.value)"><button type="button" class="sv-view" id="view-ls" hidden onclick="viewSurvey('ls')">응답</button>
             <span style="color:#ddd">|</span>
             <a href="#" onclick="openSurvey('mssi'); return false;">기분안정성평가점수</a>
-            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)">
+            <input id="score-mssi" type="number" inputmode="decimal" placeholder="점" min="0" onchange="checkMin(this)" onblur="saveMonthlyScore('mssi', this.value)"><button type="button" class="sv-view" id="view-mssi" hidden onclick="viewSurvey('mssi')">응답</button>
         </div>
 
         <div class="grid-wrapper" id="grid-container">
@@ -1392,7 +1394,7 @@
     }
 
     function isAllowedCategory(cat) {
-        return cat === 'dummy' || cat === 'score_ls' || cat === 'score_mssi' || items.some(item => item.id === cat);
+        return cat === 'dummy' || cat === 'score_ls' || cat === 'score_mssi' || cat === 'items_ls' || cat === 'items_mssi' || items.some(item => item.id === cat);
     }
 
     function isIsoDate(value) {
@@ -1881,7 +1883,6 @@
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
         }
-        return true;
     }
 
     async function checkGiftReception() {
@@ -2220,6 +2221,7 @@
             alert(`🎉 점수 입력 보상!\n\n[${data.reward_icon}] 아이콘을 획득했습니다!\n"${msg}"\n(선물함에서 확인하세요)`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
         }
+        return true;
     }
 
     async function loadData() {
@@ -2230,6 +2232,8 @@
             }
         });
         document.querySelectorAll('.cell-event').forEach(e => { e.innerText = ''; e.removeAttribute('title'); });
+        monthItems = { ls: null, mssi: null };
+        ['ls', 'mssi'].forEach(t => { document.getElementById('view-' + t).hidden = true; });
 
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const lastDay = new Date(y, m, 0).getDate();
@@ -2247,6 +2251,12 @@
         if(error) return alert("조회 오류: " + error.message);
         if(isAdminUser() && (!data || data.length === 0)) alert("해당 월의 기록이 없습니다.");
 
+        data?.forEach(rec => {
+            if (rec.category === 'items_ls' || rec.category === 'items_mssi') {
+                try { monthItems[rec.category.slice(6)] = JSON.parse(rec.value); } catch { /* 형식이 다르면 무시 */ }
+            }
+        });
+        ['ls', 'mssi'].forEach(t => { document.getElementById('view-' + t).hidden = !monthItems[t]; });
         data?.forEach(rec => {
             if(rec.category === 'score_ls') document.getElementById('score-ls').value = rec.value;
             else if(rec.category === 'score_mssi') document.getElementById('score-mssi').value = rec.value;
@@ -2559,7 +2569,7 @@
     // ---------- 생활습관·기분안정성 설문 (기분기록지 안에서, 추가 로그인 없이) ----------
     // 문항·채점은 설문 사이트 기록 앱과 같다: 생활습관 = 고른 점수 합(0–100), MSSI = Σ 빈도(1–4)×심한 정도(1–3) (0–240), 21번은 점수 제외
     const SURVEY_DATA = {"life": [{"label": "꾸준한 약물 복용", "options": [{"v": 40, "l": "약을 의사의 지시대로 규칙적인 시간에 모두 복용하였다."}, {"v": 20, "l": "한 두 번 어쩔 수 없이 복용하지 못했지만 나머지 약은 모두 복용했다."}, {"v": 10, "l": "일주일 정도 약을 복용하지 못했지만 나머지 약은 모두 복용했다."}, {"v": 0, "l": "일주일 이상 약을 복용하지 않았다."}]}, {"label": "규칙적인 수면", "options": [{"v": 20, "l": "평일과 주말 모두 오전에 일정한 시간에 일어나 활동을 시작했다."}, {"v": 10, "l": "대부분은 일정한 시간에 일어났지만 일주일 정도는 늦게까지 자거나 낮잠을 잤다."}, {"v": 5, "l": "한달 동안 절반 정도는 규칙적으로 일어났지만, 나머지 절반 정도는 그렇지 못했다."}, {"v": 0, "l": "대부분의 날 동안 일어나는 시간이 뒤죽박죽이었다."}]}, {"label": "꾸준한 운동", "options": [{"v": 10, "l": "거의 매일 한 시간 이상 운동을 했다."}, {"v": 5, "l": "거의 매일 30분 이상 운동을 했다."}, {"v": 2, "l": "운동을 하지 않은 날이 운동을 한 날보다 많았다."}, {"v": 0, "l": "거의 운동을 하지 않았다."}]}, {"label": "햇빛 보기", "options": [{"v": 5, "l": "매일 낮에 한 번은 밖으로 나가 30분 이상 햇빛을 쬐었다."}, {"v": 3, "l": "거의 매일 낮에 밖에 나가 햇빛을 쬐거나 실내에서라도 햇빛을 쬐었다."}, {"v": 1, "l": "한달 동안 절반 정도는 햇빛을 쬐었다."}, {"v": 0, "l": "대부분의 날 동안 낮에 외출하지 않고, 실내에서도 햇빛을 보지 않았다."}]}, {"label": "음주 피하기", "options": [{"v": 5, "l": "술을 전혀 마시지 않았다."}, {"v": 3, "l": "한 번 정도 적은 양(한 잔)을 정도 마셨다."}, {"v": 1, "l": "7일 정도 한 번에 서너 잔 이내로 마셨다."}, {"v": 0, "l": "술을 마신 날이 7일 이상 있거나, 한 병 이상 과음하는 날이 있었다."}]}, {"label": "대인관계 관리", "options": [{"v": 5, "l": "다른 사람들의 반응에 크게 개의치 않았다."}, {"v": 3, "l": "다른 사람들의 반응에 기쁘거나 슬프고 화가 날 때도 있었지만 오래 담아두지 않았다."}, {"v": 1, "l": "다른 사람들의 반응에 영향을 받아 자주 생각했다."}, {"v": 0, "l": "다른 사람들의 반응을 하루 종일 생각할 때가 많았다."}]}, {"label": "무리한 일 피하기", "options": [{"v": 5, "l": "꾸준히 나아질 수 있다는 믿음을 가지고 주어진 일을 해왔다."}, {"v": 3, "l": "성급하거나 자극적인 일을 생각하기도 했지만 대부분 일상을 유지했다."}, {"v": 1, "l": "때때로 기분을 빨리 나아지게 하기 위해 자극적인 일을 시도했다."}, {"v": 0, "l": "거의 매일 무리하고 성급하거나 자극적인 일을 계획/시도했다."}]}, {"label": "기분 관찰하기", "options": [{"v": 5, "l": "매일 기분기록지를 적고, 자신의 기분을 관찰했다."}, {"v": 3, "l": "한달 동안 절반 이상은 기분기록지를 적고 기분을 살펴보았다."}, {"v": 1, "l": "기분기록지를 거의 적지 않았고, 가끔 자기 기분을 돌아보았다."}, {"v": 0, "l": "스스로의 기분을 생각하지 않고 지냈다."}]}, {"label": "스스로 아껴 주기", "options": [{"v": 5, "l": "자책하지 않고 잘하지 못할 때에도 자신을 격려했다."}, {"v": 3, "l": "자책할 때도 있었지만 곧 자신에게 너그러운 마음을 가졌다."}, {"v": 1, "l": "완벽주의적 생각에 자책하고 후회하는 날이 많았다."}, {"v": 0, "l": "거의 대부분 자기를 비난하며 보내고 자신에 대해 긍정할 수 없었다."}]}], "lifeNote": {"6": "과소비, 도박, 과도한 활동, 폭식, 약물 남용 등"}, "mssi": ["감정 기복이 있었다.", "기분이 불안정했다.", "다른 사람들과 다투는 일이 있었다.", "화가 나고 짜증이 났다.", "사소한 자극에도 눈물이 나거나 우는 날이 많았다.", "사소한 일에도 흥분되었다.", "기분이 들뜨기도 했다.", "평안하다고 느낀 적이 없다.", "불안하고 초조했다.", "갑자기 에너지가 생겨 할 일을 정하고 행동으로 옮기기도 했다.", "말이 많고 빨라졌다.", "생각이 많아서 잠들기 힘들었다.", "생각이 꼬리에 꼬리를 물고 이어졌다.", "의기양양하거나 과대한 기분을 느꼈다.", "긴장감을 느꼈다.", "잠에 들 생각을 못한 채 밤을 새거나 늦게 잤다.", "나에게 안 좋은 결과를 가져올 것을 알고도 몰입하는 것이 있었다.", "죽고 싶다는 생각이 들었다.", "충동적으로 모든 일을 그만두고 싶어졌다.", "자해를 하고 싶다는 생각이 들었다."], "freq": ["1일 미만(몇 시간 지속)", "1일 이상 1주 미만", "1주 이상 2주 미만", "매일 증상이 있었다"], "sev": ["약간 (증상은 있었지만 힘들지 않았다)", "상당히 (매우 불쾌하지만 참을 수 있었다)", "심하게 (정말 견디기 힘들었다)"], "q21": "우울하더라도 행동이 느려지진 않았다.", "q21opts": [{"v": 0, "l": "아니오 (느려졌다)"}, {"v": 1, "l": "예 (느려지지 않았다)"}]};
-    let surveyType = null, surveyMonth = null, surveyOpener = null;
+    let surveyType = null, surveyMonth = null, surveyOpener = null, monthItems = { ls: null, mssi: null };
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && surveyType) closeSurvey(); });
 
     function svOptions(name, opts, row) {
@@ -2567,8 +2577,29 @@
             `<label><input type="radio" name="${name}" value="${o.v}"><span>${o.l}</span></label>`).join('') + '</div>';
     }
 
-    function openSurvey(type) {
-        if (isAdminUser()) return;
+    // 저장된 그달 응답 보기 (본인·관리자 모두, 읽기 전용)
+    function viewSurvey(type) {
+        if (!monthItems[type]) return;
+        openSurvey(type, true);
+    }
+
+    function svFill(type, saved) {
+        const pick = (name, v) => {
+            const el = document.querySelector(`#survey-form input[name="${name}"][value="${v}"]`);
+            if (el) el.checked = true;
+        };
+        if (type === 'ls') (saved.a || []).forEach((v, i) => pick('ls' + i, v));
+        else {
+            (saved.g || []).forEach((g, i) => {
+                pick(`m${i}g`, g);
+                if (g === 1) { pick(`m${i}f`, saved.f[i]); pick(`m${i}s`, saved.s[i]); document.getElementById('sv-d' + i).hidden = false; }
+            });
+            if (saved.q21 === 0 || saved.q21 === 1) pick('m20g', saved.q21);
+        }
+    }
+
+    function openSurvey(type, readOnly = false) {
+        if (isAdminUser() && !readOnly) return;
         surveyType = type;
         surveyMonth = new Date(curDate.getFullYear(), curDate.getMonth(), 1);   // 연 달에 저장 (뒤에서 달이 바뀌어도)
         surveyOpener = document.activeElement;
@@ -2599,6 +2630,14 @@
         html += '<div class="sv-foot"><span class="sv-progress" id="sv-progress"></span><button type="submit" class="sv-submit">점수 계산해서 기분기록지에 입력</button><span class="sv-msg" id="sv-msg" role="alert"></span></div>';
         const form = document.getElementById('survey-form');
         form.innerHTML = html;
+        const saved = monthItems[type];
+        if (saved) svFill(type, saved);
+        if (readOnly) {
+            form.querySelectorAll('input').forEach(el => { el.disabled = true; });
+            form.querySelector('.sv-submit').hidden = true;
+            const at = saved && saved.at ? new Date(saved.at) : null;
+            document.getElementById('sv-msg').textContent = at ? `${at.getFullYear()}. ${at.getMonth() + 1}. ${at.getDate()}. 응답` : '';
+        }
         form.onchange = e => {
             const m = /^m(\d+)g$/.exec(e.target.name || '');
             if (m && Number(m[1]) < 20) document.getElementById('sv-d' + m[1]).hidden = e.target.value !== '1';
@@ -2640,6 +2679,25 @@
         return { done, total: 21, score: complete ? score : null };
     }
 
+    // 문항별 응답 (그달 1일의 items_ls / items_mssi 에 JSON 으로 저장)
+    function svAnswers(type) {
+        const at = new Date().toISOString();
+        if (type === 'ls') return { v: 1, at, a: SURVEY_DATA.life.map((_, i) => svVal('ls' + i)) };
+        const g = [], f = [], sv = [];
+        for (let i = 0; i < 20; i++) {
+            const gi = svVal(`m${i}g`);
+            g.push(gi); f.push(gi === 1 ? svVal(`m${i}f`) : 0); sv.push(gi === 1 ? svVal(`m${i}s`) : 0);
+        }
+        return { v: 1, at, g, f, s: sv, q21: svVal('m20g') };
+    }
+
+    async function saveMonthlyItems(type, answers, monthDate) {
+        if (isAdminUser()) return false;
+        const date = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-01`;
+        const { error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `items_${type}`, p_val: JSON.stringify(answers) });
+        return !error;
+    }
+
     function svProgress() { const r = svScore(); document.getElementById('sv-progress').textContent = `${r.done} / ${r.total}`; }
 
     async function submitSurvey(e) {
@@ -2650,12 +2708,25 @@
         const input = document.getElementById('score-' + type);
         const sameMonth = curDate.getFullYear() === month.getFullYear() && curDate.getMonth() === month.getMonth();
         if (sameMonth && input.value !== '' && String(input.value) !== String(r.score) && !confirm('이미 입력된 점수가 있습니다. 새 점수로 바꿀까요?')) return;
-        const btn = document.querySelector('#survey-form .sv-submit');
-        btn.disabled = true;
-        const ok = await saveMonthlyScore(type, String(r.score), month).catch(() => false);
-        btn.disabled = false;
-        if (!ok) { document.getElementById('sv-msg').textContent = '저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.'; return; }
-        if (sameMonth) input.value = r.score;
+        const form = document.getElementById('survey-form');
+        const ans = svAnswers(type);
+        const lock = on => form.querySelectorAll('input, button').forEach(el => { el.disabled = on; });
+        lock(true);
+        const itemsOk = await saveMonthlyItems(type, ans, month).catch(() => false);
+        const ok = itemsOk && await saveMonthlyScore(type, String(r.score), month).catch(() => false);
+        lock(false);
+        if (!ok) {
+            document.getElementById('sv-msg').textContent = itemsOk
+                ? '응답은 저장했지만 점수를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.'
+                : '저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.';
+            return;
+        }
+        // 저장하는 동안 다른 달로 옮겼다면 지금 화면에는 쓰지 않는다
+        if (curDate.getFullYear() === month.getFullYear() && curDate.getMonth() === month.getMonth()) {
+            input.value = r.score;
+            monthItems[type] = ans;
+            document.getElementById('view-' + type).hidden = false;
+        }
         closeSurvey();
         alert(`${type === 'ls' ? '생활습관 점수표' : '기분안정성 평가'}: ${r.score}` + '점을 이번 달 칸에 입력했어요.');
     }
@@ -2729,7 +2800,7 @@
             const rows = e.target.result.split("\n").slice(1);
             if (rows.length > 2000) return Notebook.dialog({ title: '기록 옮겨 적기', message: '데이터 행이 너무 많습니다 (최대 2,000행).' });
             Notebook.slip(false);
-            for (let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if (cols.length >= 3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].replace(/^"|"$/g, '').trim(); if (isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } }
+            for (let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if (cols.length >= 3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].trim().replace(/^"|"$/g, '').replace(/""/g, '"'); if (isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } }
             Notebook.dialog({ title: '기록 옮겨 적기', message: '업로드 완료' });
             loadData();
         };
@@ -3012,7 +3083,9 @@
 "최근 2주 동안의 모습을 돌아보세요. 증상이 있었다면 빈도와 심한 정도도 표시해 주세요.": "Look back over the past two weeks. If you had a symptom, also mark how often and how severe it was.",
 "점수 계산해서 기분기록지에 입력": "Calculate and enter into my Mood Journal",
 "아직 답하지 않은 문항이 있어요.": "Some questions are still unanswered.",
+"응답": "Answers",
 "저장하지 못했어요. 응답은 그대로 있으니 잠시 후 다시 눌러 주세요.": "Could not save. Your answers are kept; please try again in a moment.",
+"응답은 저장했지만 점수를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.": "Your answers were saved but the score was not. Please try again in a moment.",
 "예": "Yes",
 "아니오": "No",
 "얼마나 자주?": "How often?",
@@ -3141,7 +3214,7 @@
         try { lang = localStorage.getItem(KEY) === 'en' ? 'en' : 'ko'; } catch (e) { /* 저장 불가 환경 */ }
         const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const MS = MONTHS.map(m => m.slice(0, 3));
-        const PATS = [["^(\\d{4})년 (\\d{1,2})월 칸에 입력됩니다\\.$", "It will be entered in the box for {M2} \\1."], ["^생활습관 점수표: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Lifestyle score: \\1 points have been entered for this month."], ["^기분안정성 평가: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Mood stability assessment: \\1 points have been entered for this month."], ["^(\\d{1,2})월$", "{MS1}"], ["^(\\d{4})년 (\\d{1,2})월$", "{M2} \\1"], ["^(\\d{4})년 (\\d{1,2})월, 날짜 고르기$", "{M2} \\1, choose a date"], ["^(\\d{1,2})일 생활사건$", "Life events on day \\1"], ["^조회 대상: (.+) 님$", "Viewing: \\1"], ["^Google 관리자 · 조회: (.+)$", "Google administrator · viewing: \\1"], ["^(.+)명 중 (.+)명 표시$", "Showing \\2 of \\1"], ["^(\\d{4})년 수첩$", "\\1 notebook"], ["^글자 크기 (\\d+)%$", "Text size \\1%"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)을 들었어요$", "Picked up the {T1} {T2}"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)$", "{T1} {T2}"], ["^「(.+)」의 기록을 수첩에 옮겨 적습니다\\.$", "Records from “\\1” will be copied into your notebook."], ["^\\[생활사건\\]\\n([\\s\\S]*)$", "[Life events]\n\\1"], ["^🎁 누군가로부터 (\\d+)개의 새로운 선물이 도착했습니다! \\[받은 선물함\\]을 확인해보세요\\.$", "🎁 \\1 new gift(s) arrived from someone! Check [Received gifts]."], ["^🎁 선물이 도착했습니다!\\n\\n\\[(.+?)\\] ([\\s\\S]*)$", "🎁 A gift has arrived!\n\n[\\1] {T2}"], ["^🎉 축하합니다! ([\\s\\S]*?)\\n\\n\\[(.+?)\\] 아이콘이 선물함에 도착했습니다\\.$", "🎉 Congratulations! {T1}\n\n[\\2] sticker has arrived in your gift box."], ["^🎉 축하합니다! \\[(.+?)\\] 아이콘을 획득했습니다!\\n\\n\"([\\s\\S]*)\"$", "🎉 Congratulations! You got the [\\1] sticker!\n\n\"{T2}\""], ["^🎉 점수 입력 보상!\\n\\n\\[(.+?)\\] 아이콘을 획득했습니다!\\n\"([\\s\\S]*)\"\\n\\(선물함에서 확인하세요\\)$", "🎉 Reward for entering your scores!\n\nYou got the [\\1] sticker!\n\"{T2}\"\n(Check your gift box)"], ["^🎁 선물이 누군가에게 배달되었습니다!\\n\\n🎉 \\[특별 보상\\] 따뜻한 마음을 가진 당신에게 특별한 선물 \\[(.+?)\\]을 드려요!$", "🎁 Your gift has been delivered to someone!\n\n🎉 [Special reward] A special gift [\\1] for your warm heart!"], ["^(기분|생각|의욕|기분기복|활동량): (.*)$", "{T1}: \\2"]].map(([re, tpl]) => [new RegExp(re), tpl]);
+        const PATS = [["^(\\d{4})\\. (\\d{1,2})\\. (\\d{1,2})\\. 응답$", "Answered \\1-\\2-\\3"], ["^(\\d{4})년 (\\d{1,2})월 칸에 입력됩니다\\.$", "It will be entered in the box for {M2} \\1."], ["^생활습관 점수표: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Lifestyle score: \\1 points have been entered for this month."], ["^기분안정성 평가: (\\d+)점을 이번 달 칸에 입력했어요\\.$", "Mood stability assessment: \\1 points have been entered for this month."], ["^(\\d{1,2})월$", "{MS1}"], ["^(\\d{4})년 (\\d{1,2})월$", "{M2} \\1"], ["^(\\d{4})년 (\\d{1,2})월, 날짜 고르기$", "{M2} \\1, choose a date"], ["^(\\d{1,2})일 생활사건$", "Life events on day \\1"], ["^조회 대상: (.+) 님$", "Viewing: \\1"], ["^Google 관리자 · 조회: (.+)$", "Google administrator · viewing: \\1"], ["^(.+)명 중 (.+)명 표시$", "Showing \\2 of \\1"], ["^(\\d{4})년 수첩$", "\\1 notebook"], ["^글자 크기 (\\d+)%$", "Text size \\1%"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)을 들었어요$", "Picked up the {T1} {T2}"], ["^(먹색|파랑|빨강|초록|보라|주황) (만년필|볼펜|젤펜|사인펜)$", "{T1} {T2}"], ["^「(.+)」의 기록을 수첩에 옮겨 적습니다\\.$", "Records from “\\1” will be copied into your notebook."], ["^\\[생활사건\\]\\n([\\s\\S]*)$", "[Life events]\n\\1"], ["^🎁 누군가로부터 (\\d+)개의 새로운 선물이 도착했습니다! \\[받은 선물함\\]을 확인해보세요\\.$", "🎁 \\1 new gift(s) arrived from someone! Check [Received gifts]."], ["^🎁 선물이 도착했습니다!\\n\\n\\[(.+?)\\] ([\\s\\S]*)$", "🎁 A gift has arrived!\n\n[\\1] {T2}"], ["^🎉 축하합니다! ([\\s\\S]*?)\\n\\n\\[(.+?)\\] 아이콘이 선물함에 도착했습니다\\.$", "🎉 Congratulations! {T1}\n\n[\\2] sticker has arrived in your gift box."], ["^🎉 축하합니다! \\[(.+?)\\] 아이콘을 획득했습니다!\\n\\n\"([\\s\\S]*)\"$", "🎉 Congratulations! You got the [\\1] sticker!\n\n\"{T2}\""], ["^🎉 점수 입력 보상!\\n\\n\\[(.+?)\\] 아이콘을 획득했습니다!\\n\"([\\s\\S]*)\"\\n\\(선물함에서 확인하세요\\)$", "🎉 Reward for entering your scores!\n\nYou got the [\\1] sticker!\n\"{T2}\"\n(Check your gift box)"], ["^🎁 선물이 누군가에게 배달되었습니다!\\n\\n🎉 \\[특별 보상\\] 따뜻한 마음을 가진 당신에게 특별한 선물 \\[(.+?)\\]을 드려요!$", "🎁 Your gift has been delivered to someone!\n\n🎉 [Special reward] A special gift [\\1] for your warm heart!"], ["^(기분|생각|의욕|기분기복|활동량): (.*)$", "{T1}: \\2"]].map(([re, tpl]) => [new RegExp(re), tpl]);
         const SKIP = 'script, style, textarea, input, .cell-event, .user-badge, #patient-list-body, [data-i18n-skip], .lang-name';
         const ATTR_SKIP = '.cell-event, .user-badge, #patient-list-body, [data-i18n-skip]';   // 입력칸의 안내문(placeholder)은 번역
         const textOrig = new Map();   // 원래 한국어로 되돌리기 위한 기록
