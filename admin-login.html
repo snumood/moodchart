@@ -10,89 +10,73 @@
 <link rel="shortcut icon" href="./favicon.ico">
 <title>관리자 로그인 | 기분기록지 1.2</title>
 <script src="vendor/supabase.js"></script>
+<link rel="stylesheet" href="vendor/fonts/pretendard.css">
+<link rel="stylesheet" href="vendor/fonts/maruburi.css">
+<link rel="stylesheet" href="vendor/fonts/cormorant-garamond.css">
 <style>
+    /* 기분기록지 1.2: 책상 위 가죽 수첩의 '관리자' 면지 */
     :root {
-        --primary: #005eb8;
-        --text: #2c3e50;
+        --paper: #fbf8f1; --ink: #33353d; --soft: #6f6a62; --accent: #9b2f35; --accent-dark: #7a2228; --gold: #c9a85a;
+        --print: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        --serif-ko: 'MaruBuri', 'AppleMyungjo', 'Batang', serif;
+        --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+        --leather-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='l' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting surfaceScale='1.6' lighting-color='%23ffffff'%3E%3CfeDistantLight azimuth='235' elevation='48'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 -0.72'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23l)'/%3E%3C/svg%3E");
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-        margin: 0;
-        min-height: 100dvh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        background: url('./bg2.jpg') no-repeat center center fixed;
-        background-size: cover;
-        color: var(--text);
-        font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+        margin: 0; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 20px;
+        color: var(--ink); font-family: var(--print); word-break: keep-all;
+        background: radial-gradient(90% 60% at 18% 0%, rgba(255, 252, 245, 0.85), rgba(255, 252, 245, 0) 60%), #e6e1d9;
     }
-    body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: -1;
+    .book {
+        position: relative; width: 100%; max-width: 400px; padding: 12px 12px 12px 20px; border-radius: 6px 16px 16px 6px;
+        background-color: #18181b;
+        background-image: var(--leather-grain), radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.07), transparent 55%);
+        box-shadow: 0 30px 60px -12px rgba(40, 30, 20, 0.45), 0 12px 24px -8px rgba(40, 30, 20, 0.35);
+        animation: rise .5s cubic-bezier(.2, .8, .3, 1) both;
+    }
+    .book::after {   /* 고무 밴드 */
+        content: ""; position: absolute; top: -3px; bottom: -3px; right: 30px; width: 10px; border-radius: 2px;
+        background: linear-gradient(90deg, #070708, #26262a 45%, #0c0c0e); box-shadow: -2px 0 4px rgba(0, 0, 0, 0.5);
     }
     .auth-box {
-        width: 100%;
-        max-width: 400px;
-        padding: 30px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        text-align: center;
+        position: relative; z-index: 1; padding: 34px 28px 26px; border-radius: 3px 10px 10px 3px; text-align: center;
+        background:
+            linear-gradient(90deg, rgba(40, 30, 20, 0.14), rgba(40, 30, 20, 0.03) 22px, rgba(40, 30, 20, 0) 40px),
+            repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 31px, rgba(60, 58, 70, 0.075) 31px 32px), var(--paper);
+        box-shadow: 1px 0 0 #efeae0, 2px 0 0 #fbf8f1, 3px 1px 0 #e9e3d7, 4px 1px 0 #f8f4ec, 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-    h1 {
-        margin: 0 0 8px;
-        color: var(--primary);
-        font-size: 22px;
-    }
-    p {
-        margin: 0 0 20px;
-        color: #666;
-        font-size: 12px;
-        line-height: 1.5;
-    }
+    .kicker { font-family: var(--serif); font-style: italic; letter-spacing: 2px; color: var(--accent); font-size: 15px; }
+    h1 { margin: 4px 0 10px; font-family: var(--serif-ko); font-size: 24px; color: #23252c; letter-spacing: 1px; }
+    p { margin: 0 0 22px; color: var(--soft); font-size: 14px; line-height: 1.7; }
     button {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        background: #fff;
-        color: #333;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: bold;
+        width: 100%; min-height: 48px; padding: 12px; border: 0; border-radius: 10px; cursor: pointer;
+        background: linear-gradient(180deg, #a8373e, #86252c); color: #fdf8ef; box-shadow: 0 2px 0 #5e171c;
+        font: 700 15px/1.2 var(--print); display: inline-flex; align-items: center; justify-content: center; gap: 10px;
     }
-    button:hover { background: #f8f9fa; border-color: #aaa; }
+    button:hover { background: linear-gradient(180deg, #9b2f35, #7a2228); }
+    button:focus-visible, .back-link:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     button:disabled { cursor: wait; opacity: 0.65; }
-    .back-link {
-        display: inline-block;
-        margin-top: 20px;
-        color: #666;
-        font-size: 12px;
-        text-decoration: underline;
-    }
-    .status {
-        min-height: 18px;
-        margin-top: 12px;
-        color: #d32f2f;
-        font-size: 11px;
-        line-height: 1.4;
-    }
+    .g { width: 20px; height: 20px; border-radius: 50%; background: #fff; display: inline-grid; place-items: center; color: #4285f4; font: 700 13px/1 Arial, sans-serif; }
+    .back-link { display: inline-block; margin-top: 18px; color: var(--soft); font-size: 13px; text-underline-offset: 3px; }
+    .status { min-height: 18px; margin-top: 12px; color: var(--accent); font-size: 13px; line-height: 1.5; }
+    .stamp { margin-top: 18px; font-family: var(--serif-ko); font-size: 11px; letter-spacing: 4px; color: rgba(155, 47, 53, 0.6); }
+    @keyframes rise { from { transform: translateY(16px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .book { animation: none; } }
 </style>
 </head>
 <body>
+<div class="book">
 <main class="auth-box">
+    <div class="kicker">Clinician · 기분기록지 1.2</div>
     <h1>관리자 로그인</h1>
     <p>승인된 관리자 Google 계정만 접근할 수 있습니다.</p>
-    <button id="google-login" type="button">Google 계정으로 로그인</button>
+    <button id="google-login" type="button"><span class="g" aria-hidden="true">G</span>Google 계정으로 로그인</button>
     <div id="status" class="status" role="status" aria-live="polite"></div>
     <a class="back-link" href="./">사용자 로그인으로 돌아가기</a>
+    <div class="stamp">분당서울대학교병원 기분장애클리닉</div>
 </main>
+</div>
 
 <script>
     const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
