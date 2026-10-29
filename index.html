@@ -28,6 +28,7 @@
 <script src="vendor/luxon.js"></script>
 <script src="vendor/chartjs-adapter-luxon.js"></script>
 <script src="vendor/chartjs-plugin-annotation.js"></script>
+<script src="guide/kbsds.js?v=20261029a"></script>
 
 <style>
     /* --- 디자인 시스템 --- */
@@ -5614,6 +5615,7 @@
                 ls.querySelectorAll('input[type=radio]:checked').forEach(i => { sum += Number(i.value); n++; });
                 out.textContent = n ? sum + (n < groups ? ` (${n}/${groups})` : ' 점') : '–';
             });
+            window.wireKbsds?.(sr);   // 기분장애 가이드북의 K-BSDS 점수·해석 (guide/kbsds.js)
         }
         // 애니메이션이 멈춰도(백그라운드 탭 등) 리더가 잠기지 않도록 기다리는 시간에 상한을 둠
         const settleWithin = (p, ms) => Promise.race([p.catch(() => {}), new Promise(r => setTimeout(r, ms))]);

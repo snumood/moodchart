@@ -31,16 +31,45 @@
     .tbl table.qa td { background: rgba(255, 255, 255, 0.5); }
     .spectrum { margin: 22px 0 26px; padding: 14px 12px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.5); box-shadow: inset 0 0 0 1px var(--line); }
     .sp-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .sp-col { padding: 10px 10px 4px; border-radius: 18px 18px 8px 8px; background: #e1e7f2; font-size: 0.87em; line-height: 1.65; }
-    .sp-col:nth-child(2) { background: #e3e4ee; } .sp-col:nth-child(3) { background: #e6e0e8; } .sp-col:nth-child(4) { background: #e9dbe0; }
+    .sp-field { position: relative; isolation: isolate; }
+    /* 원본처럼: 오른쪽(조울증적 경향)으로 갈수록 커지는 삼각형이 칸 뒤에 깔림 */
+    .sp-field::before { content: ""; position: absolute; inset: 0 0 0 0; z-index: -1; background: linear-gradient(90deg, #f4d3d6 0%, #dfb2ba 40%, #b98f9b 72%, #8b7580 100%); clip-path: polygon(0 100%, 100% 0, 100% 100%); }
+    .sp-col { padding: 10px 10px 4px; border-radius: 18px 18px 8px 8px; background: rgba(216, 226, 243, 0.8); font-size: 0.87em; line-height: 1.65; }
     .sp-col p { margin: 0 0 9px; }
     .sp-h { text-align: center; font-weight: 700; padding: 3px 4px; margin-bottom: 10px; border: 2px solid #3c5a99; background: #fff; font-size: 0.94em; color: #23252c; }
-    .sp-b { font-weight: 700; } .sp-t { text-align: center; font-weight: 700; }
-    .sp-warn { margin: 10px 0 8px; padding: 10px 16px; border: 2px dashed #3c5a99; border-radius: 18px; background: #fff; font-size: 0.87em; line-height: 1.7; }
+    .sp-b { font-weight: 700; } .sp-t { text-align: center; font-weight: 700; border-top: 1px dashed rgba(60, 90, 153, 0.55); padding-top: 8px; }
+    .sp-warn { position: relative; margin: 10px 0 0 calc(25% + 2px); padding: 10px 16px; border: 2px dashed #3c5a99; border-radius: 18px; background: rgba(255, 255, 255, 0.92); font-size: 0.87em; line-height: 1.7; }
     .sp-warn p { margin: 0 0 4px; } .sp-warn ul { list-style: none; padding: 0; margin: 0; } .sp-warn li { margin: 0; } .sp-warn li::before { content: "- "; }
-    .sp-axis { display: flex; justify-content: space-between; margin-top: 8px; padding: 10px 6px 0; border-top: 4px solid #5b7bb5; font-weight: 700; }
-    @media (max-width: 760px) { .sp-cols { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .sp-cols { grid-template-columns: 1fr; } }
+    .sp-arrow { position: relative; height: 4px; margin: 14px 14px 0; border-radius: 2px; background: #5b7bb5; }
+    .sp-arrow::before, .sp-arrow::after { content: ""; position: absolute; top: 50%; transform: translateY(-50%); border: 8px solid transparent; }
+    .sp-arrow::before { left: -12px; border-left: 0; border-right: 13px solid #5b7bb5; }
+    .sp-arrow::after { right: -12px; border-right: 0; border-left: 13px solid #5b7bb5; }
+    .sp-axis { display: flex; justify-content: space-between; padding: 8px 6px 0; font-weight: 700; }
+    @media (max-width: 760px) { .sp-cols { grid-template-columns: 1fr 1fr; } .sp-warn { margin-left: 0; } }
+    @media (max-width: 480px) { .sp-cols { grid-template-columns: 1fr; } .sp-field::before { background: linear-gradient(180deg, #f4d3d6 0%, #dfb2ba 40%, #b98f9b 72%, #8b7580 100%); } }
+    /* K-BSDS: 직접 답하면 점수와 해석이 나옴 */
+    .kb-ox { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: 1px; text-indent: 0; white-space: nowrap; }
+    .kb-ox label { cursor: pointer; }
+    .kb-ox input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .kb-ox span { display: inline-grid; place-items: center; width: 30px; height: 26px; border: 1px solid rgba(60, 58, 70, 0.3); border-radius: 13px; background: #fff; font-weight: 700; font-size: 13px; line-height: 1; color: var(--ink-soft); }
+    .kb-ox input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+    @media (forced-colors: active) { .kb-ox input:checked + span { forced-color-adjust: none; background: Highlight; border: 3px solid CanvasText; color: HighlightText; } }
+    .kb-ox input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+    ul.kb-last li label { cursor: pointer; }
+    ul.kb-last input { accent-color: var(--accent); margin: 0 6px 0 0; }
+    ul.kb-last li:has(input:checked) { background: rgba(242, 208, 106, 0.25); border-radius: 6px; }
+    .kb-result { margin: 14px 0 6px; padding: 12px 16px; border: 1px solid rgba(155, 47, 53, 0.25); border-radius: 10px; background: #fffdf8; }
+    .kb-result p { margin: 0; }
+    .kb-msg { color: var(--ink-soft); }
+    .kb-score { font-family: var(--hand); font-size: 34px; line-height: 1.1; color: var(--pen, #1f2a44); }
+    .kb-band { font-weight: 700; margin: 2px 0 10px; }
+    .kb-band.b2 { color: #b0613a; } .kb-band.b3 { color: var(--accent); }
+    .kb-scale { position: relative; display: grid; grid-template-columns: 7fr 6fr 7fr 6fr; gap: 2px; margin: 0 0 10px; font-size: 11.5px; text-align: center; }
+    .kb-scale span { padding: 3px 0; background: rgba(60, 58, 70, 0.07); color: var(--ink-soft); }
+    .kb-scale span.on { background: rgba(155, 47, 53, 0.14); color: var(--accent); font-weight: 700; }
+    .kb-scale i { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--accent); }
+    .kb-note { font-size: 0.87em; color: var(--ink-soft); }
+    .kb-reset { margin-top: 8px; padding: 5px 14px; border: 1px solid rgba(60, 58, 70, 0.3); border-radius: 14px; background: #fff; font: inherit; font-size: 13px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -68,6 +97,7 @@
 <p>Mood disorders are commonly known as depression and manic depression. Depression mainly appears as a low mood together with a loss of interest and motivation, negative thoughts, slowed thinking and movement, and changes in eating and sleeping. Manic depression has been called by that name because the ‘mania/hypomania’ state, in which the mood is elevated and excited, and the ‘depression’ state, in which the mood sinks, appear in alternation. Doctors then gave the illness the name bipolar disorder, because the mood in this illness shows two poles, up and down.</p>
 <p><b>However, it is becoming increasingly clear that depression and bipolar disorder (manic depression) are not completely separate illnesses, but rather illnesses within the same group of mood disorders that differ in how strongly they lean toward depression or toward bipolar disorder (a spectrum).</b> In other words, some conditions lean strongly toward depression, such as typical depression; some lean strongly toward manic depression, such as bipolar I disorder; and in between are bipolar spectrum disorder and bipolar II disorder, depending on the proportion of depressive and manic-depressive tendencies. In particular, it is known that people living with bipolar disorder experience depression far more often than mania or hypomania, and that the periods they suffer from depression are much longer than those of mania or hypomania. <b>In fact, when we take another look at patients who had been treated for a long time for recurrent depression without much improvement, it is quite common to find that the diagnosis was not simple depression but manic depression, and that they improved with specialized treatment for manic depression.</b></p>
 <div class="spectrum" role="group" aria-label="Spectrum of mood disorders">
+<div class="sp-field">
 <div class="sp-cols">
 <div class="sp-col c1"><div class="sp-h">Typical depression</div>
 <p class="sp-b">Depressed periods only</p>
@@ -111,6 +141,8 @@
 <li>Being sensitive in relationships and easily hurt by other people</li>
 <li>Accompanying binge eating, alcohol or gambling problems, or a personality disorder</li>
 </ul></div>
+</div>
+<div class="sp-arrow" aria-hidden="true"></div>
 <div class="sp-axis"><span>Depressive tendency</span><span>Manic-depressive tendency</span></div>
 </div>
 <p><b>A mood disorder is not an illness of the mood alone. It is an illness in which mood, thinking, motivation and sensation all change together.</b> It is not only that the mood is depressed; it can appear in very many ways depending on how strongly there is a manic-depressive tendency. Mood disorders have a wide range of symptoms, and because mild forms of the symptoms are present even before the illness fully begins, they are often not accepted as an illness but are thought of as personality, as if the person had always been that way.</p>
@@ -130,38 +162,40 @@
 <h3>2) Symptoms of mood disorders</h3>
 <p><b>(1) Difficulty regulating mood:</b> With a normal mood, even when something good or bad happens, you feel good or bad for a few days, and the mood does not go beyond a certain range for more than a few days. In depression, however, you can be depressed for weeks or months over something that would make others depressed for a day, and you can also become depressed for no particular reason. People express feeling depressed in very different ways. They say, ‘My mood is down,’ ‘I feel stifled,’ ‘My chest feels blocked,’ ‘I don’t want to do anything,’ ‘Everything is a bother,’ ‘I have become sensitive,’ ‘I have become more irritable,’ or ‘I have become more angry.’ In other words, becoming irritable, even exploding in anger, over things that others can put up with, becoming more sensitive than others, and becoming sensitive to changes in the surroundings are all signs related to a mood disorder.</p>
 <p>In a manic/hypomanic state, it can also show up as an elevated mood. The elevated mood can sometimes last a week or more, or even several months. At other times it may appear only very briefly, for a few days. It does not happen only when something good happens; people may also become elevated while trying hard to overcome a difficulty. You may not feel your own mood being elevated, and may even think that your depression has gone away, that you have found yourself again, or that you have changed your personality through effort, but to other people you may seem unlike your usual self and inappropriate. When a slightly elevated state appears, work seems to go well and you seem to have improved, but in most cases the state cannot be kept up, and you become excessively elevated, your mood swings become severe, or you fall into severe depression.</p>
-<div class="box kbsds">
+<div class="box kbsds" data-lang="en">
 <p class="c"><b>- Korean Bipolar Spectrum Diagnostic Scale (K-BSDS) -</b></p>
 <p><b>Read the following sentences carefully, and mark O or X for whether what each sentence describes is similar to you</b></p>
 <ul class="hang kb">
-<li>① Some people notice that, from time to time, their mood or energy level clearly changes ( ).</li>
-<li>② These people know that there are times when their mood or energy is somewhat <b>lower</b> than usual and times when their mood or energy is somewhat <b>higher</b> than usual ( ).</li>
-<li>③ When their mood or energy <b>goes down</b>, they usually feel they have no strength, so they spend more time lying down or sleeping than usual, put off things they should do or lose motivation ( ).</li>
-<li>④ So, they often gain weight during these times ( ).</li>
-<li>⑤ And during these times, people often feel “depressed” or say they are depressed ( ).</li>
-<li>⑥ Sometimes, during these times, they may feel hopeless or have thoughts of wanting to die ( ),</li>
-<li>⑦ and their ability to handle work and daily life at work or at home may decline ( ).</li>
-<li>⑧ These “down periods” usually last a few weeks, but in some cases may last only a few days ( ).</li>
-<li>⑨ These people also have “usual mood periods,” when their mood or energy is as usual and they have no particular trouble handling work and daily life at work or at home ( ).</li>
-<li>⑩ That is why they can notice the change in mood between the “usual mood periods” and the “down periods” ( ).</li>
-<li>⑪ There are times when their energy increases above the “usual periods” mentioned above, and during these times they may do many things they could not do when they were as usual ( ),</li>
-<li>⑫ and sometimes, during these “up periods,” they may feel that they have too much energy or more than they can handle ( ).</li>
-<li>⑬ In the “up periods,” some people may feel that they are on edge, irritable or aggressive ( ),</li>
-<li>⑭ and some people do many things at once during these times ( ).</li>
-<li>⑮ Some people spend a lot of money during these times and get into trouble because of it ( ).</li>
-<li>⑯ During these times they talk more than usual, become more outgoing, or have increased interest in sex ( ).</li>
-<li>⑰ Sometimes, the behavior that appears during these times may cause discomfort to other people or make them come across as someone different from their usual self ( ),</li>
-<li>⑱ during these times they may have trouble working with colleagues, or may cause trouble and end up at the police station ( ),</li>
-<li>⑲ and they may misuse alcohol or non-prescription drugs ( ).</li>
+<li id="kbq1">① Some people notice that, from time to time, their mood or energy level clearly changes. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq1"><label><input type="radio" name="kb1" value="1"><span>O</span></label><label><input type="radio" name="kb1" value="0"><span>X</span></label></span></li>
+<li id="kbq2">② These people know that there are times when their mood or energy is somewhat <b>lower</b> than usual and times when their mood or energy is somewhat <b>higher</b> than usual. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq2"><label><input type="radio" name="kb2" value="1"><span>O</span></label><label><input type="radio" name="kb2" value="0"><span>X</span></label></span></li>
+<li id="kbq3">③ When their mood or energy <b>goes down</b>, they usually feel they have no strength, so they spend more time lying down or sleeping than usual, put off things they should do or lose motivation. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq3"><label><input type="radio" name="kb3" value="1"><span>O</span></label><label><input type="radio" name="kb3" value="0"><span>X</span></label></span></li>
+<li id="kbq4">④ So, they often gain weight during these times. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq4"><label><input type="radio" name="kb4" value="1"><span>O</span></label><label><input type="radio" name="kb4" value="0"><span>X</span></label></span></li>
+<li id="kbq5">⑤ And during these times, people often feel “depressed” or say they are depressed. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq5"><label><input type="radio" name="kb5" value="1"><span>O</span></label><label><input type="radio" name="kb5" value="0"><span>X</span></label></span></li>
+<li id="kbq6">⑥ Sometimes, during these times, they may feel hopeless or have thoughts of wanting to die, <span class="kb-ox" role="radiogroup" aria-labelledby="kbq6"><label><input type="radio" name="kb6" value="1"><span>O</span></label><label><input type="radio" name="kb6" value="0"><span>X</span></label></span></li>
+<li id="kbq7">⑦ and their ability to handle work and daily life at work or at home may decline. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq7"><label><input type="radio" name="kb7" value="1"><span>O</span></label><label><input type="radio" name="kb7" value="0"><span>X</span></label></span></li>
+<li id="kbq8">⑧ These “down periods” usually last a few weeks, but in some cases may last only a few days. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq8"><label><input type="radio" name="kb8" value="1"><span>O</span></label><label><input type="radio" name="kb8" value="0"><span>X</span></label></span></li>
+<li id="kbq9">⑨ These people also have “usual mood periods,” when their mood or energy is as usual and they have no particular trouble handling work and daily life at work or at home. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq9"><label><input type="radio" name="kb9" value="1"><span>O</span></label><label><input type="radio" name="kb9" value="0"><span>X</span></label></span></li>
+<li id="kbq10">⑩ That is why they can notice the change in mood between the “usual mood periods” and the “down periods”. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq10"><label><input type="radio" name="kb10" value="1"><span>O</span></label><label><input type="radio" name="kb10" value="0"><span>X</span></label></span></li>
+<li id="kbq11">⑪ There are times when their energy increases above the “usual periods” mentioned above, and during these times they may do many things they could not do when they were as usual, <span class="kb-ox" role="radiogroup" aria-labelledby="kbq11"><label><input type="radio" name="kb11" value="1"><span>O</span></label><label><input type="radio" name="kb11" value="0"><span>X</span></label></span></li>
+<li id="kbq12">⑫ and sometimes, during these “up periods,” they may feel that they have too much energy or more than they can handle. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq12"><label><input type="radio" name="kb12" value="1"><span>O</span></label><label><input type="radio" name="kb12" value="0"><span>X</span></label></span></li>
+<li id="kbq13">⑬ In the “up periods,” some people may feel that they are on edge, irritable or aggressive, <span class="kb-ox" role="radiogroup" aria-labelledby="kbq13"><label><input type="radio" name="kb13" value="1"><span>O</span></label><label><input type="radio" name="kb13" value="0"><span>X</span></label></span></li>
+<li id="kbq14">⑭ and some people do many things at once during these times. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq14"><label><input type="radio" name="kb14" value="1"><span>O</span></label><label><input type="radio" name="kb14" value="0"><span>X</span></label></span></li>
+<li id="kbq15">⑮ Some people spend a lot of money during these times and get into trouble because of it. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq15"><label><input type="radio" name="kb15" value="1"><span>O</span></label><label><input type="radio" name="kb15" value="0"><span>X</span></label></span></li>
+<li id="kbq16">⑯ During these times they talk more than usual, become more outgoing, or have increased interest in sex. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq16"><label><input type="radio" name="kb16" value="1"><span>O</span></label><label><input type="radio" name="kb16" value="0"><span>X</span></label></span></li>
+<li id="kbq17">⑰ Sometimes, the behavior that appears during these times may cause discomfort to other people or make them come across as someone different from their usual self, <span class="kb-ox" role="radiogroup" aria-labelledby="kbq17"><label><input type="radio" name="kb17" value="1"><span>O</span></label><label><input type="radio" name="kb17" value="0"><span>X</span></label></span></li>
+<li id="kbq18">⑱ during these times they may have trouble working with colleagues, or may cause trouble and end up at the police station, <span class="kb-ox" role="radiogroup" aria-labelledby="kbq18"><label><input type="radio" name="kb18" value="1"><span>O</span></label><label><input type="radio" name="kb18" value="0"><span>X</span></label></span></li>
+<li id="kbq19">⑲ and they may misuse alcohol or non-prescription drugs. <span class="kb-ox" role="radiogroup" aria-labelledby="kbq19"><label><input type="radio" name="kb19" value="1"><span>O</span></label><label><input type="radio" name="kb19" value="0"><span>X</span></label></span></li>
 </ul>
-<p><b>Then, after reading the above, mark the option below that applies to you,</b></p>
-<ul class="hang kb">
-<li>① The above is completely like me (6 points)</li>
-<li>② The above is quite like me (4 points)</li>
-<li>③ The above is like me in some ways, but mostly it is not (2 points)</li>
-<li>④ The above is not at all like me (0 points)</li>
+<p id="kbq20"><b>Then, after reading the above, mark the option below that applies to you,</b></p>
+<ul class="hang kb kb-last" role="radiogroup" aria-labelledby="kbq20">
+<li><label><input type="radio" name="kb20" value="6"> ① The above is completely like me (6 points)</label></li>
+<li><label><input type="radio" name="kb20" value="4"> ② The above is quite like me (4 points)</label></li>
+<li><label><input type="radio" name="kb20" value="2"> ③ The above is like me in some ways, but mostly it is not (2 points)</label></li>
+<li><label><input type="radio" name="kb20" value="0"> ④ The above is not at all like me (0 points)</label></li>
 </ul>
 <p>(For each of the 19 items above, an O mark is 1 point and an X mark is 0 points. Add the score of the last question to the total for the 19 items, and the result can be interpreted as follows: “6 points or less – the likelihood of bipolar disorder is very low; 7–12 points – low; 13–19 – possible; 20 points or more – very high.” However, a simple questionnaire cannot replace a doctor’s diagnosis.)</p>
+<div class="kb-result" aria-live="polite"></div>
+<button type="button" class="kb-reset" hidden></button>
 </div>
 <p>There are also people in whom these depressive and manic/hypomanic periods appear clearly separated, and between them they live with a normal mood, without depression or mania/hypomania. Some people, however, do not have clearly separated depressive and manic/hypomanic periods, and mood symptoms continue even in between. In these people, depressive symptoms or an elevated mood appear in a mild form even between depression and mania/hypomania, and irritability and anxiety caused by the mood changes appear together. So instead of thinking that they have a mood disorder, they may mistake it for having a moody, changeable personality or a personality that is easily hurt. Also, some people have no severe depressive periods but have mild depression that is always present, and they may describe themselves as ‘I have always been depressed since I was young’ or ‘I am a depressed person by nature.’ As emotional reactivity that goes with these moods, they may feel fear, timidity, worry and anxiety. It becomes harder than usual to speak up in front of people, and you become anxious even over small matters. Irritability and anger arise, so you may get very angry or act violently, and conflicts arise even over small matters. This emotional reactivity can appear both when you are depressed and when you are elevated.</p>
 <p><b>2) Changes in motivation:</b> Even for things you would usually enjoy and be good at, they are no longer enjoyable, and you become indifferent. Everything is a bother, you do not feel like working, and you gradually put off what you have to do. It is not easy to make an appointment with even one person and meet them, and no plans may come to mind. As a result, students’ grades drop, working people may hear bad things about their evaluation at work or in their relationships, and parents may fail to take proper care of their children. At other times, however, you become interested in even small things, everything is fun and exciting. You gain confidence that everything you do will go well, and you may finish a backlog of work in an instant. You feel that you can do even the things you would normally skip because they are a bother, so you make various plans, make several appointments, spend far too much, and make high-risk investments. Because these things were not done calmly and after careful thought, problems often arise later, and in many cases you become listless again.</p>
@@ -419,5 +453,6 @@
 
 <footer class="colophon">Mood Journal <b>1.2</b> · Mood Disorder Clinic, Seoul National University Bundang Hospital</footer>
 </article></main>
+<script src="kbsds.js?v=20261029a"></script>
 </body>
 </html>
