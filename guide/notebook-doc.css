@@ -168,3 +168,4 @@ html.embed h2, html.embed h3 { scroll-margin-top: 12px; }
 .ep-video figcaption { margin-top: 8px; font-size: 0.95em; line-height: 1.5; color: #4a4650; }
 .ep-video figcaption b { color: #9b2f35; margin-right: 6px; }
 .ep-video .ep-sub { color: #6f6a62; }
+.ep-video .ep-ai { display: inline-block; margin-left: 8px; padding: 1px 8px; border: 1px solid rgba(60, 58, 70, 0.25); border-radius: 10px; font-size: 0.82em; color: #6f6a62; white-space: nowrap; }
