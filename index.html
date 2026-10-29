@@ -16,7 +16,7 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' https://snumood.com; connect-src 'self' https://cloudflareinsights.com https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' https://snumood.com; connect-src 'self' https://cloudflareinsights.com https://gcjdxyauirbugbugltmv.supabase.co wss://gcjdxyauirbugbugltmv.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>기분기록지 1.2 | 분당서울대학교병원</title>
 <link rel="stylesheet" href="vendor/fonts/pretendard.css">
@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="vendor/fonts/nanum-pen-script.css">
 <link rel="stylesheet" href="vendor/fonts/cormorant-garamond.css">
 <script src="vendor/supabase.js"></script>
+<script type="module">import * as A from "/account/auth.js?v=20261030a"; window.SnumoodAuth = A;</script>
 <script src="vendor/chart.js"></script>
 <script src="vendor/luxon.js"></script>
 <script src="vendor/chartjs-adapter-luxon.js"></script>
@@ -1107,7 +1108,7 @@
             <input id="l-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="current-password">
             <div class="save-login-wrap">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" id="remember-me"> 이 기기에서 30일간 로그인 유지
+                    <input type="checkbox" id="remember-me"> 이 기기에서 로그인 유지
                 </label>
                 <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="./admin-login.html">.</a></div>
             </div>
@@ -1118,13 +1119,10 @@
             <label class="tag-label" for="j-id">희망 아이디</label>
             <input id="j-id" class="auth-inp" placeholder="희망 아이디" autocomplete="username">
             <label class="tag-label" for="j-pw">비밀번호</label>
-            <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호" autocomplete="new-password">
-            <label class="tag-label" for="j-hosp">연결 번호</label>
-            <input id="j-hosp" class="auth-inp" placeholder="명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열">
-            <div style="font-size:11px; color:#d32f2f; text-align:left; margin-bottom:3px;">⚠️ 이 번호는 담당 의료진이 작성 내용을 확인할 수 있도록 연결하는 용도입니다.</div>
-            <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">예: 43445678 또는 HGD19990305 (중복 가입 불가)</div>
+            <input id="j-pw" class="auth-inp" type="password" placeholder="비밀번호 (12자 이상)" autocomplete="new-password" minlength="12">
+            <div style="font-size:11px; color:#666; text-align:left; margin-bottom:5px;">비밀번호는 12자 이상. 이 계정으로 설문 사이트에도 로그인할 수 있습니다.</div>
             <div class="legal-text">
-                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 진료실에서 함께 볼 수 있습니다.
+                본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 담당 의료진은 본인이 동의한 경우에만 기록을 볼 수 있습니다.
             </div>
             <label style="font-size:12px; cursor:pointer; display:block; text-align:left; margin-bottom:15px;">
                 <input type="checkbox" id="j-agree"> 위 내용을 확인하였으며 동의합니다.
@@ -1250,7 +1248,7 @@
         </div>
         
         <div class="sb-legal">
-            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 진료실에서 함께 볼 수 있습니다.
+            본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 담당 의료진은 본인이 동의한 경우에만 기록을 볼 수 있습니다.
         </div>
         <div class="sb-version"><span>기분기록지 1.2</span><span>분당서울대학교병원 기분장애클리닉</span></div>
     </div>
@@ -1402,8 +1400,8 @@
 </div>
 
 <script>
-    const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
+    const SUPABASE_URL = 'https://gcjdxyauirbugbugltmv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_3l7U25p2cC6pWiddxhlZlw_4vjqeDmz';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function hashPassword(str) {
@@ -1444,26 +1442,16 @@
         return btoa(String.fromCharCode(...arr)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
     }
 
-    async function deviceTokenHash(token) {
-        return hashPassword(`moodchart-device-token-v1:${token}`);
-    }
-
+    // 옛 '이 기기에서 로그인 유지' 토큰은 더 쓰지 않는다(통합 계정 세션이 대신함). 남은 값만 지운다.
     function clearDeviceLogin() {
         localStorage.removeItem('mood_device_user');
         localStorage.removeItem('mood_device_token');
         localStorage.removeItem('mood_saved_pw');
     }
 
-    async function revokeStoredDeviceLogin() {
-        const token = localStorage.getItem('mood_device_token');
-        clearDeviceLogin();
-        if (!token) return;
-        try {
-            await sb.rpc('revoke_mood_persistent_login', { p_token_hash: await deviceTokenHash(token) });
-        } catch (e) {
-            console.warn('기기 로그인 해제 실패(무시됨):', e);
-        }
-    }
+    const AUTH = () => window.SnumoodAuth;
+    const authLang = () => (typeof I18N !== 'undefined' && I18N.lang === 'en') ? 'en' : 'ko';
+    const authMsg = reason => AUTH().message(reason, authLang());
 
     async function completeAdminLogin(session) {
         const { data: authorized, error } = await sb.rpc('moodchart_admin_session');
@@ -1569,8 +1557,8 @@
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(async () => {
             sessionStorage.setItem('mood_skip_auto_login_once', '1');
-            if (isAdminUser()) {
-                await sb.auth.signOut();
+            if (isAdminUser() || localStorage.getItem('mood_keep_login') !== '1') {
+                await AUTH().signOutEverywhere(sb);
             }
             alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
             location.reload();
@@ -1594,19 +1582,40 @@
     }
 
     window.onload = async () => {
-        const { data: { session } } = await sb.auth.getSession();
-        if (session && await completeAdminLogin(session)) {
-            return;
-        }
-
+        clearDeviceLogin();
         const savedId = localStorage.getItem('mood_saved_id');
-        localStorage.removeItem('mood_saved_pw');
         if(savedId) {
             document.getElementById('l-id').value = savedId;
-            document.getElementById('remember-me').checked = true;
+            document.getElementById('remember-me').checked = localStorage.getItem('mood_keep_login') === '1';
         }
-        await tryDeviceLogin();
+        if (location.hash === '#join') toggleAuth('join');
+
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) return;
+        // 10분 무활동으로 잠근 직후 한 번은 로그인 화면을 보여 준다(세션은 유지).
+        if (sessionStorage.getItem('mood_skip_auto_login_once') === '1') {
+            sessionStorage.removeItem('mood_skip_auto_login_once');
+            return;
+        }
+        await enterWithSession(session);
     };
+
+    async function enterWithSession(session) {
+        const { data: prof } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+        const role = prof?.role || '';
+        if (role === 'admin') return completeAdminLogin(session);
+        if (role !== 'patient' && role !== 'journal') {
+            alert('이 계정은 기분기록지를 쓸 수 없습니다. 환자·기분기록지 계정으로 로그인해 주세요.');
+            return false;
+        }
+        await completeLogin(AUTH().loginIdOf(session.user), session.user.id);
+        const st = await AUTH().resumeJournal(sb);
+        if (st.result === 'resumed') alert('끝나지 않았던 예전 기록 옮기기를 마쳤습니다.');
+        if (st.result === 'link_available') {
+            alert('같은 아이디의 예전 기분기록지 기록이 있습니다.\n메뉴의 "계정"(snumood.com/login/)에서 "기분기록지 기록 연결"로 가져올 수 있어요.');
+        }
+        return true;
+    }
 
     document.addEventListener('keydown', e => {
         const t = e.target;
@@ -1617,30 +1626,19 @@
 
     async function join() {
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
-        const id = document.getElementById('j-id').value, pw = document.getElementById('j-pw').value, h = document.getElementById('j-hosp').value;
-        
+        const id = document.getElementById('j-id').value.trim(), pw = document.getElementById('j-pw').value;
         if(!id || !pw) return alert('필수 입력 누락');
-        
-        const hashedPw = await hashPassword(pw);
-        const { data, error } = await sb.rpc('register_user_secure', { p_id: id, p_pw: hashedPw, p_hosp: h ? h : '' });
-        
-        if (error) {
-            if (error.message.includes('duplicate')) {
-                return alert('이미 존재하는 아이디 또는 중복된 등록번호입니다.');
-            }
-            return alert('오류: ' + error.message);
-        }
-        
-        if (data === 'duplicate_id') return alert('이미 존재하는 아이디입니다.');
-        if (data === 'duplicate_hosp') return alert('이미 가입된 번호나 문자열입니다. 다른 번호나 문자열을 사용하세요');
-        if (data === 'duplicate') return alert('중복된 데이터가 존재하여 가입할 수 없습니다.');
-        
-        alert('가입 완료.'); 
-        toggleAuth('login');
+        const r = await AUTH().signUpJournal(sb, id, pw);
+        if (!r.ok) return alert(authMsg(r.reason));
+        document.getElementById('j-pw').value = '';
+        alert('가입 완료.');
+        localStorage.setItem('mood_saved_id', id);
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) await enterWithSession(session);
     }
 
-    async function completeLogin(id, hashedPw) {
-        user = { username: id, password: hashedPw, role: 'patient' };
+    async function completeLogin(id, authUserId) {
+        user = { username: id, role: 'patient', authUserId };
         document.getElementById('l-pw').value = '';
         resetLogoutTimer();
 
@@ -1653,67 +1651,43 @@
         renderTable();
     }
 
-    async function saveDeviceLogin(id, hashedPw, role) {
-        const token = randomToken();
-        const { error } = await sb.rpc('create_mood_persistent_login', {
-            p_user: id,
-            p_pw: hashedPw,
-            p_role: role,
-            p_token_hash: await deviceTokenHash(token),
-            p_user_agent: navigator.userAgent || '',
-            p_days: 30
-        });
-        if (error) {
-            console.warn('기기 로그인 저장 실패:', error.message);
-            clearDeviceLogin();
-            return;
-        }
-        localStorage.setItem('mood_saved_id', id);
-        localStorage.setItem('mood_device_user', id);
-        localStorage.setItem('mood_device_token', token);
-    }
-
-    async function tryDeviceLogin() {
-        if (sessionStorage.getItem('mood_skip_auto_login_once') === '1') {
-            sessionStorage.removeItem('mood_skip_auto_login_once');
-            return false;
-        }
-        const id = localStorage.getItem('mood_device_user');
-        const token = localStorage.getItem('mood_device_token');
-        if (!id || !token) return false;
-        try {
-            const { data, error } = await sb.rpc('consume_mood_persistent_login', {
-                p_token_hash: await deviceTokenHash(token),
-                p_user_agent: navigator.userAgent || ''
-            });
-            if (error || !data?.password_hash || data.username !== id) throw error || new Error('invalid device token');
-            const hashedPw = data.password_hash;
-            const { data: check, error: authError } = await sb.rpc('mood_login_check', { p_user: id, p_pw: hashedPw });
-            if (authError) throw authError;
-            if (!check?.ok) throw new Error(check?.reason || 'Auth failed');
-            await completeLogin(id, hashedPw);
-            return true;
-        } catch (e) {
-            console.warn('자동 로그인 실패:', e?.message || e);
-            await revokeStoredDeviceLogin();
-            return false;
-        }
-    }
-
+    // 로그인: 통합 계정으로 먼저, 없으면 예전 기분기록지 계정을 그 자리에서 옮긴 뒤 로그인(공용 모듈).
+    let loginBusy = false;
     async function login() {
-        const id = document.getElementById('l-id').value;
+        if (loginBusy) return;
+        const id = document.getElementById('l-id').value.trim();
         const pw = document.getElementById('l-pw').value;
+        const keep = document.getElementById('remember-me').checked;
         localStorage.removeItem('mood_saved_pw');
-        if(document.getElementById('remember-me').checked) { localStorage.setItem('mood_saved_id', id); }
-        else { localStorage.removeItem('mood_saved_id'); await revokeStoredDeviceLogin(); }
-        const hashedPw = await hashPassword(pw); 
-        const { data: check, error } = await sb.rpc('mood_login_check', { p_user: id, p_pw: hashedPw });
-        if(error) return alert('오류: ' + (error.message || '로그인 서버에 연결하지 못했습니다.'));
-        if(check?.reason === 'locked') return alert('로그인 시도가 너무 많아 잠시 잠겼습니다. 15분 뒤 다시 시도해 주세요.');
-        if(!check?.ok) return alert('로그인 실패: 아이디가 없거나 비밀번호가 틀립니다.');
-        if(document.getElementById('remember-me').checked) await saveDeviceLogin(id, hashedPw, 'patient');
-        await completeLogin(id, hashedPw);
+        if(keep) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_keep_login', '1'); }
+        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_keep_login'); }
+        loginBusy = true;
+        let r;
+        try {
+            r = await AUTH().signIn(sb, id, pw, { newUsername: pendingNewId() });
+        } finally {
+            loginBusy = false;
+        }
+        if (!r.ok) {
+            if (['needs_new_username', 'invalid_new_username', 'username_taken'].includes(r.reason)) {
+                const n = prompt(authMsg(r.reason) + '\n\n새 아이디:');
+                if (n && n.trim()) { document.getElementById('l-id').dataset.newId = n.trim(); return login(); }
+            }
+            delete document.getElementById('l-id').dataset.newId;
+            return alert((authLang() === 'en' ? 'Sign-in failed: ' : '로그인 실패: ') + authMsg(r.reason));
+        }
+        delete document.getElementById('l-id').dataset.newId;
+        if (r.migrated) {
+            const n = Number(r.counts?.records_legacy) || 0;
+            alert(authLang() === 'en' ? `Moved ${n} old mood-journal records into the combined account.` + (r.loginId && r.loginId !== id.toLowerCase() ? `\nFrom now on, sign in with your new ID "${r.loginId}".` : '')
+                : `예전 기분기록지 기록 ${n}건을 통합 계정으로 옮겼습니다.` + (r.loginId && r.loginId !== id.toLowerCase() ? `\n앞으로는 새 아이디 "${r.loginId}"로 로그인하세요.` : ''));
+            if (keep && r.loginId) localStorage.setItem('mood_saved_id', r.loginId);
+        }
+        if (r.weak) alert('비밀번호가 12자보다 짧습니다. 메뉴의 "비밀번호 변경"에서 더 긴 비밀번호로 바꾸는 것을 권합니다.');
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) await enterWithSession(session);
     }
+    const pendingNewId = () => document.getElementById('l-id').dataset.newId || null;
 
     async function searchPatient() {
         const q = document.getElementById('search-id').value.trim();
@@ -1917,7 +1891,7 @@
 
     async function checkSpecialEvents() {
         if(isAdminUser()) return;
-        const { data, error } = await sb.rpc('check_special_event_secure', { p_user: user.username, p_pw: user.password });
+        const { data, error } = await sb.rpc('journal_check_special_event');
         if (data && data.status === 'success') {
             alert(`🎁 선물이 도착했습니다!\n\n[${data.icon}] ${data.msg}`);
             if(document.getElementById('gift-modal').style.display === 'flex') switchGiftTab('my');
@@ -1926,7 +1900,7 @@
 
     async function checkGiftReception() {
         if(isAdminUser()) return;
-        const { data, error } = await sb.rpc('check_gift_reception_secure', { p_user: user.username, p_pw: user.password });
+        const { data, error } = await sb.rpc('journal_check_gift_reception');
         
         if (!data || data.status === 'none') return; 
 
@@ -2245,14 +2219,14 @@
         if(isAdminUser()) return;
         const y = curDate.getFullYear(), m = curDate.getMonth()+1;
         const date = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: cat, p_val: val });
+        await sb.rpc('journal_upsert_record', { p_date: date, p_cat: cat, p_val: val });
     }
 
     async function saveMonthlyScore(type, val, monthDate) {
         if(isAdminUser()) return false;
         const d = monthDate || curDate;
         const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
-        const { data, error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `score_${type}`, p_val: val });
+        const { data, error } = await sb.rpc('journal_upsert_record', { p_date: date, p_cat: `score_${type}`, p_val: val });
         if (error) return false;
         
         if (data && data.reward_icon) {
@@ -2281,8 +2255,8 @@
 
         const reqTarget = target, reqSeq = ++loadDataSeq;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: start, p_end: end })
-            : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: start, p_end: end });
+            ? sb.rpc('moodchart_admin_get_records', { p_start: start, p_end: end })
+            : sb.rpc('journal_get_records', { p_start: start, p_end: end });
         const { data, error } = await request;
         // 더 늦게 시작된 조회(다른 환자·다른 달)가 있으면 이 응답은 버린다.
         if (reqSeq !== loadDataSeq || reqTarget !== target) return;
@@ -2370,7 +2344,7 @@
         const container = document.getElementById('gift-list-container');
         container.innerHTML = '<div style="grid-column:span 6; text-align:center;">로딩중...</div>';
         
-        const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await sb.rpc('journal_get_inventory');
         container.innerHTML = '';
         
         const filtered = data ? data.filter(item => {
@@ -2457,9 +2431,7 @@
         if(!replyTargetItemId || !selectedInventoryId) return;
         if(!confirm("선택한 아이콘을 보답으로 보내시겠습니까?")) return;
 
-        const { data, error } = await sb.rpc('send_reply_gift_secure', { 
-            p_user: user.username, 
-            p_pw: user.password, 
+        const { data, error } = await sb.rpc('journal_send_reply_gift', { 
             p_my_item_id: selectedInventoryId, 
             p_received_item_id: replyTargetItemId 
         });
@@ -2476,7 +2448,7 @@
 
     async function tryUnlockGift() {
         const randIcon = rewardIcons[Math.floor(Math.random() * rewardIcons.length)];
-        const { data, error } = await sb.rpc('unlock_reward_secure', { p_user: user.username, p_pw: user.password, p_icon: randIcon });
+        const { data, error } = await sb.rpc('journal_unlock_reward', { p_icon: randIcon });
         
         if(error) return alert("오류: " + error.message);
         if(data === 'keep_going') return alert("아직은 상자가 열리지 않네요. 조금 더 기록해볼까요?");
@@ -2490,7 +2462,7 @@
     async function sendGiftToRandom() {
         if(!selectedInventoryId) return;
         if(!confirm("정말 이 아이콘을 누군가에게 선물하시겠습니까?\n(보낸 후에는 선물함에서 사라집니다)")) return;
-        const { data, error } = await sb.rpc('send_gift_secure', { p_user: user.username, p_pw: user.password, p_inv_id: selectedInventoryId });
+        const { data, error } = await sb.rpc('journal_send_gift', { p_inv_id: selectedInventoryId });
         if(error) return alert("오류: " + error.message);
         
         if(data?.status === 'milestone') {
@@ -2524,7 +2496,7 @@
 
         const container = document.getElementById('event-icon-container');
         container.innerHTML = '로딩중...';
-        const { data } = await sb.rpc('get_inventory_secure', { p_user: user.username, p_pw: user.password });
+        const { data } = await sb.rpc('journal_get_inventory');
         container.innerHTML = '';
 
         const starDiv = document.createElement('div');
@@ -2597,8 +2569,8 @@
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
-            : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+            ? sb.rpc('moodchart_admin_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' })
+            : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
         const { data } = await request;
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
         const targetCat = `score_${type}`;
@@ -2785,7 +2757,7 @@
     async function saveMonthlyItems(type, answers, monthDate) {
         if (isAdminUser()) return false;
         const date = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-01`;
-        const { error } = await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: date, p_cat: `items_${type}`, p_val: JSON.stringify(answers) });
+        const { error } = await sb.rpc('journal_upsert_record', { p_date: date, p_cat: `items_${type}`, p_val: JSON.stringify(answers) });
         return !error;
     }
 
@@ -2854,21 +2826,16 @@
     function openPwModal() { if(isAdminUser()) return; document.getElementById('pw-old').value=''; document.getElementById('pw-new').value=''; document.getElementById('pw-cfm').value=''; document.getElementById('pw-modal').style.display = 'flex'; }
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     async function doLogout() {
-        if (isAdminUser()) {
-            await sb.auth.signOut();
-        } else {
-            await revokeStoredDeviceLogin();
-        }
-        sessionStorage.setItem('mood_skip_auto_login_once', '1');
+        await AUTH().signOutEverywhere(sb);
+        localStorage.removeItem('mood_keep_login');
         await Notebook.close();
         location.reload();
     }
     async function changePassword() {
         const o = document.getElementById('pw-old').value, n = document.getElementById('pw-new').value, c = document.getElementById('pw-cfm').value;
         if(!o || !n) return alert("입력 필요"); if(n!==c) return alert("불일치");
-        const ho = await hashPassword(o), hn = await hashPassword(n);
-        const { data } = await sb.rpc('change_password_secure', { p_user: user.username, p_old_pw: ho, p_new_pw: hn });
-        if(data==='success') { await revokeStoredDeviceLogin(); alert("완료. 재로그인하세요."); location.reload(); } else alert("실패");
+        const r = await AUTH().changePassword(sb, o, n);
+        if (r.ok) { closePwModal(); alert("비밀번호를 바꿨습니다."); } else alert((authLang() === 'en' ? 'Failed: ' : '실패: ') + authMsg(r.reason));
     }
     function moveMonth(n) {
         Notebook.flipTo(() => { const y = curDate.getFullYear(), m = curDate.getMonth() + n, last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(curDate.getDate(), last)); });
@@ -2882,7 +2849,7 @@
         if (isAdminUser()) return Notebook.dialog({ title: '사본 만들기', message: '관리자 화면에서는 사용할 수 없어요.' });
         if (document.getElementById('sidebar')?.classList.contains('open')) toggleSidebar();
         Notebook.slip(true);
-        const { data } = await sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: user.username, p_start: '2000-01-01', p_end: '2099-12-31' });
+        const { data } = await sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
         if (!data || !data.length) return Notebook.dialog({ title: '사본 만들기', message: '아직 적힌 기록이 없어요.' });
         let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
         data.forEach(r => { if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`; });
@@ -2902,7 +2869,7 @@
             const rows = e.target.result.split("\n").slice(1);
             if (rows.length > 2000) return Notebook.dialog({ title: '기록 옮겨 적기', message: '데이터 행이 너무 많습니다 (최대 2,000행).' });
             Notebook.slip(false);
-            for (let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if (cols.length >= 3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].trim().replace(/^"|"$/g, '').replace(/""/g, '"'); if (isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('upsert_record_secure', { p_user: user.username, p_pw: user.password, p_date: d, p_cat: c, p_val: safeText(v, 500) }); } }
+            for (let row of rows) { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if (cols.length >= 3) { const d = cols[0].trim(), c = cols[1].trim(), v = cols[2].trim().replace(/^"|"$/g, '').replace(/""/g, '"'); if (isIsoDate(d) && isAllowedCategory(c)) await sb.rpc('journal_upsert_record', { p_date: d, p_cat: c, p_val: safeText(v, 500) }); } }
             Notebook.dialog({ title: '기록 옮겨 적기', message: '업로드 완료' });
             loadData();
         };
@@ -2917,7 +2884,7 @@
 "아이디": "User ID",
 "아이디를 적어 주세요": "Write your user ID",
 "비밀번호": "Password",
-"이 기기에서 30일간 로그인 유지": "Stay signed in on this device for 30 days",
+"이 기기에서 로그인 유지": "Stay signed in on this device",
 "※공용기기에서는 사용하지 마세요": "※ Do not use this on a shared device",
 "열쇠로 열기 (로그인)": "Open with your key (sign in)",
 "새 수첩 만들기 (회원가입)": "Start a new notebook (sign up)",
@@ -2927,12 +2894,22 @@
 "명함에 적어드린 번호 또는 이니셜생년월일과 같은 구분 가능한 문자열": "The number written on your clinic card, or an identifying string such as initials + date of birth",
 "⚠️ 이 번호는 담당 의료진이 작성 내용을 확인할 수 있도록 연결하는 용도입니다.": "⚠️ This number links your journal so that your care team can see what you record.",
 "예: 43445678 또는 HGD19990305 (중복 가입 불가)": "e.g. 43445678 or HGD19990305 (cannot be registered twice)",
-"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 진료실에서 함께 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. It is best not to use a user ID that could identify you. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. If you enter the number written on your clinic card, your care team can look at it with you in the clinic.",
-"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 명함에 적어드린 번호를 입력하는 경우 의료진이 진료실에서 함께 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. If you enter the number written on your clinic card, your care team can look at it with you in the clinic.",
+"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 신원을 특정할 수 있는 아이디를 사용하지 않는 것이 좋습니다. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 담당 의료진은 본인이 동의한 경우에만 기록을 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. It is best not to use a user ID that could identify you. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. Your care team can see your records only if you agree.",
+"본 프로그램은 종이기분기록지를 사용하기 어려운 분들을 위해 만든 무료 온라인 프로그램입니다. 의료용이 아니며 모든 사용 책임은 작성자에게 있습니다. 보안을 보장할 수 없으니 개인식별정보 및 민감정보를 적지 않도록 주의하세요. 익명 프로그램이므로 계정을 분실하면 복구할 수 없습니다. 주기적으로 데이터를 파일로 백업하세요. 담당 의료진은 본인이 동의한 경우에만 기록을 볼 수 있습니다.": "This is a free online program for people who find it hard to use the paper mood chart. It is not a medical device, and the person who writes in it is responsible for its use. Security cannot be guaranteed, so do not write personally identifying or sensitive information. Because the program is anonymous, a lost account cannot be recovered. Back up your data to a file regularly. Your care team can see your records only if you agree.",
 "위 내용을 확인하였으며 동의합니다.": "I have read the above and agree.",
 "가입완료": "Create account",
 "돌아가기": "Back",
 "가입 완료.": "Account created.",
+"이 계정은 기분기록지를 쓸 수 없습니다. 환자·기분기록지 계정으로 로그인해 주세요.": "This account cannot use the mood journal. Please sign in with a patient or mood-journal account.",
+"끝나지 않았던 예전 기록 옮기기를 마쳤습니다.": "Finished moving the records that were left unfinished.",
+"같은 아이디의 예전 기분기록지 기록이 있습니다.": "There are old mood-journal records with the same ID.",
+"메뉴의 \"계정\"(snumood.com/login/)에서 \"기분기록지 기록 연결\"로 가져올 수 있어요.": "You can bring them in from \"Connect mood-journal records\" on the account page (snumood.com/login/).",
+"비밀번호를 바꿨습니다.": "Your password has been changed.",
+"비밀번호가 12자보다 짧습니다. 메뉴의 \"비밀번호 변경\"에서 더 긴 비밀번호로 바꾸는 것을 권합니다.": "Your password is shorter than 12 characters. We recommend changing it to a longer one under \"Change password\" in the menu.",
+"비밀번호는 12자 이상. 이 계정으로 설문 사이트에도 로그인할 수 있습니다.": "Use 12 or more characters for the password. This account also signs you in to the survey site.",
+"비밀번호 (12자 이상)": "Password (12 or more characters)",
+"앞으로는 새 아이디로 로그인하세요.": "From now on, sign in with your new ID.",
+"새 아이디:": "New ID:",
 "동의가 필요합니다.": "Please agree to the terms.",
 "필수 입력 누락": "Please fill in all required fields.",
 "이미 존재하는 아이디입니다.": "This user ID already exists.",
@@ -5706,8 +5683,8 @@
             const key = `${isAdminUser() ? 'a' : 'p'}:${target}`;
             if (yearCache[key]) return yearCache[key];
             const req = isAdminUser()
-                ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
-                : sb.rpc('get_records_secure', { p_user: user.username, p_pw: user.password, p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' });
+                ? sb.rpc('moodchart_admin_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' })
+                : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
             const { data, error } = await req;
             if (error) return new Set();
             const ys = new Set((data || []).map(r => Number(String(r.record_date).slice(0, 4))).filter(y => y >= 2000 && y <= 2099));
