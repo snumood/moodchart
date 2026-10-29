@@ -759,6 +759,12 @@
     }
     body.nb-notebook #nb-cover, body.nb-notebook #nb-ribbon, body.nb-notebook #nb-tabs, body.nb-notebook #nb-tabs-l { will-change: transform; }
     body.nb-notebook #main-screen .grid-wrapper { overflow: clip; }
+    body.nb-notebook .col-label { transform: translateX(var(--nb-lab, 0px)); }
+    body.nb-notebook thead th { transform: translateY(var(--nb-head, 0px)); }
+    body.nb-notebook thead th.col-label { transform: translate(var(--nb-lab, 0px), var(--nb-head, 0px)); }
+    body.nb-notebook .month-nav { transform: translateX(var(--nb-nav, 0px)); }
+    body.nb-notebook .btn-menu { transform: translateX(var(--nb-menu, 0px)); }
+    body.nb-notebook .container.nb-pin-l .col-label { box-shadow: inset 3px 0 0 var(--tape, transparent), 7px 0 8px -7px rgba(40, 40, 60, 0.35); }
     body.nb-notebook #mood-table { margin-bottom: 0; }
     body.nb-notebook .scroll-arrow { display: none !important; }
     body.nb-notebook, body.nb-notebook #main-screen * { touch-action: none; }
@@ -4016,7 +4022,8 @@
         const VIEW_KEY = 'mood_view_mode';
         const DRAG_HINT_KEY = 'mood_drag_hint';
         let viewMode = store.get(VIEW_KEY, 'read') === 'notebook' ? 'notebook' : 'read';
-        const nbView = { s: 1, sFit: 1, zoom: false, dx: 0, dy: 0, minDx: 0, minDy: 0, x0: 0 };
+        const nbView = { s: 1, sFit: 1, zoom: false, dx: 0, dy: 0, minDx: 0, minDy: 0, x0: 0, top: 0, roomL: 0, roomR: 0, pins: null };
+        const PIN_VARS = ['--nb-lab', '--nb-head', '--nb-nav', '--nb-menu'];
         let panAnim = 0, inertia = 0;
         const isNotebook = () => viewMode === 'notebook';
         const NB_MOVERS = ['nb-cover', 'nb-ribbon', 'nb-tabs', 'nb-tabs-l', 'nb-pages', 'nb-edge-r', 'nb-edge-l'];
@@ -4028,7 +4035,26 @@
             const cont = document.querySelector('#main-screen .container');
             if (!cont || !isNotebook()) return;
             cont.style.transform = `translate(${dx}px, ${dy}px) scale(${nbView.s})`;
+            pinEdges(cont);
             NB_MOVERS.forEach(id => { const el = document.getElementById(id); if (el) el.style.transform = (dx || dy) ? `translate(${dx}px, ${dy}px)` : ''; });
+        }
+        // 좁은 화면에서 수첩을 옮겨도 항목 이름·날짜 줄·달 넘김·메뉴는 화면 안에 남김 (가독성 모드의 고정 칸과 같은 역할)
+        function measurePins(cont) {
+            PIN_VARS.forEach(v => cont.style.setProperty(v, '0px'));
+            const cr = cont.getBoundingClientRect(), k = cr.width / (cont.offsetWidth || 1) || 1;
+            const at = sel => { const el = cont.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return { l: (r.left - cr.left) / k, t: (r.top - cr.top) / k }; };
+            nbView.pins = { w: cont.offsetWidth, lab: at('#header-row .col-label'), nav: at('.month-nav'), head: at('#header-row th') };
+        }
+        function pinEdges(cont) {
+            const pin = nbView.pins;
+            if (!pin) return;
+            const s = nbView.s, L = (nbView.roomL - nbView.x0 - nbView.dx) / s, R = (nbView.roomR - nbView.x0 - nbView.dx) / s, T = (-nbView.top - nbView.dy) / s;
+            const lab = pin.lab ? Math.max(0, L - pin.lab.l) : 0;
+            cont.style.setProperty('--nb-lab', `${lab}px`);
+            cont.style.setProperty('--nb-head', `${pin.head ? Math.max(0, T - pin.head.t) : 0}px`);
+            cont.style.setProperty('--nb-nav', `${pin.nav ? Math.max(0, L) : 0}px`);
+            cont.style.setProperty('--nb-menu', `${Math.min(0, R - pin.w)}px`);
+            cont.classList.toggle('nb-pin-l', lab > 0.5);
         }
         function clearView() {
             const main = document.getElementById('main-screen');
@@ -4036,12 +4062,13 @@
             const cont = document.querySelector('#main-screen .container');
             if (cont) {
                 cont.style.transform = ''; cont.style.clipPath = '';
-                ['--nb-padl', '--nb-padr', '--nb-inv'].forEach(v => cont.style.removeProperty(v));
+                ['--nb-padl', '--nb-padr', '--nb-inv', ...PIN_VARS].forEach(v => cont.style.removeProperty(v));
+                cont.classList.remove('nb-pin-l');
             }
             const pages = document.querySelector('#nb-pages > div');
             if (pages) pages.style.clipPath = '';
             NB_MOVERS.forEach(id => { const el = document.getElementById(id); if (el) el.style.transform = ''; });
-            Object.assign(nbView, { dx: 0, dy: 0, minDx: 0, minDy: 0, s: 1, zoom: false });
+            Object.assign(nbView, { dx: 0, dy: 0, minDx: 0, minDy: 0, s: 1, zoom: false, pins: null });
         }
         function rootVars() {
             const root = getComputedStyle(document.documentElement);
@@ -4095,7 +4122,8 @@
             }
             const gut = document.getElementById('nb-gutter');
             if (gut) { const gw = 120 / s; gut.style.left = `${F - gw / 2}px`; gut.style.width = `${gw}px`; }
-            nbView.s = s; nbView.x0 = x0;
+            nbView.s = s; nbView.x0 = x0; nbView.roomL = 0; nbView.roomR = vw; nbView.top = top;   // 화면 가장자리 (여백 쪽에 칸이 비쳐 보이지 않게)
+            measurePins(cont);
             nbView.minDx = Math.min(0, roomW - Wv);
             nbView.minDy = Math.min(0, roomH - Hv);
             applyPan(clampX(nbView.dx), clampY(nbView.dy));
