@@ -16,7 +16,7 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://cloudflareinsights.com https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' https://snumood.com; connect-src 'self' https://cloudflareinsights.com https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>기분기록지 1.2 | 분당서울대학교병원</title>
 <link rel="stylesheet" href="vendor/fonts/pretendard.css">
@@ -5569,6 +5569,7 @@
             const base = new URL(d.src, location.href);
             // 상대 주소(그림·글꼴·스타일)를 책자 위치 기준으로 바꿈
             doc.querySelectorAll('[src]').forEach(el => el.setAttribute('src', new URL(el.getAttribute('src'), base).href));
+            doc.querySelectorAll('video[poster]').forEach(el => el.setAttribute('poster', new URL(el.getAttribute('poster'), base).href));
             const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map(l => `<link rel="stylesheet" href="${new URL(l.getAttribute('href'), base).href}">`).join('');
             const styles = [...doc.querySelectorAll('style')].map(st => st.outerHTML).join('');
             const page = doc.querySelector('.page');
