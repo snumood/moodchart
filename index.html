@@ -5663,6 +5663,7 @@
             const r = document.getElementById('nb-reader');
             if (!r || r.classList.contains('hidden') || readerBusy) return;
             readerBusy = true;
+            r.querySelector('.rd-scroll')?.shadowRoot?.querySelectorAll('video').forEach(v => v.pause());   // 책자를 닫으면 영상도 멈춤
             const book = r.querySelector('.rd-book');
             try {
                 if (!reduceMotion && book.animate) {
