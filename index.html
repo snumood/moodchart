@@ -1557,7 +1557,7 @@
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(async () => {
             sessionStorage.setItem('mood_skip_auto_login_once', '1');
-            if (isAdminUser() || localStorage.getItem('mood_keep_login') !== '1') {
+            if (isAdminUser() || !AUTH().keepLogin()) {
                 await AUTH().signOutEverywhere(sb);
             }
             alert("보안을 위해 10분 동안 활동이 없어 자동 로그아웃됩니다.");
@@ -1586,10 +1586,11 @@
         const savedId = localStorage.getItem('mood_saved_id');
         if(savedId) {
             document.getElementById('l-id').value = savedId;
-            document.getElementById('remember-me').checked = localStorage.getItem('mood_keep_login') === '1';
+            document.getElementById('remember-me').checked = AUTH().keepLogin();
         }
         if (location.hash === '#join') toggleAuth('join');
 
+        if (!await AUTH().enforceLoginPolicy(sb)) return;
         const { data: { session } } = await sb.auth.getSession();
         if (!session) return;
         // 10분 무활동으로 잠근 직후 한 번은 로그인 화면을 보여 준다(세션은 유지).
@@ -1598,6 +1599,27 @@
             return;
         }
         await enterWithSession(session);
+    };
+
+    sb.auth.onAuthStateChange((event, session) => {
+        if (!user || isAdminUser()) return;
+        if (!session || session.user?.id !== user.authUserId) {
+            user = null;
+            setTimeout(() => location.reload(), 0);
+        }
+    });
+    // 기록 쓰기·읽기 직전에도 세션 주인을 확인한다(탭 사이 알림이 늦게 와도 막히게).
+    const rpcDirect = sb.rpc.bind(sb);
+    sb.rpc = async (fn, args) => {
+        if (fn.startsWith('journal_') && user && !isAdminUser()) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session?.user?.id !== user.authUserId) {
+                user = null;
+                setTimeout(() => location.reload(), 0);
+                return { data: null, error: { message: '로그인한 계정이 바뀌어 화면을 다시 엽니다.' } };
+            }
+        }
+        return args === undefined ? rpcDirect(fn) : rpcDirect(fn, args);
     };
 
     async function enterWithSession(session) {
@@ -1628,7 +1650,7 @@
         if(!document.getElementById('j-agree').checked) return alert("동의가 필요합니다.");
         const id = document.getElementById('j-id').value.trim(), pw = document.getElementById('j-pw').value;
         if(!id || !pw) return alert('필수 입력 누락');
-        const r = await AUTH().signUpJournal(sb, id, pw);
+        const r = await AUTH().signUpJournal(sb, id, pw, { keep: document.getElementById('remember-me').checked });
         if (!r.ok) return alert(authMsg(r.reason));
         document.getElementById('j-pw').value = '';
         alert('가입 완료.');
@@ -1659,12 +1681,11 @@
         const pw = document.getElementById('l-pw').value;
         const keep = document.getElementById('remember-me').checked;
         localStorage.removeItem('mood_saved_pw');
-        if(keep) { localStorage.setItem('mood_saved_id', id); localStorage.setItem('mood_keep_login', '1'); }
-        else { localStorage.removeItem('mood_saved_id'); localStorage.removeItem('mood_keep_login'); }
+        if(keep) localStorage.setItem('mood_saved_id', id); else localStorage.removeItem('mood_saved_id');
         loginBusy = true;
         let r;
         try {
-            r = await AUTH().signIn(sb, id, pw, { newUsername: pendingNewId() });
+            r = await AUTH().signIn(sb, id, pw, { newUsername: pendingNewId(), keep });
         } finally {
             loginBusy = false;
         }
@@ -2255,7 +2276,7 @@
 
         const reqTarget = target, reqSeq = ++loadDataSeq;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_start: start, p_end: end })
+            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: start, p_end: end })
             : sb.rpc('journal_get_records', { p_start: start, p_end: end });
         const { data, error } = await request;
         // 더 늦게 시작된 조회(다른 환자·다른 달)가 있으면 이 응답은 버린다.
@@ -2569,7 +2590,7 @@
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' })
+            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
             : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
         const { data } = await request;
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
@@ -2827,7 +2848,6 @@
     function closePwModal() { document.getElementById('pw-modal').style.display = 'none'; }
     async function doLogout() {
         await AUTH().signOutEverywhere(sb);
-        localStorage.removeItem('mood_keep_login');
         await Notebook.close();
         location.reload();
     }
@@ -2910,6 +2930,7 @@
 "비밀번호 (12자 이상)": "Password (12 or more characters)",
 "앞으로는 새 아이디로 로그인하세요.": "From now on, sign in with your new ID.",
 "새 아이디:": "New ID:",
+"로그인한 계정이 바뀌어 화면을 다시 엽니다.": "The signed-in account changed, so the page will reopen.",
 "동의가 필요합니다.": "Please agree to the terms.",
 "필수 입력 누락": "Please fill in all required fields.",
 "이미 존재하는 아이디입니다.": "This user ID already exists.",
@@ -5683,7 +5704,7 @@
             const key = `${isAdminUser() ? 'a' : 'p'}:${target}`;
             if (yearCache[key]) return yearCache[key];
             const req = isAdminUser()
-                ? sb.rpc('moodchart_admin_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' })
+                ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
                 : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
             const { data, error } = await req;
             if (error) return new Set();
