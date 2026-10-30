@@ -1601,21 +1601,25 @@
         await enterWithSession(session);
     };
 
+    // 이 화면이 연 계정(환자·기분기록지). 정해진 뒤 세션 주인이 바뀌거나 로그아웃되면 화면을 닫고,
+    // 그 뒤로는 기록 함수를 전혀 부르지 않는다(다른 계정에 기록이 써지지 않게).
+    let boundUid = null, journalClosed = false;
+    function closeJournal() {
+        if (journalClosed) return;
+        journalClosed = true;
+        user = null;
+        setTimeout(() => location.reload(), 0);
+    }
     sb.auth.onAuthStateChange((event, session) => {
-        if (!user || isAdminUser()) return;
-        if (!session || session.user?.id !== user.authUserId) {
-            user = null;
-            setTimeout(() => location.reload(), 0);
-        }
+        if (boundUid && session?.user?.id !== boundUid) closeJournal();
     });
     // 기록 쓰기·읽기 직전에도 세션 주인을 확인한다(탭 사이 알림이 늦게 와도 막히게).
     const rpcDirect = sb.rpc.bind(sb);
     sb.rpc = async (fn, args) => {
-        if (fn.startsWith('journal_') && user && !isAdminUser()) {
+        if (fn.startsWith('journal_') && (boundUid || journalClosed)) {
             const { data: { session } } = await sb.auth.getSession();
-            if (session?.user?.id !== user.authUserId) {
-                user = null;
-                setTimeout(() => location.reload(), 0);
+            if (journalClosed || session?.user?.id !== boundUid) {
+                closeJournal();
                 return { data: null, error: { message: '로그인한 계정이 바뀌어 화면을 다시 엽니다.' } };
             }
         }
@@ -1661,6 +1665,7 @@
 
     async function completeLogin(id, authUserId) {
         user = { username: id, role: 'patient', authUserId };
+        boundUid = authUserId;
         document.getElementById('l-pw').value = '';
         resetLogoutTimer();
 
