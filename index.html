@@ -1661,7 +1661,8 @@
             p_role: role,
             p_token_hash: await deviceTokenHash(token),
             p_user_agent: navigator.userAgent || '',
-            p_days: 30
+            p_days: 30,
+            p_token: token
         });
         if (error) {
             console.warn('기기 로그인 저장 실패:', error.message);
@@ -1684,7 +1685,8 @@
         try {
             const { data, error } = await sb.rpc('consume_mood_persistent_login', {
                 p_token_hash: await deviceTokenHash(token),
-                p_user_agent: navigator.userAgent || ''
+                p_user_agent: navigator.userAgent || '',
+                p_token: token
             });
             if (error || !data?.password_hash || data.username !== id) throw error || new Error('invalid device token');
             const hashedPw = data.password_hash;
