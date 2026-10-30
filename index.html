@@ -1613,17 +1613,30 @@
     sb.auth.onAuthStateChange((event, session) => {
         if (boundUid && session?.user?.id !== boundUid) closeJournal();
     });
-    // 기록 쓰기·읽기 직전에도 세션 주인을 확인한다(탭 사이 알림이 늦게 와도 막히게).
+    // 기록 함수는 확인한 바로 그 토큰으로만 보낸다(확인과 전송 사이에 다른 탭이 계정을 바꿔도 다른 계정에 써지지 않게).
     const rpcDirect = sb.rpc.bind(sb);
     sb.rpc = async (fn, args) => {
-        if (fn.startsWith('journal_') && (boundUid || journalClosed)) {
-            const { data: { session } } = await sb.auth.getSession();
-            if (journalClosed || session?.user?.id !== boundUid) {
-                closeJournal();
-                return { data: null, error: { message: '로그인한 계정이 바뀌어 화면을 다시 엽니다.' } };
-            }
+        if (!fn.startsWith('journal_') || !(boundUid || journalClosed)) {
+            return args === undefined ? rpcDirect(fn) : rpcDirect(fn, args);
         }
-        return args === undefined ? rpcDirect(fn) : rpcDirect(fn, args);
+        const { data: { session } } = await sb.auth.getSession();
+        if (journalClosed || !session || session.user?.id !== boundUid) {
+            closeJournal();
+            return { data: null, error: { message: '로그인한 계정이 바뀌어 화면을 다시 엽니다.' } };
+        }
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${encodeURIComponent(fn)}`, {
+                method: 'POST',
+                headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(args ?? {})
+            });
+            const text = await res.text();
+            const body = text ? JSON.parse(text) : null;
+            if (!res.ok) return { data: null, error: { message: body?.message || `HTTP ${res.status}`, code: body?.code } };
+            return { data: body, error: null };
+        } catch (e) {
+            return { data: null, error: { message: e?.message || '서버에 연결하지 못했습니다.' } };
+        }
     };
 
     async function enterWithSession(session) {
