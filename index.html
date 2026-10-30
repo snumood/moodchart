@@ -1372,9 +1372,9 @@
     .share-switch input:focus-visible + span { outline: 2px solid #2f5fd0; outline-offset: 2px; }
     .share-switch input:disabled + span { opacity: .5; }
   </style>
-  <p>스위치를 켜면 그 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.</p>
-  <p>유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.</p>
-  <ul id="journal-share-list"></ul>
+  <p>스위치를 켜면 분당서울대학교병원 담당 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.</p>
+  <p>공유가 켜져 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.</p>
+  <ul id="journal-share-list"><li><span id="journal-share-label">담당 의료진에게 기록 공유</span><label class="share-switch"><input type="checkbox" role="switch" id="journal-share-switch" aria-labelledby="journal-share-label" disabled><span></span></label></li></ul>
   <p id="journal-share-link" hidden><a href="/login/#link">계정에서 병원코드와 환자번호 연결</a></p>
   <p id="journal-share-msg" role="status" aria-live="polite"></p>
   <p>철회하면 이후 조회부터 볼 수 없어요. 이미 열람하거나 내려받은 기록은 회수할 수 없어요.</p>
@@ -2919,7 +2919,13 @@
 "유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.": "While valid clinician sharing consent is active, the administrator can view and download your records.",
 "계정에서 병원코드와 환자번호 연결": "Link your hospital code and patient number in Account",
 "계정에서 병원코드와 환자번호를 먼저 연결해 주세요.": "Please link your hospital code and patient number in Account first.",
-"스위치를 켜면 그 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.": "Turn a switch on and that clinician can see your mood journal, including past records. Turn it off any time to stop sharing.",
+"스위치를 켜면 분당서울대학교병원 담당 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.": "Turn the switch on and your care team at Seoul National University Bundang Hospital can see your mood journal, including past records. Turn it off any time to stop sharing.",
+"공유가 켜져 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.": "While sharing is on, the administrator can also view and download your records.",
+"담당 의료진에게 기록 공유": "Share my journal with my care team",
+"기록을 공유하고 있어요.": "Your journal is being shared.",
+"기록을 공유하지 않고 있어요.": "Your journal is not being shared.",
+"담당 의료진에게 기분기록을 공유할까요?": "Share your mood journal with your care team?",
+"기분기록 공유를 멈출까요?": "Stop sharing your mood journal?",
 "공유 중": "Sharing",
 "공유 안 함": "Not sharing",
 "같은 병원에 승인된 의료진이 없습니다.": "There are no approved clinicians at your hospital.",
@@ -6102,6 +6108,6 @@
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
-<script src="journal-share.js?v=20261030f"></script>
+<script src="journal-share.js?v=20261030g"></script>
 </body>
 </html>
