@@ -1110,7 +1110,7 @@
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="checkbox" id="remember-me"> 이 기기에서 로그인 유지
                 </label>
-                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="./admin-login.html">.</a></div>
+                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="/survey/admin.html">.</a></div>
             </div>
             <button class="btn-auth" onclick="login()">열쇠로 열기 (로그인)</button>
             <button type="button" class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</button>
@@ -1218,6 +1218,7 @@
 
         <div class="menu-section">
             <div class="menu-title">계정 관리</div>
+            <button type="button" class="menu-item" id="journal-share-open" onclick="openJournalShare()">담당 의료진 기록 공유</button>
             <div class="menu-item" id="password-menu-item" role="button" tabindex="0" onclick="openPwModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="12" r="4"/><path d="M12.5 12H21M17.5 12v3M20 12v2.5"/></svg><span>비밀번호 변경</span></div>
             <div class="menu-item" role="button" tabindex="0" onclick="doLogout()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4H6v16h8"/><path d="M10 12h10"/><path d="M17 9l3 3-3 3"/></svg><span>로그아웃</span></div>
         </div>
@@ -1357,6 +1358,20 @@
     </div>
 </div>
 
+<dialog id="journal-share-dialog" aria-labelledby="journal-share-title" style="max-width:520px;width:85%;max-height:80vh;overflow:auto;border:1px solid #c9bba6;border-radius:12px;padding:24px;background:#fbf8f1;">
+  <h2 id="journal-share-title">담당 의료진 기록 공유</h2>
+  <p>선택한 의료진은 공유 기간 동안 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 철회할 수 있어요.</p>
+  <p>유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.</p>
+  <ul id="journal-share-list"></ul>
+  <p><a href="/login/">계정에서 병원코드와 환자번호 연결</a></p>
+  <label for="journal-share-doctor">공유할 의료진</label>
+  <select id="journal-share-doctor" style="max-width:100%;"></select>
+  <button type="button" id="journal-share-grant" disabled>기록 공유 시작</button>
+  <p id="journal-share-msg" role="status" aria-live="polite"></p>
+  <p>철회하면 이후 조회부터 볼 수 없어요. 이미 열람하거나 내려받은 기록은 회수할 수 없어요.</p>
+  <button type="button" onclick="document.getElementById('journal-share-dialog').close()">닫기</button>
+</dialog>
+
 <div id="pw-modal" class="modal-wrap">
     <div class="modal-content">
         <div class="modal-header"><span>비밀번호 변경</span><span style="cursor:pointer;" onclick="closePwModal()">✕</span></div>
@@ -1453,35 +1468,8 @@
     const authLang = () => (typeof I18N !== 'undefined' && I18N.lang === 'en') ? 'en' : 'ko';
     const authMsg = reason => AUTH().message(reason, authLang());
 
-    async function completeAdminLogin(session) {
-        const { data: authorized, error } = await sb.rpc('moodchart_admin_session');
-        if (error || authorized !== true) {
-            await sb.auth.signOut();
-            alert("승인된 관리자 Google 계정이 아닙니다.");
-            return false;
-        }
-
-        user = {
-            username: session.user.email || 'Google 관리자',
-            password: null,
-            role: 'admin',
-            authUserId: session.user.id
-        };
-        target = null;
-        resetLogoutTimer();
-
-        Notebook.leaveAuth();
-        document.getElementById('main-screen').classList.remove('hidden');
-        document.getElementById('user-badge').innerText = 'Google 관리자';
-        document.getElementById('doc-panel').classList.add('active');
-        document.getElementById('password-menu-item').classList.add('hidden');
-        document.getElementById('admin-stats-menu-section').classList.remove('hidden');
-        document.getElementById('gift-menu-section').classList.add('hidden');
-        document.getElementById('data-menu-section').classList.add('hidden');
-        document.getElementById('score-ls').disabled = true;
-        document.getElementById('score-mssi').disabled = true;
-        Notebook.onLogin();
-        toggleSidebar();
+    async function completeAdminLogin() {
+        location.assign('/survey/admin.html');
         return true;
     }
 
@@ -2917,6 +2905,25 @@
 <script>
     // 영어 사전 (guides-src/i18n/en_dict.py 에서 생성)
     const DICT = {
+"담당 의료진 기록 공유": "Share journal with your care team",
+"선택한 의료진은 공유 기간 동안 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 철회할 수 있어요.": "Your selected clinician can view your journal, including past records, while sharing is active. You can revoke sharing at any time.",
+"유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.": "While valid clinician sharing consent is active, the administrator can view and download your records.",
+"계정에서 병원코드와 환자번호 연결": "Link your hospital code and patient number in Account",
+"계정에서 병원코드와 환자번호를 먼저 연결해 주세요.": "Please link your hospital code and patient number in Account first.",
+"공유할 의료진": "Clinician to share with",
+"기록 공유 시작": "Start sharing",
+"공유 철회": "Revoke sharing",
+"공유 중인 의료진이 없습니다.": "You are not sharing with any clinicians.",
+"현재 열람 불가": "Access currently unavailable",
+"선택할 수 있는 승인된 의료진이 없습니다.": "No approved clinicians are available.",
+"공유 정보를 불러오지 못했습니다. 다시 시도해 주세요.": "Could not load sharing details. Please try again.",
+"공유 설정을 바꾸지 못했습니다. 다시 시도해 주세요.": "Could not update sharing. Please try again.",
+"선택한 의료진에게 기분기록을 공유할까요?": "Share your journal with this clinician?",
+"이 의료진의 기분기록 공유를 철회할까요?": "Revoke journal sharing with this clinician?",
+"기록 공유를 시작했습니다.": "Journal sharing has started.",
+"기록 공유를 철회했습니다.": "Journal sharing has been revoked.",
+"철회하면 이후 조회부터 볼 수 없어요. 이미 열람하거나 내려받은 기록은 회수할 수 없어요.": "Revocation blocks subsequent access. Previously viewed or downloaded records cannot be recalled.",
+
 "기분기록지": "Mood Journal",
 "기분기록지 로그인": "Mood Journal sign-in",
 "아이디": "User ID",
@@ -6081,5 +6088,6 @@
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
+<script src="journal-share.js?v=20261030d"></script>
 </body>
 </html>
