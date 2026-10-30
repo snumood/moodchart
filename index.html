@@ -1360,13 +1360,22 @@
 
 <dialog id="journal-share-dialog" aria-labelledby="journal-share-title" style="max-width:520px;width:85%;max-height:80vh;overflow:auto;border:1px solid #c9bba6;border-radius:12px;padding:24px;background:#fbf8f1;">
   <h2 id="journal-share-title">담당 의료진 기록 공유</h2>
-  <p>선택한 의료진은 공유 기간 동안 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 철회할 수 있어요.</p>
+  <style>
+    #journal-share-list { list-style: none; padding: 0; margin: 12px 0; }
+    #journal-share-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e3d9c8; }
+    .share-switch { position: relative; flex: none; width: 52px; height: 30px; }
+    .share-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .share-switch span { position: absolute; inset: 0; border-radius: 15px; background: #c8c2b8; transition: background .15s; pointer-events: none; }
+    .share-switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .15s; }
+    .share-switch input:checked + span { background: #3d7a4f; }
+    .share-switch input:checked + span::after { transform: translateX(22px); }
+    .share-switch input:focus-visible + span { outline: 2px solid #2f5fd0; outline-offset: 2px; }
+    .share-switch input:disabled + span { opacity: .5; }
+  </style>
+  <p>스위치를 켜면 그 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.</p>
   <p>유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.</p>
   <ul id="journal-share-list"></ul>
-  <p><a href="/login/#link">계정에서 병원코드와 환자번호 연결</a></p>
-  <label for="journal-share-doctor">공유할 의료진</label>
-  <select id="journal-share-doctor" style="max-width:100%;"></select>
-  <button type="button" id="journal-share-grant" disabled>기록 공유 시작</button>
+  <p id="journal-share-link" hidden><a href="/login/#link">계정에서 병원코드와 환자번호 연결</a></p>
   <p id="journal-share-msg" role="status" aria-live="polite"></p>
   <p>철회하면 이후 조회부터 볼 수 없어요. 이미 열람하거나 내려받은 기록은 회수할 수 없어요.</p>
   <button type="button" onclick="document.getElementById('journal-share-dialog').close()">닫기</button>
@@ -2910,7 +2919,10 @@
 "유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.": "While valid clinician sharing consent is active, the administrator can view and download your records.",
 "계정에서 병원코드와 환자번호 연결": "Link your hospital code and patient number in Account",
 "계정에서 병원코드와 환자번호를 먼저 연결해 주세요.": "Please link your hospital code and patient number in Account first.",
-"공유할 의료진": "Clinician to share with",
+"스위치를 켜면 그 의료진이 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 스위치를 꺼서 공유를 멈출 수 있어요.": "Turn a switch on and that clinician can see your mood journal, including past records. Turn it off any time to stop sharing.",
+"공유 중": "Sharing",
+"공유 안 함": "Not sharing",
+"같은 병원에 승인된 의료진이 없습니다.": "There are no approved clinicians at your hospital.",
 "기록 공유 시작": "Start sharing",
 "공유 철회": "Revoke sharing",
 "선택한 의료진에게 기분기록을 공유할까요?": "Share your mood journal with the selected clinician?",
@@ -6090,6 +6102,6 @@
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
-<script src="journal-share.js?v=20261030e"></script>
+<script src="journal-share.js?v=20261030f"></script>
 </body>
 </html>
