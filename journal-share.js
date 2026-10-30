@@ -51,7 +51,7 @@ async function loadJournalShare() {
 async function changeJournalShare(rpc, doctorId, button) {
   if (!doctorId || button.disabled) return;
   const granting = rpc === 'journal_grant_share';
-  if (!confirm(granting ? '선택한 의료진에게 기분기록을 공유할까요?' : '이 의료진의 기분기록 공유를 철회할까요?')) return;
+  if (!confirm(I18N.t(granting ? '선택한 의료진에게 기분기록을 공유할까요?' : '이 의료진의 기분기록 공유를 철회할까요?'))) return;
   button.disabled = true;
   try {
     const { error } = await sb.rpc(rpc, { p_doctor: doctorId });

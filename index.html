@@ -1363,7 +1363,7 @@
   <p>선택한 의료진은 공유 기간 동안 이전 기록을 포함한 기분기록을 볼 수 있어요. 언제든 철회할 수 있어요.</p>
   <p>유효한 의료진 공유 동의가 있는 동안 관리자가 기록을 열람하고 다운로드할 수 있어요.</p>
   <ul id="journal-share-list"></ul>
-  <p><a href="/login/">계정에서 병원코드와 환자번호 연결</a></p>
+  <p><a href="/login/#link">계정에서 병원코드와 환자번호 연결</a></p>
   <label for="journal-share-doctor">공유할 의료진</label>
   <select id="journal-share-doctor" style="max-width:100%;"></select>
   <button type="button" id="journal-share-grant" disabled>기록 공유 시작</button>
@@ -2913,6 +2913,8 @@
 "공유할 의료진": "Clinician to share with",
 "기록 공유 시작": "Start sharing",
 "공유 철회": "Revoke sharing",
+"선택한 의료진에게 기분기록을 공유할까요?": "Share your mood journal with the selected clinician?",
+"이 의료진의 기분기록 공유를 철회할까요?": "Stop sharing your mood journal with this clinician?",
 "공유 중인 의료진이 없습니다.": "You are not sharing with any clinicians.",
 "현재 열람 불가": "Access currently unavailable",
 "선택할 수 있는 승인된 의료진이 없습니다.": "No approved clinicians are available.",
@@ -6088,6 +6090,6 @@
             setViewMode: safe(setViewMode), afterTableBuilt: (isCurMonth) => { try { return afterTableBuilt(isCurMonth); } catch (e) { console.warn('보기 방식 오류(무시됨):', e?.message || e); return false; } } };
     })();
 </script>
-<script src="journal-share.js?v=20261030d"></script>
+<script src="journal-share.js?v=20261030e"></script>
 </body>
 </html>
