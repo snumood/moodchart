@@ -1111,7 +1111,7 @@
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="checkbox" id="remember-me"> 이 기기에서 로그인 유지
                 </label>
-                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="/survey/admin.html">.</a></div>
+                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="/survey/admin.html?tab=journal">.</a></div>
             </div>
             <button class="btn-auth" onclick="login()">열쇠로 열기 (로그인)</button>
             <button type="button" class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</button>
@@ -1479,7 +1479,7 @@
     const authMsg = reason => AUTH().message(reason, authLang());
 
     async function completeAdminLogin() {
-        location.assign('/survey/admin.html');
+        location.assign("/survey/admin.html?tab=journal");
         return true;
     }
 
