@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <script src="gh-redirect.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://cloudflareinsights.com https://vzybcxvwpqhdmrxbxzmq.supabase.co wss://vzybcxvwpqhdmrxbxzmq.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://cloudflareinsights.com https://gcjdxyauirbugbugltmv.supabase.co wss://gcjdxyauirbugbugltmv.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
 <link rel="shortcut icon" href="./favicon.ico">
-<title>관리자 로그인 | 기분기록지 1.2</title>
+<title>기분기록지 관리자 로그인 | 기분기록지 1.2</title>
 <script src="vendor/supabase.js"></script>
+<script type="module">import * as A from "/account/auth.js?v=20261030a"; window.SnumoodAuth = A;</script>
 <link rel="stylesheet" href="vendor/fonts/pretendard.css">
 <link rel="stylesheet" href="vendor/fonts/maruburi.css?v=20261029a">
 <link rel="stylesheet" href="vendor/fonts/cormorant-garamond.css">
@@ -70,8 +71,8 @@
 <div class="book">
 <main class="auth-box">
     <div class="kicker">Clinician · 기분기록지 1.2</div>
-    <h1>관리자 로그인</h1>
-    <p>승인된 관리자 Google 계정만 접근할 수 있습니다.</p>
+    <h1>기분기록지 관리자</h1>
+    <p>승인된 관리자 Google 계정만 접근할 수 있습니다.<br>설문 관리는 <a href="/survey/admin.html">설문 관리자 화면</a>에서 합니다.</p>
     <button id="google-login" type="button"><span class="g" aria-hidden="true">G</span>Google 계정으로 로그인</button>
     <div id="status" class="status" role="status" aria-live="polite"></div>
     <a class="back-link" href="./">사용자 로그인으로 돌아가기</a>
@@ -80,31 +81,58 @@
 </div>
 
 <script>
-    const SUPABASE_URL = 'https://vzybcxvwpqhdmrxbxzmq.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_bAlzb9dPdxb5lpzudvqwHQ_MxpUVkNj';
+    // 기분기록지 관리자 로그인(설문 관리자와 별개 화면). 계정은 통합 Supabase 프로젝트의 관리자 Google 계정 하나이고,
+    // 권한은 서버 journal_admin_session(is_admin)이 판정한다. 통과하면 기분기록지(./)의 관리자 모드로 간다.
+    const SUPABASE_URL = 'https://gcjdxyauirbugbugltmv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_3l7U25p2cC6pWiddxhlZlw_4vjqeDmz';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const loginButton = document.getElementById('google-login');
     const statusBox = document.getElementById('status');
     const appUrl = new URL('./', window.location.href).href;
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const fromGoogle = params.has('oauth_cb');
 
+    async function authApi() {
+        for (let i = 0; i < 100 && !window.SnumoodAuth; i++) await new Promise(r => setTimeout(r, 20));
+        return window.SnumoodAuth || null;
+    }
+
+    let checking = false;
     async function validateAdminSession(session) {
-        if (!session) return false;
-        const { data: authorized, error } = await sb.rpc('moodchart_admin_session');
-        if (!error && authorized === true) {
-            window.location.replace(appUrl);
-            return true;
+        if (!session || checking) return false;
+        checking = true;
+        try {
+            const { data: authorized, error } = await sb.rpc('journal_admin_session');
+            if (!error && authorized === true) {
+                // 관리자 Google 로그인은 '로그인 유지'로 본다(설문 관리자와 같은 규칙).
+                (await authApi())?.markLogin(true);
+                window.location.replace(appUrl);
+                return true;
+            }
+            if (fromGoogle) {
+                // Google 에서 막 돌아온 계정이 관리자가 아니면 그 로그인을 끝낸다.
+                const A = await authApi();
+                if (A) await A.signOutEverywhere(sb); else await sb.auth.signOut({ scope: 'local' });
+                statusBox.textContent = '승인된 관리자 Google 계정이 아닙니다.';
+            } else {
+                // 다른 계정(환자 등)이 로그인한 채로 열었으면 그 로그인은 건드리지 않는다.
+                statusBox.textContent = '지금 로그인한 계정은 관리자 계정이 아닙니다. 관리자 Google 계정으로 로그인해 주세요.';
+            }
+            return false;
+        } finally {
+            checking = false;
         }
-        await sb.auth.signOut();
-        statusBox.textContent = '승인된 관리자 Google 계정이 아닙니다.';
-        return false;
     }
 
     async function startGoogleLogin() {
         loginButton.disabled = true;
         statusBox.textContent = '';
+        const redirect = new URL('./admin.html', window.location.href);
+        redirect.searchParams.set('oauth_cb', Date.now().toString());
         const { error } = await sb.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: appUrl }
+            options: { redirectTo: redirect.href, queryParams: { prompt: 'select_account' } }
         });
         if (error) {
             loginButton.disabled = false;
@@ -115,6 +143,8 @@
     loginButton.addEventListener('click', startGoogleLogin);
 
     window.addEventListener('load', async () => {
+        const oauthError = params.get('error_description') || hashParams.get('error_description');
+        if (oauthError) statusBox.textContent = 'Google 로그인 실패: ' + oauthError.slice(0, 200);
         const { data: { session } } = await sb.auth.getSession();
         await validateAdminSession(session);
     });

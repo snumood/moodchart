@@ -308,6 +308,10 @@
     .stats-note { color: #64748b; font-size: 10px; line-height: 1.5; margin-top: 12px; }
     .stats-status { min-height: 18px; color: #d32f2f; font-size: 11px; margin-top: 10px; }
     #doc-panel .patient-list-open { width: 100%; margin-bottom: 10px; background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+    #doc-panel .admin-wide { width: 100%; }
+    #doc-panel button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .admin-picked { font-size: 13px; line-height: 1.5; color: #33353d; word-break: break-all; }
+    .patient-table tr.no-consent td { color: #8a857c; }
     .patient-search { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 10px; }
     .patient-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .patient-table th { text-align: left; color: #64748b; font-weight: bold; padding: 6px 8px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: #fff; }
@@ -1111,7 +1115,7 @@
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="checkbox" id="remember-me"> 이 기기에서 로그인 유지
                 </label>
-                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="/survey/admin.html?tab=journal">.</a></div>
+                <div class="warning-text">※공용기기에서는 사용하지 마세요<a class="admin-entry" href="./admin.html">.</a></div>
             </div>
             <button class="btn-auth" onclick="login()">열쇠로 열기 (로그인)</button>
             <button type="button" class="toggle-auth" onclick="toggleAuth('join')">새 수첩 만들기 (회원가입)</button>
@@ -1181,14 +1185,17 @@
             <div style="font-weight:bold; margin-bottom:5px; color:#1565c0;">환자 조회</div>
             <button class="patient-list-open" onclick="openPatientListModal()"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="17" cy="8" r="2.4"/><path d="M15.5 13.6c2.3.1 4 1.4 4.6 4"/></svg><span>사용자 목록에서 선택</span></button>
             <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
-                <input id="search-id" placeholder="ID 또는 번호">
+                <input id="search-id" placeholder="아이디 또는 환자번호" maxlength="100" onkeydown="if(event.key==='Enter')searchPatient()">
                 <button onclick="searchPatient()">검색</button>
             </div>
-            <div style="font-weight:bold; margin-bottom:5px; color:#d32f2f;">환자 데이터 복구 (다운로드)</div>
-            <div style="display:flex; justify-content:space-between;">
-                <input id="download-hosp-id" placeholder="병원 등록번호">
-                <button style="background:#d32f2f;" onclick="adminDownloadByHosp()">다운로드</button>
-            </div>
+            <div id="admin-picked" class="admin-picked" role="status" aria-live="polite">선택한 사용자가 없습니다.</div>
+            <div style="font-weight:bold; margin:10px 0 5px; color:#d32f2f;">환자 데이터 복구 (다운로드)</div>
+            <button id="admin-download" class="admin-wide" style="background:#d32f2f;" onclick="adminDownloadSelected()" disabled>선택한 환자의 전체 기록 CSV</button>
+            <div style="font-weight:bold; margin:10px 0 5px; color:#6f6a62;">비밀번호 재설정</div>
+            <form id="admin-reset-form" onsubmit="event.preventDefault(); adminResetPassword();">
+                <input id="admin-reset-pw" type="password" autocomplete="new-password" minlength="12" placeholder="새 비밀번호 (12자 이상)" style="width:100%; margin-bottom:6px;">
+                <button id="admin-reset-btn" class="admin-wide" type="submit" disabled>선택한 사용자 비밀번호 재설정</button>
+            </form>
         </div>
 
         <div class="menu-section hidden" id="admin-stats-menu-section">
@@ -1316,25 +1323,18 @@
         <div class="stats-section-title">선택 기간의 실제 기록 사용자</div>
         <div class="stats-grid">
             <div class="stats-card"><div class="stats-card-label">실제 사용자</div><div class="stats-card-value" id="stat-active-users">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">등록번호 등록 사용자</div><div class="stats-card-value" id="stat-linked-users">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">미등록 사용자</div><div class="stats-card-value" id="stat-unlinked-users">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">신규 기록 사용자</div><div class="stats-card-value" id="stat-new-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">환자번호 연결 사용자</div><div class="stats-card-value" id="stat-linked-users">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">미연결 사용자</div><div class="stats-card-value" id="stat-unlinked-users">-</div></div>
             <div class="stats-card"><div class="stats-card-label">전체 기록 일수</div><div class="stats-card-value" id="stat-record-days">-</div></div>
             <div class="stats-card"><div class="stats-card-label">사용자당 평균 기록 일수</div><div class="stats-card-value" id="stat-average-days">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">기록 항목 수</div><div class="stats-card-value" id="stat-records">-</div></div>
         </div>
 
-        <div class="stats-section-title">현재 아이템 및 선물</div>
+        <div class="stats-section-title">전체 계정</div>
         <div class="stats-grid">
-            <div class="stats-card"><div class="stats-card-label">아이템 보유 사용자</div><div class="stats-card-value" id="stat-item-holders">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">전체 보유 아이템</div><div class="stats-card-value" id="stat-current-items">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">전체 선물·답례</div><div class="stats-card-value" id="stat-gift-transfers">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">선물을 보낸 사용자</div><div class="stats-card-value" id="stat-gift-senders">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">선물을 받은 사용자</div><div class="stats-card-value" id="stat-gift-receivers">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">선물 기능 사용자</div><div class="stats-card-value" id="stat-gift-participants">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">일반 선물</div><div class="stats-card-value" id="stat-normal-gifts">-</div></div>
-            <div class="stats-card"><div class="stats-card-label">답례 선물</div><div class="stats-card-value" id="stat-reply-gifts">-</div></div>
+            <div class="stats-card"><div class="stats-card-label">기분기록지 사용 가능 계정</div><div class="stats-card-value" id="stat-total-accounts">-</div></div>
         </div>
-        <div class="stats-note">사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 아이템과 선물은 현재 DB에 남아 있는 사용자 보유 항목만 집계합니다. 사용자 아이디나 등록번호는 표시하지 않습니다.</div>
+        <div class="stats-note">사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 사용자 아이디나 환자번호는 표시하지 않습니다. 통계 조회는 관리자 접근 기록에 남습니다.</div>
         <div class="stats-status" id="stats-status" role="status" aria-live="polite"></div>
     </div>
 </div>
@@ -1345,16 +1345,16 @@
             <span>사용자 목록</span>
             <span style="cursor:pointer; font-size:20px;" onclick="closePatientListModal()">✕</span>
         </div>
-        <input id="patient-list-search" class="patient-search" type="search" maxlength="100" autocomplete="off" placeholder="아이디 또는 병원 등록번호 일부로 검색" oninput="schedulePatientListSearch()">
+        <input id="patient-list-search" class="patient-search" type="search" maxlength="100" autocomplete="off" placeholder="아이디 또는 환자번호 일부로 검색" oninput="schedulePatientListSearch()">
         <div class="stats-range" id="patient-list-summary"></div>
         <div class="patient-list-wrap">
             <table class="patient-table">
-                <thead><tr><th>아이디</th><th>등록번호</th><th>최근 기록일</th><th>기록일수</th></tr></thead>
+                <thead><tr><th>아이디</th><th>환자번호</th><th>최근 기록일</th><th>기록일수</th><th>공유 동의</th></tr></thead>
                 <tbody id="patient-list-body"></tbody>
             </table>
         </div>
         <button id="patient-list-more" class="patient-more hidden" onclick="loadPatientList(false)">더 보기</button>
-        <div class="stats-note">최근 기록일 순으로 표시합니다. 행을 누르면 해당 사용자의 기록지를 읽기 전용으로 엽니다. 목록 조회와 사용자 선택은 관리자 접근 기록에 남습니다.</div>
+        <div class="stats-note">아이디 순으로 표시합니다. 공유 동의가 있는 행을 누르면 그 사용자의 기록지를 읽기 전용으로 엽니다. 동의가 없는 사용자는 기록을 열 수 없고 비밀번호 재설정만 할 수 있습니다. 목록 조회와 사용자 선택은 관리자 접근 기록에 남습니다.</div>
         <div class="stats-status" id="patient-list-status" role="status" aria-live="polite"></div>
     </div>
 </div>
@@ -1478,8 +1478,39 @@
     const authLang = () => (typeof I18N !== 'undefined' && I18N.lang === 'en') ? 'en' : 'ko';
     const authMsg = reason => AUTH().message(reason, authLang());
 
-    async function completeAdminLogin() {
-        location.assign("/survey/admin.html?tab=journal");
+    // 기분기록지 관리자 모드(설문 관리자와 별개). 로그인은 ./admin.html 의 Google 로그인으로 하고,
+    // 권한은 서버(journal_admin_session → is_admin)가 판정한다. 기록 열람은 공유 동의한 환자만 된다(서버 강제).
+    async function completeAdminLogin(session) {
+        const { data: authorized, error } = await sb.rpc('journal_admin_session');
+        if (error || authorized !== true) {
+            await AUTH().signOutEverywhere(sb);
+            alert("승인된 관리자 Google 계정이 아닙니다.");
+            return false;
+        }
+
+        user = {
+            username: session.user.email || 'Google 관리자',
+            role: 'admin',
+            authUserId: session.user.id
+        };
+        boundUid = session.user.id;
+        target = null;
+        clearAdminTarget();
+        resetLogoutTimer();
+
+        Notebook.leaveAuth();
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('user-badge').innerText = 'Google 관리자';
+        document.getElementById('doc-panel').classList.add('active');
+        document.getElementById('password-menu-item').classList.add('hidden');
+        document.getElementById('journal-share-open')?.classList.add('hidden');
+        document.getElementById('admin-stats-menu-section').classList.remove('hidden');
+        document.getElementById('gift-menu-section').classList.add('hidden');
+        document.getElementById('data-menu-section').classList.add('hidden');
+        document.getElementById('score-ls').disabled = true;
+        document.getElementById('score-mssi').disabled = true;
+        Notebook.onLogin();
+        toggleSidebar();
         return true;
     }
 
@@ -1726,39 +1757,113 @@
     }
     const pendingNewId = () => document.getElementById('l-id').dataset.newId || null;
 
+    // ---------- 기분기록지 관리자: 사용자 선택·목록·다운로드·비밀번호 재설정 ----------
+    // adminPicked: 목록·검색에서 고른 사용자(공유 동의가 없어도 비밀번호 재설정은 할 수 있음).
+    // target: 기록지를 연 환자(uuid). 서버가 공유 동의를 확인한 뒤에만 정해진다.
+    let adminPicked = null, adminRecordsCache = null;
+    const adminLabel = p => `${safeText(p.username, 60)} / ${safeText(p.patient_number || '-', 20)}`;
+    const ADMIN_NO_CONSENT = '이 사용자는 담당 의료진 기록 공유에 동의하지 않아 기록을 열 수 없습니다.';
+
+    function updateAdminPicked() {
+        const box = document.getElementById('admin-picked');
+        if (!box) return;
+        const p = adminPicked;
+        box.textContent = !p ? '선택한 사용자가 없습니다.'
+            : `선택: ${adminLabel(p)} · ${target === p.patient_id ? '기록지 열람 중' : (p.has_consent ? '공유 동의 있음' : '공유 동의 없음')}`;
+        document.getElementById('admin-download').disabled = !(p && target === p.patient_id && p.hospital_code && p.patient_number);
+        document.getElementById('admin-reset-btn').disabled = !p;
+    }
+
+    function clearAdminTarget() {
+        selectPatientSeq++;
+        adminPicked = null; target = null; adminRecordsCache = null;
+        const pw = document.getElementById('admin-reset-pw');
+        if (pw) pw.value = '';
+        updateAdminPicked();
+    }
+
     async function searchPatient() {
-        const q = document.getElementById('search-id').value.trim();
-        if(!q) return alert("ID 또는 번호를 입력하세요.");
-        
+        const q = safeText(document.getElementById('search-id').value.trim(), 100);
+        if(!q) return alert("아이디 또는 환자번호를 입력하세요.");
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
-        if (await selectPatient(q)) toggleSidebar();
+        const { data, error } = await sb.rpc('journal_admin_list_patients', { p_search: q, p_limit: 50, p_offset: 0 });
+        if (error || !Array.isArray(data)) return alert('사용자를 찾지 못했습니다. 잠시 뒤 다시 시도해 주세요.');
+        if (data.length === 0) return alert('해당 정보로 가입된 사용자를 찾을 수 없습니다.');
+        const exact = data.filter(r => r.username === q.toLowerCase() || r.username === q || r.patient_number === q.toUpperCase());
+        const row = data.length === 1 ? data[0] : (exact.length === 1 ? exact[0] : null);
+        if (!row) {
+            // 여러 명이면 목록에서 고르게 한다.
+            openPatientListModal(q);
+            return;
+        }
+        if (await pickPatient(row)) toggleSidebar();
     }
 
     let selectPatientSeq = 0;
-    async function selectPatient(query, exactUsername = false) {
+    async function pickPatient(row) {
         const seq = ++selectPatientSeq;
-        const { data, error } = exactUsername
-            ? await sb.rpc('moodchart_admin_select_patient', { p_username: query })
-            : await sb.rpc('moodchart_admin_resolve_patient', { p_query: query });
-        // 그 사이 다른 환자를 선택했으면 이 응답은 버린다.
+        adminPicked = row; target = null; adminRecordsCache = null;
+        document.getElementById('user-badge').innerText = 'Google 관리자';
+        updateAdminPicked();
+        renderTable();
+        if (!row.has_consent) {
+            alert(ADMIN_NO_CONSENT);
+            return false;
+        }
+        const { data, error } = await sb.rpc('journal_admin_select_patient', { p_target: row.patient_id });
+        // 그 사이 다른 사용자를 골랐으면 이 응답은 버린다.
         if (seq !== selectPatientSeq) return false;
-        if(error) { alert("조회 권한 오류: " + error.message); return false; }
-        if(!data) { alert("해당 정보로 가입된 환자를 찾을 수 없습니다."); return false; }
-
-        target = data;
-        document.getElementById('user-badge').innerText = `Google 관리자 · 조회: ${safeText(target, 40)}`;
-        alert(`조회 대상: ${target} 님`);
+        if (error || data !== row.patient_id) {
+            alert('기록지를 열지 못했습니다. 공유 동의와 관리자 권한을 확인해 주세요.');
+            return false;
+        }
+        target = row.patient_id;
+        document.getElementById('user-badge').innerText = `Google 관리자 · 조회: ${adminLabel(row)}`;
+        updateAdminPicked();
         renderTable();
         return true;
+    }
+
+    // 서버는 한 번에 최대 366일만 돌려준다. 마지막 기록이 있는 해부터 한 해씩 거슬러 읽고,
+    // 3년 연속 기록이 없거나 2000년에 이르면 멈춘다.
+    async function adminFetchYears(lastYear, fetchRange) {
+        const rows = [];
+        let empty = 0;
+        for (let y = lastYear; y >= 2000 && empty < 3; y--) {
+            const { data, error } = await fetchRange(`${y}-01-01`, `${y}-12-31`);
+            if (error) return { data: null, error };
+            if (Array.isArray(data) && data.length) { rows.push(...data); empty = 0; } else empty++;
+        }
+        rows.sort((a, b) => String(a.record_date).localeCompare(String(b.record_date)));
+        return { data: rows, error: null };
+    }
+    const adminLastYear = p => {
+        const y = Number(String(p?.last_record_date || '').slice(0, 4));
+        return y >= 2000 && y <= 2099 ? y : new Date().getFullYear();
+    };
+
+    // 열람 중인 환자의 전체 기록(차트·책장용). 같은 환자는 한 번만 읽는다.
+    function adminAllRecords() {
+        const id = target, p = adminPicked;
+        if (!id || !p || p.patient_id !== id) return Promise.resolve({ data: [], error: null });
+        if (adminRecordsCache?.id === id) return adminRecordsCache.promise;
+        const promise = adminFetchYears(adminLastYear(p),
+            (s, e) => sb.rpc('journal_admin_get_records', { p_target: id, p_start: s, p_end: e }))
+            .then(r => {
+                if (r.error && adminRecordsCache?.promise === promise) adminRecordsCache = null;
+                return r;
+            });
+        adminRecordsCache = { id, promise };
+        return promise;
     }
 
     const PATIENT_PAGE_SIZE = 50;
     let patientListOffset = 0, patientListTimer = null, patientListSeq = 0, patientListQuery = '';
 
-    function openPatientListModal() {
+    function openPatientListModal(initialSearch = '') {
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
         if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
-        document.getElementById('patient-list-search').value = '';
+        document.getElementById('patient-list-search').value = typeof initialSearch === 'string' ? initialSearch : '';
         document.getElementById('patient-list-modal').style.display = 'flex';
         loadPatientList(true);
         document.getElementById('patient-list-search').focus();
@@ -1766,7 +1871,6 @@
 
     function clearPatientList() {
         patientListSeq++;
-        selectPatientSeq++;
         clearTimeout(patientListTimer);
         document.getElementById('patient-list-body').replaceChildren();
         document.getElementById('patient-list-summary').textContent = '';
@@ -1799,7 +1903,7 @@
         status.textContent = '목록을 불러오는 중입니다.';
         more.disabled = true;
 
-        const { data, error } = await sb.rpc('moodchart_admin_list_patients', {
+        const { data, error } = await sb.rpc('journal_admin_list_patients', {
             p_search: search, p_limit: PATIENT_PAGE_SIZE, p_offset: patientListOffset
         });
         if (seq !== patientListSeq) return;
@@ -1813,12 +1917,15 @@
         data.forEach(row => {
             const tr = document.createElement('tr');
             tr.tabIndex = 0;
-            if (row.username === target) tr.classList.add('selected');
+            tr.dataset.patient = String(row.patient_id || '');
+            if (row.patient_id === target) tr.classList.add('selected');
+            if (!row.has_consent) tr.classList.add('no-consent');
             [
                 safeText(row.username, 60),
-                safeText(row.hospital_id || '-', 40),
+                safeText(row.patient_number || '-', 20),
                 isIsoDate(row.last_record_date) ? row.last_record_date : '-',
-                formatAdminStat(row.record_days)
+                formatAdminStat(row.record_days),
+                row.has_consent ? '있음' : '없음'
             ].forEach(text => {
                 const td = document.createElement('td');
                 td.textContent = text;
@@ -1826,7 +1933,9 @@
             });
             const pick = async () => {
                 if (!tr.isConnected) return;
-                if (await selectPatient(row.username, true)) closePatientListModal();
+                closePatientListModal();
+                // 동의가 없거나 열지 못하면 메뉴를 열어 선택 상태와 비밀번호 재설정을 보여 준다.
+                if (!await pickPatient(row)) toggleSidebar();
             };
             tr.addEventListener('click', pick);
             tr.addEventListener('keydown', e => { if (e.key === 'Enter') pick(); });
@@ -1841,43 +1950,80 @@
         status.textContent = total === 0 ? '검색 결과가 없습니다.' : '';
     }
 
-    async function adminDownloadByHosp() {
-        const h = document.getElementById('download-hosp-id').value.trim();
-        if(!h) return alert("번호를 입력하세요.");
+    let adminDownloadBusy = false;
+    async function adminDownloadSelected() {
+        const p = adminPicked;
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
-        const { data, error } = await sb.rpc('moodchart_admin_download_by_hosp', { p_hosp_id: h });
-        if(error) return alert("오류: " + error.message);
-        if(!data || data.length === 0) return alert("데이터가 없습니다.");
-        
-        let csv = "data:text/csv;charset=utf-8,Date,Category,Value\n";
-        data.forEach(r => {
-            if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) {
-                csv += `${r.record_date},${r.category},${csvCell(r.value)}\n`;
-            }
-        });
-        const link = document.createElement("a");
-        link.href = encodeURI(csv);
-        link.download = `mood_recovery_${safeFilePart(h)}.csv`;
-        link.click();
+        if (!p || target !== p.patient_id) return alert('먼저 공유 동의가 있는 사용자의 기록지를 여세요.');
+        if (!p.hospital_code || !p.patient_number) return alert('병원코드와 환자번호가 연결된 사용자만 내려받을 수 있습니다.');
+        if (adminDownloadBusy) return;
+        adminDownloadBusy = true;
+        const button = document.getElementById('admin-download');
+        button.disabled = true;
+        try {
+            const { data, error } = await adminFetchYears(adminLastYear(p), (s, e) => sb.rpc('journal_admin_download_by_hosp', {
+                p_hospital_code: p.hospital_code, p_patient_number: p.patient_number, p_start: s, p_end: e
+            }));
+            if (adminPicked !== p) return;
+            if (error) return alert("다운로드하지 못했습니다: " + safeText(error.message, 200));
+            if (!data || data.length === 0) return alert("데이터가 없습니다.");
+            let csv = "﻿Date,Category,Value\r\n";
+            data.forEach(r => {
+                if (isIsoDate(r.record_date) && isAllowedCategory(r.category)) {
+                    csv += `${r.record_date},${r.category},${csvCell(r.value)}\r\n`;
+                }
+            });
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `mood_recovery_${safeFilePart(p.patient_number)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } finally {
+            adminDownloadBusy = false;
+            updateAdminPicked();
+        }
     }
 
-    const adminStatPeriods = new Set(['1w', '2w', '4w', '2m', '3m', '6m', '1y']);
+    let adminResetBusy = false;
+    async function adminResetPassword() {
+        const p = adminPicked;
+        const input = document.getElementById('admin-reset-pw');
+        const value = input.value;
+        if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
+        if (!p) return alert('먼저 사용자를 선택하세요.');
+        if ([...value].length < 12 || new TextEncoder().encode(value).length > 72) {
+            return alert('새 비밀번호는 12자 이상, UTF-8 72바이트 이하여야 합니다.');
+        }
+        if (adminResetBusy) return;
+        if (!confirm(`${safeText(p.username, 60)} 계정의 비밀번호를 재설정할까요?\n그 계정의 모든 로그인이 끝납니다.`)) return;
+        adminResetBusy = true;
+        input.value = '';
+        try {
+            const { error } = await sb.rpc('journal_admin_reset_password', { p_target: p.patient_id, p_new_password: value });
+            alert(error ? '비밀번호를 재설정하지 못했습니다.' : '비밀번호를 재설정했습니다. 새 비밀번호를 사용자에게 안전하게 전달해 주세요.');
+        } finally {
+            adminResetBusy = false;
+        }
+    }
+
+    // 기간 → 오늘을 포함한 일수와 표시 이름(서버는 시작·종료일을 받는다, 최대 366일)
+    const adminStatPeriods = new Map([
+        ['1w', [7, '1주']], ['2w', [14, '2주']], ['4w', [28, '4주']], ['2m', [61, '2개월']],
+        ['3m', [92, '3개월']], ['6m', [183, '6개월']], ['1y', [365, '1년']]
+    ]);
     const adminStatFields = {
         active_users: 'stat-active-users',
         linked_users: 'stat-linked-users',
         unlinked_users: 'stat-unlinked-users',
-        new_record_users: 'stat-new-users',
         record_days: 'stat-record-days',
         average_record_days: 'stat-average-days',
-        item_holders: 'stat-item-holders',
-        current_items: 'stat-current-items',
-        gift_transfers: 'stat-gift-transfers',
-        gift_senders: 'stat-gift-senders',
-        gift_receivers: 'stat-gift-receivers',
-        gift_participants: 'stat-gift-participants',
-        normal_gifts: 'stat-normal-gifts',
-        reply_gifts: 'stat-reply-gifts'
+        records: 'stat-records',
+        total_accounts: 'stat-total-accounts'
     };
+    const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     function openAdminStatsModal() {
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
@@ -1899,6 +2045,7 @@
         });
     }
 
+    let adminStatsSeq = 0;
     async function loadAdminStats(period) {
         if (!isAdminUser() || !adminStatPeriods.has(period)) return;
 
@@ -1910,7 +2057,13 @@
             button.classList.toggle('active', button.dataset.statsPeriod === period);
         });
 
-        const { data, error } = await sb.rpc('moodchart_admin_usage_summary', { p_period: period });
+        const [days, label] = adminStatPeriods.get(period);
+        const end = new Date(), start = new Date();
+        start.setDate(start.getDate() - (days - 1));
+        const range = { p_start: isoLocal(start), p_end: isoLocal(end) };
+        const seq = ++adminStatsSeq;
+        const { data, error } = await sb.rpc('journal_admin_usage_summary', range);
+        if (seq !== adminStatsSeq) return;
 
         buttons.forEach(button => { button.disabled = false; });
         if (error || !data || typeof data !== 'object') {
@@ -1918,11 +2071,13 @@
             return;
         }
 
+        const active = Number(data.active_users) || 0;
+        const stats = { ...data, average_record_days: active ? (Number(data.record_days) || 0) / active : 0 };
         Object.entries(adminStatFields).forEach(([field, elementId]) => {
             const digits = field === 'average_record_days' ? 1 : 0;
-            document.getElementById(elementId).textContent = formatAdminStat(data[field], digits);
+            document.getElementById(elementId).textContent = formatAdminStat(stats[field], digits);
         });
-        document.getElementById('stats-range').textContent = `${safeText(data.period_label, 20)} · ${safeText(data.period_start, 20)} ~ ${safeText(data.period_end, 20)}`;
+        document.getElementById('stats-range').textContent = `${label} · ${range.p_start} ~ ${range.p_end}`;
         status.textContent = '';
     }
 
@@ -2292,7 +2447,7 @@
 
         const reqTarget = target, reqSeq = ++loadDataSeq;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: start, p_end: end })
+            ? sb.rpc('journal_admin_get_records', { p_target: target, p_start: start, p_end: end })
             : sb.rpc('journal_get_records', { p_start: start, p_end: end });
         const { data, error } = await request;
         // 더 늦게 시작된 조회(다른 환자·다른 달)가 있으면 이 응답은 버린다.
@@ -2606,7 +2761,7 @@
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
         const request = isAdminUser()
-            ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
+            ? adminAllRecords()
             : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
         const { data } = await request;
         if(!data || data.length === 0) return alert("데이터가 없습니다.");
@@ -3306,6 +3461,25 @@
 "힘든 순간에도 기록을 멈추지 않은 당신을 응원해요.": "We're cheering for you, who kept recording even in hard moments.",
 "환자 조회": "Find a patient",
 "사용자 목록에서 선택": "Choose from the user list",
+"아이디 또는 환자번호": "User ID or patient number",
+"선택한 사용자가 없습니다.": "No user selected.",
+"선택한 환자의 전체 기록 CSV": "All records of the selected patient (CSV)",
+"비밀번호 재설정": "Reset password",
+"새 비밀번호 (12자 이상)": "New password (12+ characters)",
+"선택한 사용자 비밀번호 재설정": "Reset the selected user's password",
+"환자번호 연결 사용자": "Users linked to a patient number",
+"미연결 사용자": "Unlinked users",
+"기록 항목 수": "Record entries",
+"전체 계정": "All accounts",
+"기분기록지 사용 가능 계정": "Accounts that can use the journal",
+"사용자 수는 로그인 횟수가 아니라 실제 기록일을 기준으로 계산합니다. 사용자 아이디나 환자번호는 표시하지 않습니다. 통계 조회는 관리자 접근 기록에 남습니다.": "User counts are based on actual recorded days, not sign-ins. No user IDs or patient numbers are shown. Viewing statistics is recorded in the administrator access log.",
+"아이디 또는 환자번호 일부로 검색": "Search by part of a user ID or patient number",
+"환자번호": "Patient no.",
+"공유 동의": "Sharing consent",
+"있음": "Yes",
+"없음": "No",
+"아이디 순으로 표시합니다. 공유 동의가 있는 행을 누르면 그 사용자의 기록지를 읽기 전용으로 엽니다. 동의가 없는 사용자는 기록을 열 수 없고 비밀번호 재설정만 할 수 있습니다. 목록 조회와 사용자 선택은 관리자 접근 기록에 남습니다.": "Sorted by user ID. Tap a row with sharing consent to open that user's chart read-only. Users without consent cannot be opened; only their password can be reset. Listing and selecting users are recorded in the administrator access log.",
+"이 사용자는 담당 의료진 기록 공유에 동의하지 않아 기록을 열 수 없습니다.": "This user has not consented to share the journal with the care team, so the records cannot be opened.",
 "ID 또는 번호": "ID or number",
 "검색": "Search",
 "환자 데이터 복구 (다운로드)": "Recover patient data (download)",
@@ -5749,7 +5923,7 @@
             const key = `${isAdminUser() ? 'a' : 'p'}:${target}`;
             if (yearCache[key]) return yearCache[key];
             const req = isAdminUser()
-                ? sb.rpc('moodchart_admin_get_records', { p_target: target, p_start: '2000-01-01', p_end: '2099-12-31' })
+                ? adminAllRecords()
                 : sb.rpc('journal_get_records', { p_start: '2000-01-01', p_end: '2099-12-31' });
             const { data, error } = await req;
             if (error) return new Set();
