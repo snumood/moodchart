@@ -1449,12 +1449,12 @@
     const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
     function csvCell(value) {
         let text = safeText(value, 2000);
-        if (CSV_FORMULA.test(text) && !PLAIN_NUMBER.test(text)) text = "'" + text;
+        if ((CSV_FORMULA.test(text) && !PLAIN_NUMBER.test(text)) || /^'+[=+\-@\t\r]/.test(text)) text = "'" + text;
         return `"${text.replace(/"/g, '""')}"`;
     }
     function csvUnquote(raw) {
         const v = raw.trim().replace(/^"|"$/g, '').replace(/""/g, '"');
-        return /^'[=+\-@\t\r]/.test(v) && !PLAIN_NUMBER.test(v.slice(1)) ? v.slice(1) : v;
+        return /^'+[=+\-@\t\r]/.test(v) && !PLAIN_NUMBER.test(v.slice(1)) ? v.slice(1) : v;
     }
 
     // Supabase API 는 한 번에 최대 1000행만 돌려준다(초과분은 조용히 잘림). 그만큼 왔으면 기간을 반으로 나눠 다시 읽는다.
@@ -1465,7 +1465,8 @@
         const { data, error } = await fetchRange(start, end);
         if (error) return { data: null, error };
         const rows = Array.isArray(data) ? data : [];
-        if (rows.length < ROW_CAP || start === end) return { data: rows, error: null };
+        if (rows.length < ROW_CAP) return { data: rows, error: null };
+        if (start === end) return { data: null, error: { message: '하루 기록이 너무 많아 모두 읽지 못했습니다.' } };
         const a = dayMs(start), b = dayMs(end);
         const mid = isoDay(a + Math.floor((b - a) / 86400000 / 2) * 86400000);
         const left = await fetchRangeAll(fetchRange, start, mid);
@@ -1512,8 +1513,23 @@
 
     // 기분기록지 관리자 모드(설문 관리자와 별개). 로그인은 ./admin.html 의 Google 로그인으로 하고,
     // 권한은 서버(journal_admin_session → is_admin)가 판정한다. 기록 열람은 공유 동의한 환자만 된다(서버 강제).
+    function usesGoogleIdentity(u) {
+        const providers = Array.isArray(u?.app_metadata?.providers) ? u.app_metadata.providers : [];
+        const identities = Array.isArray(u?.identities) ? u.identities.map(i => i?.provider) : [];
+        return u?.app_metadata?.provider === 'google' || providers.includes('google') || identities.includes('google');
+    }
     async function completeAdminLogin(session) {
+        if (!usesGoogleIdentity(session?.user)) {
+            await AUTH().signOutEverywhere(sb);
+            alert("관리자는 Google 계정으로만 로그인할 수 있습니다.");
+            return false;
+        }
         const { data: authorized, error } = await sb.rpc('journal_admin_session');
+        if (error && !['42501', '28000'].includes(error.code)) {
+            // 네트워크·서버 일시 장애: 로그인은 그대로 두고 다시 시도하게 한다.
+            alert("관리자 권한을 확인하지 못했습니다. 잠시 뒤 새로고침해 주세요.");
+            return false;
+        }
         if (error || authorized !== true) {
             await AUTH().signOutEverywhere(sb);
             alert("승인된 관리자 Google 계정이 아닙니다.");
@@ -1537,7 +1553,7 @@
         document.getElementById('password-menu-item').classList.add('hidden');
         document.getElementById('journal-share-open')?.classList.add('hidden');
         document.getElementById('admin-stats-menu-section').classList.remove('hidden');
-        document.getElementById('gift-menu-section').classList.add('hidden');
+        // id 가 뒤바뀌어 있다: gift-menu-section 은 '분석 리포트'(추세 그래프, 관리자도 씀), data-menu-section 은 '선물'.
         document.getElementById('data-menu-section').classList.add('hidden');
         document.getElementById('score-ls').disabled = true;
         document.getElementById('score-mssi').disabled = true;
@@ -1835,9 +1851,10 @@
         const q = safeText(document.getElementById('search-id').value.trim(), 100);
         if(!q) return alert("아이디 또는 환자번호를 입력하세요.");
         if (!isAdminUser()) return alert("관리자 로그인이 필요합니다.");
-        const seq = ++searchSeq;
+        const seq = ++searchSeq, pickSeq = selectPatientSeq;
         const { data, error } = await sb.rpc('journal_admin_list_patients', { p_search: q, p_limit: 50, p_offset: 0 });
-        if (seq !== searchSeq) return;
+        // 그 사이 다른 검색을 했거나 목록에서 다른 사용자를 골랐으면 이 결과는 버린다.
+        if (seq !== searchSeq || pickSeq !== selectPatientSeq) return;
         if (error || !Array.isArray(data)) return alert('사용자를 찾지 못했습니다. 잠시 뒤 다시 시도해 주세요.');
         if (data.length === 0) return alert('해당 정보로 가입된 사용자를 찾을 수 없습니다.');
         const total = Number(data[0].total_count) || data.length;
@@ -1902,11 +1919,25 @@
 
     // 열람 중인 환자의 전체 기록(차트·책장용). 매번 서버에서 읽는다(동의 철회가 다음 조회에 바로 반영되게).
     // 같은 환자에 대해 동시에 겹친 요청만 하나로 합친다.
+    // 선택한 뒤 새 기록일이 생겼을 수 있으니, 전체 읽기 직전에 그 사용자의 기록일수·마지막 기록일을 다시 받는다.
+    async function adminFreshRow(p) {
+        const { data, error } = await sb.rpc('journal_admin_list_patients', { p_search: p.patient_id, p_limit: 1, p_offset: 0 });
+        if (error || !Array.isArray(data)) return { row: null, error: error || { message: '사용자 정보를 다시 읽지 못했습니다.' } };
+        const row = data.find(r => r.patient_id === p.patient_id);
+        return row ? { row, error: null } : { row: null, error: { message: '사용자를 찾지 못했습니다.' } };
+    }
+    async function adminFetchAllFor(p, fetchRange) {
+        const { row, error } = await adminFreshRow(p);
+        if (error) return { data: null, error };
+        // 오늘이 속한 해부터 읽기 시작해(마지막 기록일보다 늦을 수 있음) 새 기록도 놓치지 않는다.
+        const fresh = { ...row, last_record_date: `${Math.max(adminLastYear(row), new Date().getFullYear())}-12-31` };
+        return adminFetchYears(fresh, fetchRange);
+    }
     function adminAllRecords() {
         const id = target, p = adminPicked;
         if (!id || !p || p.patient_id !== id) return Promise.resolve({ data: [], error: null });
         if (adminRecordsCache?.id === id) return adminRecordsCache.promise;
-        const promise = adminFetchYears(p,
+        const promise = adminFetchAllFor(p,
             (s, e) => sb.rpc('journal_admin_get_records', { p_target: id, p_start: s, p_end: e }))
             .finally(() => { if (adminRecordsCache?.promise === promise) adminRecordsCache = null; });
         adminRecordsCache = { id, promise };
@@ -2018,7 +2049,7 @@
         const button = document.getElementById('admin-download');
         button.disabled = true;
         try {
-            const { data, error } = await adminFetchYears(p, (s, e) => sb.rpc('journal_admin_download_by_hosp', {
+            const { data, error } = await adminFetchAllFor(p, (s, e) => sb.rpc('journal_admin_download_by_hosp', {
                 p_hospital_code: p.hospital_code, p_patient_number: p.patient_number, p_start: s, p_end: e
             }));
             if (adminPicked !== p) return;
@@ -5987,7 +6018,7 @@
         // 기록이 있는 해들 (로그인 대상마다 한 번만, 전체 기록 조회와 같은 호출)
         const yearCache = {};
         async function recordYears() {
-            const key = `${isAdminUser() ? 'a' : 'p'}:${target}`;
+            const key = isAdminUser() ? `a:${target}:${selectPatientSeq}` : `p:${target}`;
             if (yearCache[key]) return yearCache[key];
             const req = isAdminUser()
                 ? adminAllRecords()

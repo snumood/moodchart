@@ -104,6 +104,11 @@
         checking = true;
         try {
             const { data: authorized, error } = await sb.rpc('journal_admin_session');
+            // 권한 거절(42501)·로그인 만료(28000)가 아닌 오류(네트워크·서버 일시 장애)로는 로그아웃하지 않는다.
+            if (error && !['42501', '28000'].includes(error.code)) {
+                statusBox.textContent = '관리자 권한을 확인하지 못했습니다. 잠시 뒤 새로고침해 주세요.';
+                return false;
+            }
             if (!error && authorized === true) {
                 // 관리자 Google 로그인은 '로그인 유지'로 본다(설문 관리자와 같은 규칙).
                 (await authApi())?.markLogin(true);
