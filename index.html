@@ -2844,17 +2844,19 @@
         closeEventModal(); 
     }
 
+    let chartSeq = 0;
     async function openChartModal(type) {
         toggleSidebar(); document.getElementById('chart-modal').style.display = 'flex';
         const title = type === 'ls' ? '월간생활습관점수 추세' : '기분안정성평가점수 추세';
         document.getElementById('chart-title').innerText = title;
-        const reqTarget = target;
+        const reqTarget = target, reqPick = selectPatientSeq, reqChart = ++chartSeq;
         if (myChart) { myChart.destroy(); myChart = null; }
         const request = isAdminUser()
             ? adminAllRecords()
             : patientAllRecords();
         const { data } = await request;
-        if (reqTarget !== target) return;
+        // 그 사이 다른 사용자를 골랐거나(같은 사용자를 다시 고른 경우 포함) 다른 그래프를 열었으면 버린다.
+        if (reqTarget !== target || reqPick !== selectPatientSeq || reqChart !== chartSeq) return;
         if(!data || data.length === 0) {
             document.getElementById('chart-modal').style.display = 'none';
             return alert("데이터가 없습니다.");

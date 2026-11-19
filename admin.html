@@ -149,7 +149,11 @@
 
     window.addEventListener('load', async () => {
         const oauthError = params.get('error_description') || hashParams.get('error_description');
-        if (oauthError) statusBox.textContent = 'Google 로그인 실패: ' + oauthError.slice(0, 200);
+        if (oauthError) {
+            // Google 로그인이 취소·실패했으면 원래 있던 로그인(환자 등)은 건드리지 않는다.
+            statusBox.textContent = 'Google 로그인 실패: ' + oauthError.slice(0, 200);
+            return;
+        }
         const { data: { session } } = await sb.auth.getSession();
         await validateAdminSession(session);
     });
